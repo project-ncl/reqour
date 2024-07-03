@@ -10,6 +10,7 @@
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <quarkus.package.type>uber-jar</quarkus.package.type>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.11.3</quarkus.platform.version>
@@ -66,6 +67,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <finalName>reqour</finalName>
+                    <!-- needed to publish to maven central -->
+                    <skipOriginalJarRename>true</skipOriginalJarRename>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
