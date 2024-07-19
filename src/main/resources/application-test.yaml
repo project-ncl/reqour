@@ -1,0 +1,6 @@
+reqour:
+  git:
+    git-backends:
+      available:
+        gitlab:
+          git-url-internal-template: git@gitlab.cee.redhat.com:test-workspace/

@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.endpoints.api;
+package org.jboss.pnc.reqour.api;
 
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
@@ -29,26 +29,33 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-
-import static org.jboss.pnc.reqour.endpoints.api.openapi.OpenapiConstants.SUCCESS_CODE;
-import static org.jboss.pnc.reqour.endpoints.api.openapi.OpenapiConstants.SUCCESS_DESCRIPTION;
+import org.jboss.pnc.reqour.api.openapi.OpenapiConstants;
 
 @Tag(name = "Translation")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
-@Path("")
+@Path("/git-external-to-internal")
 public interface TranslationEndpoint {
 
     String EXTERNAL_TO_INTERNAL_DESC = "Translate external git repo URL into internal";
 
     @Operation(summary = EXTERNAL_TO_INTERNAL_DESC)
-    @APIResponses({ @APIResponse(
-            responseCode = SUCCESS_CODE,
-            description = SUCCESS_DESCRIPTION,
-            content = @Content(schema = @Schema(implementation = TranslateResponse.class))) })
+    @APIResponses({
+            @APIResponse(
+                    responseCode = OpenapiConstants.SUCCESS_CODE,
+                    description = OpenapiConstants.SUCCESS_DESCRIPTION,
+                    content = @Content(schema = @Schema(implementation = TranslateResponse.class))),
+            @APIResponse(
+                    responseCode = OpenapiConstants.BAD_REQUEST_CODE,
+                    description = OpenapiConstants.BAD_REQUEST_DESCRIPTION,
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @APIResponse(
+                    responseCode = OpenapiConstants.SERVER_ERROR_CODE,
+                    description = OpenapiConstants.SERVER_ERROR_DESCRIPTION,
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))) })
     @POST
-    @Path("/external-to-internal")
     TranslateResponse externalToInternal(@Valid TranslateRequest externalToInternalRequestDto);
 }

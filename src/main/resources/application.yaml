@@ -1,3 +1,17 @@
 quarkus:
   swagger-ui:
     always-include: true
+
+reqour:
+  git:
+    git-backends:
+      available:
+        gitlab:
+          git-url-internal-template: git@gitlab.cee.redhat.com:pnc-workspace
+      active: gitlab
+    acceptable-schemes:
+      - https
+      - http
+      - git
+      - git+ssh
+      - ssh

@@ -15,10 +15,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.endpoints.api.openapi;
+package org.jboss.pnc.reqour.profile;
 
-public class OpenapiConstants {
+import io.quarkus.test.junit.QuarkusTestProfile;
 
-    public static final String SUCCESS_DESCRIPTION = "Success with results";
-    public static final String SUCCESS_CODE = "200";
+/**
+ * This test profile extracts common test-profile-related overrides, which would be normally replicated among several
+ * test profiles. Hence, test profiles which do not have any unusual requirements should just extend this test profile.
+ */
+public abstract class CommonTestProfile implements QuarkusTestProfile {
+
+    @Override
+    public String getConfigProfile() {
+        return "test";
+    }
 }

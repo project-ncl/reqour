@@ -15,11 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.endpoints.api;
+package org.jboss.pnc.reqour.common.exceptions;
 
-import io.quarkus.test.junit.QuarkusIntegrationTest;
+public class InvalidExternalUrlException extends RuntimeException {
 
-@QuarkusIntegrationTest
-class TranslationEndpointIT extends TranslationEndpointTest {
-    // Execute the same tests but in packaged mode.
+    public InvalidExternalUrlException(String message) {
+        super(message);
+    }
+
+    public InvalidExternalUrlException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }
