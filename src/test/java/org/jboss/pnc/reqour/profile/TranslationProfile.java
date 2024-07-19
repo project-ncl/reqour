@@ -15,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.endpoints.impl;
+package org.jboss.pnc.reqour.profile;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import org.jboss.pnc.api.reqour.dto.TranslateRequest;
-import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.endpoints.api.TranslationEndpoint;
+import java.util.Set;
 
-@ApplicationScoped
-public class TranslationEndpointImpl implements TranslationEndpoint {
+public class TranslationProfile extends CommonTestProfile {
 
     @Override
-    public TranslateResponse externalToInternal(TranslateRequest externalToInternalRequestDto) {
-        return TranslateResponse.builder()
-                .externalUrl(externalToInternalRequestDto.getExternalUrl())
-                .internalUrl("git@gitlab.cee.redhat.com:pnc-workspace/project-ncl/reqour.git")
-                .build();
+    public Set<String> tags() {
+        return Set.of("translation");
     }
 }

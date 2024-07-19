@@ -15,29 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.endpoints.api;
+package org.jboss.pnc.reqour.config;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.http.ContentType;
-import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.junit.jupiter.api.Test;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.is;
-
+// TODO: How to test this? Basically thanks to the @QuarkusTest the test cannot even start, since the exception is
+// thrown right after the start
 @QuarkusTest
-class TranslationEndpointTest {
+// @TestProfile(InvalidConfigProfile.class)
+class ConfigUtilsTest {
 
     @Test
-    void testExternalToInternalEndpoint() {
-        given().when()
-                .contentType(ContentType.JSON)
-                .body(TranslateResponse.builder().externalUrl("whatever").build())
-                .post("/external-to-internal")
-                .then()
-                .statusCode(200)
-                .body(
-                        is(
-                                "{\"externalUrl\":\"whatever\",\"internalUrl\":\"git@gitlab.cee.redhat.com:pnc-workspace/project-ncl/reqour.git\"}"));
+    void validateActiveGitBackendExists() {
+        // assertThrows(InvalidConfigException.class, () -> System.out.println("Whatever"));
     }
 }
