@@ -15,19 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.profile;
 
-import io.quarkus.test.junit.QuarkusTest;
-import org.junit.jupiter.api.Test;
+import java.util.Set;
 
-// TODO: How to test this? Basically thanks to the @QuarkusTest the test cannot even start, since the exception is
-// thrown right after the start
-@QuarkusTest
-// @TestProfile(InvalidConfigProfile.class)
-class ConfigUtilsTest {
+public class ConfigProfile extends CommonTestProfile {
 
-    @Test
-    void validateActiveGitBackendExists() {
-        // assertThrows(InvalidConfigException.class, () -> System.out.println("Whatever"));
+    @Override
+    public Set<String> tags() {
+        return Set.of("config");
     }
 }

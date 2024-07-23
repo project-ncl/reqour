@@ -18,6 +18,7 @@
 package org.jboss.pnc.reqour.config;
 
 import io.smallrye.config.WithName;
+import org.jboss.pnc.reqour.config.validation.WithExistingActive;
 
 import java.util.Map;
 import java.util.Set;
@@ -32,6 +33,7 @@ public interface GitConfig {
 
     Set<String> acceptableSchemes();
 
+    @WithExistingActive
     interface GitBackendsConfig {
 
         @WithName("available")
