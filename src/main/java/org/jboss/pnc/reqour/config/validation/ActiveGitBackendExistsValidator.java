@@ -15,20 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.profile;
+package org.jboss.pnc.reqour.config.validation;
 
-import java.util.Map;
-import java.util.Set;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import org.jboss.pnc.reqour.config.GitConfig;
 
-public class InvalidConfigProfile extends CommonTestProfile {
+public class ActiveGitBackendExistsValidator
+        implements ConstraintValidator<WithExistingActive, GitConfig.GitBackendsConfig> {
+
+    private String message;
 
     @Override
-    public Map<String, String> getConfigOverrides() {
-        return Map.of("reqour.git.git-backends.active", "non-existent-git-backend");
+    public void initialize(WithExistingActive constraintAnnotation) {
+        message = constraintAnnotation.message();
     }
 
     @Override
-    public Set<String> tags() {
-        return Set.of("config");
+    public boolean isValid(GitConfig.GitBackendsConfig value, ConstraintValidatorContext context) {
+        context.buildConstraintViolationWithTemplate(message);
+        return value.availableGitBackends().containsKey(value.activeGitBackend());
     }
 }

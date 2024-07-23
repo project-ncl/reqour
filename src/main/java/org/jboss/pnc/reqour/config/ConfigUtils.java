@@ -17,15 +17,11 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.reqour.common.exceptions.InvalidConfigException;
 import org.jboss.pnc.reqour.model.GitBackend;
 
-import java.util.List;
 import java.util.Set;
 
 @ApplicationScoped
@@ -34,17 +30,6 @@ public class ConfigUtils {
 
     @Inject
     ReqourConfig config;
-
-    void validateActiveGitBackendExists(@Observes StartupEvent event) {
-        String activeGitBackend = getActiveGitBackendName();
-        Set<String> availableGitBackends = config.gitConfigs().gitBackendsConfig().availableGitBackends().keySet();
-        if (!availableGitBackends.contains(activeGitBackend)) {
-            throw new InvalidConfigException(
-                    "Active git backend (" + getActiveGitBackendName()
-                            + ") does not match any of the available git backends: " + availableGitBackends);
-        }
-        log.info("Application config successfully loaded and passed validation");
-    }
 
     public Set<String> getAcceptableSchemes() {
         return config.gitConfigs().acceptableSchemes();

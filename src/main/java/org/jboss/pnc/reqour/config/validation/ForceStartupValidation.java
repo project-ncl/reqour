@@ -15,14 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.common.exceptions;
+package org.jboss.pnc.reqour.config.validation;
+
+import io.quarkus.runtime.Startup;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
+import org.jboss.pnc.reqour.config.ReqourConfig;
 
 /**
- * Denotes the problem with the config, e.g. specified active git backend does not exist.
+ * In order to fail due to invalid config during startup, we force the validation using this bean.
  */
-public class InvalidConfigException extends RuntimeException {
+@Singleton
+@Startup
+public class ForceStartupValidation {
 
-    public InvalidConfigException(String message) {
-        super(message);
-    }
+    @Inject
+    ReqourConfig config;
 }
