@@ -15,16 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.api.openapi;
+package org.jboss.pnc.reqour.common.utils;
 
-public class OpenapiConstants {
+import org.junit.jupiter.api.Test;
 
-    public static final String SUCCESS_DESCRIPTION = "Success with results";
-    public static final String SUCCESS_CODE = "200";
-    public static final String ACCEPTED_DESCRIPTION = "Request was accepted for processing";
-    public static final String ACCEPTED_CODE = "202";
-    public static final String BAD_REQUEST_DESCRIPTION = "Invalid input parameters or validation error";
-    public static final String BAD_REQUEST_CODE = "400";
-    public static final String SERVER_ERROR_DESCRIPTION = "Server error";
-    public static final String SERVER_ERROR_CODE = "500";
+import static org.assertj.core.api.Assertions.assertThat;
+
+class URLUtilsTest {
+
+    @Test
+    void addUsernameToUrl_scpLike_returnsUrlUnchanged() {
+        String url = "git@github.com:foo/bar.git";
+
+        String adjustedUrl = URLUtils.addUsernameToUrl(url, "whatever");
+
+        assertThat(adjustedUrl).isEqualTo(url);
+    }
+
+    @Test
+    void addUsernameToUrl_nonScpLikeWithoutUser_returnsAdjustedUrl() {
+        String adjustedUrl = URLUtils.addUsernameToUrl("https://github.com/foo/bar.git", "user");
+
+        assertThat(adjustedUrl).isEqualTo("https://user@github.com/foo/bar");
+    }
 }

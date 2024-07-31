@@ -15,16 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.api.openapi;
+package org.jboss.pnc.reqour.model;
 
-public class OpenapiConstants {
+import lombok.Builder;
+import lombok.Value;
 
-    public static final String SUCCESS_DESCRIPTION = "Success with results";
-    public static final String SUCCESS_CODE = "200";
-    public static final String ACCEPTED_DESCRIPTION = "Request was accepted for processing";
-    public static final String ACCEPTED_CODE = "202";
-    public static final String BAD_REQUEST_DESCRIPTION = "Invalid input parameters or validation error";
-    public static final String BAD_REQUEST_CODE = "400";
-    public static final String SERVER_ERROR_DESCRIPTION = "Server error";
-    public static final String SERVER_ERROR_CODE = "500";
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+@Value
+@Builder(builderClassName = "Builder", toBuilder = true)
+public class ProcessContext {
+
+    List<String> command;
+    Path workingDirectory;
+    Map<String, String> extraEnvVariables;
+    Consumer<String> stdoutConsumer;
+    Consumer<String> stderrConsumer;
 }

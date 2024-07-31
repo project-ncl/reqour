@@ -15,16 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.api.openapi;
+package org.jboss.pnc.reqour.common.exceptions;
 
-public class OpenapiConstants {
+public class GitException extends RuntimeException {
 
-    public static final String SUCCESS_DESCRIPTION = "Success with results";
-    public static final String SUCCESS_CODE = "200";
-    public static final String ACCEPTED_DESCRIPTION = "Request was accepted for processing";
-    public static final String ACCEPTED_CODE = "202";
-    public static final String BAD_REQUEST_DESCRIPTION = "Invalid input parameters or validation error";
-    public static final String BAD_REQUEST_CODE = "400";
-    public static final String SERVER_ERROR_DESCRIPTION = "Server error";
-    public static final String SERVER_ERROR_CODE = "500";
+    public GitException(String message) {
+        super(message);
+    }
 }

@@ -35,6 +35,10 @@ public class ConfigUtils {
         return config.gitConfigs().acceptableSchemes();
     }
 
+    public Set<String> getAcceptableCloneTypes() {
+        return config.cloneConfig().supportedProviders();
+    }
+
     public GitBackend getActiveGitBackend() {
         String activeGitBackendName = getActiveGitBackendName();
         return GitBackend.fromConfig(

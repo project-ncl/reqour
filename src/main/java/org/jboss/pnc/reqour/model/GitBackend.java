@@ -26,10 +26,14 @@ import org.jboss.pnc.reqour.config.GitBackendConfig;
 public class GitBackend {
 
     String name;
-
     String gitUrlInternalTemplate;
+    String username;
 
     public static GitBackend fromConfig(String name, GitBackendConfig config) {
-        return GitBackend.builder().name(name).gitUrlInternalTemplate(config.gitUrlInternalTemplate()).build();
+        return GitBackend.builder()
+                .name(name)
+                .gitUrlInternalTemplate(config.gitUrlInternalTemplate())
+                .username(config.username())
+                .build();
     }
 }
