@@ -29,7 +29,6 @@ import io.restassured.response.Response;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.enums.ResultStatus;
@@ -79,9 +78,8 @@ class CloningEndpointIT {
     ObjectMapper objectMapper;
 
     @BeforeAll
-    static void setUpCloneRepo() throws IOException, GitAPIException {
+    static void setUpCloneRepo() throws IOException {
         Files.createDirectory(SOURCE_REPO_ABSOLUTE_PATH);
-        TestUtils.cloneSourceRepoFromGithub();
     }
 
     @AfterAll
