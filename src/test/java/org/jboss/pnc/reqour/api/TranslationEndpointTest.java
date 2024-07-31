@@ -27,9 +27,9 @@ import jakarta.ws.rs.core.Response.Status;
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
+import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.facade.api.TranslationProvider;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 
 @QuarkusTest
-@TestHTTPEndpoint(TranslationEndpoint.class)
+@TestHTTPEndpoint(TranslateEndpoint.class)
 @TestProfile(TranslationProfile.class)
 class TranslationEndpointTest {
 
@@ -49,7 +49,7 @@ class TranslationEndpointTest {
 
     @Test
     void externalToInternal_validURL_returnsResponse() {
-        TranslateResponse expectedResponse = TestData.httpsWithOrganizationAndGitSuffix();
+        TranslateResponse expectedResponse = TestData.Translation.httpsWithOrganizationAndGitSuffix();
         TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
         Mockito.when(provider.externalToInternal(any())).thenReturn(expectedResponse);
 
@@ -65,10 +65,10 @@ class TranslationEndpointTest {
 
     @Test
     void externalToInternal_invalidURL_returnsErrorDTO() {
-        InvalidExternalUrlException exceptionToBeThrown = new InvalidExternalUrlException("Invalid external URL given");
-        TranslateRequest request = TestData.withoutRepository();
-        Mockito.doThrow(exceptionToBeThrown).when(provider).externalToInternal(any());
-        ErrorResponse expectedResponse = new ErrorResponse(exceptionToBeThrown);
+        TranslateRequest request = TestData.Translation.withoutRepository();
+        ErrorResponse expectedResponse = new ErrorResponse(
+                "ResteasyReactiveViolationException",
+                "externalToInternal.arg0.externalUrl: Invalid URL of the git repository");
 
         Response response = given().contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

@@ -15,34 +15,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.facade.api;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 
 /**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
+ * Clone provider used for cloning of the repository to the internal repository. <br/>
  */
-public interface GitConfig {
+public interface CloneProvider {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
+    /**
+     * Clone the external repository (either completely or partially - depending on the
+     * {@link RepositoryCloneRequest#ref} to the internal repository.
+     *
+     * @param cloneRequest cloning request describing the way it should be cloned
+     */
+    void clone(RepositoryCloneRequest cloneRequest);
 
-    Set<String> acceptableSchemes();
-
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
-    }
+    /**
+     * Name of the clone provider.
+     *
+     * @return name of the clone provider
+     */
+    String name();
 }

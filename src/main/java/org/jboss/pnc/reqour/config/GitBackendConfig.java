@@ -20,4 +20,6 @@ package org.jboss.pnc.reqour.config;
 public interface GitBackendConfig {
 
     String gitUrlInternalTemplate();
+
+    String username();
 }

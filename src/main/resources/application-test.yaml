@@ -4,3 +4,4 @@ reqour:
       available:
         gitlab:
           git-url-internal-template: git@gitlab.cee.redhat.com:test-workspace/
+    private-github-user: test-user

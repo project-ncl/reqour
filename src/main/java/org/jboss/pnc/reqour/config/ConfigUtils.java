@@ -42,6 +42,10 @@ public class ConfigUtils {
                 config.gitConfigs().gitBackendsConfig().availableGitBackends().get(activeGitBackendName));
     }
 
+    public CallbackSenderConfig getCallbackSenderConfig() {
+        return config.callbackSender();
+    }
+
     private String getActiveGitBackendName() {
         return config.gitConfigs().gitBackendsConfig().activeGitBackend();
     }

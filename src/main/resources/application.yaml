@@ -8,6 +8,7 @@ reqour:
       available:
         gitlab:
           git-url-internal-template: git@gitlab.cee.redhat.com:pnc-workspace
+          username: user
       active: gitlab
     acceptable-schemes:
       - https
@@ -15,3 +16,4 @@ reqour:
       - git
       - git+ssh
       - ssh
+    private-github-user: ${PRIVATE_GITHUB_USER}

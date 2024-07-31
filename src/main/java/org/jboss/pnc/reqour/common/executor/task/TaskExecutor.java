@@ -15,34 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
-
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+package org.jboss.pnc.reqour.common.executor.task;
 
 /**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
+ * This executor is used for starting long-running tasks. It assigns every task to the provided task ID.
  */
-public interface GitConfig {
+public interface TaskExecutor {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
-
-    Set<String> acceptableSchemes();
-
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
-    }
+    // TODO
 }

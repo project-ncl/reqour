@@ -15,34 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.common.utils;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+public class IOUtils {
 
-/**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
- */
-public interface GitConfig {
+    public static void ignoreOutput(String s) {
+    }
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
+    public static Path createTempDirForCloning() {
+        try {
+            return Files.createTempDirectory("clone-");
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot create temporary directory for cloning", e);
+        }
+    }
 
-    Set<String> acceptableSchemes();
+    public static long countLines(String text) {
+        return text.lines().count();
+    }
 
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
+    public static List<String> splitByNewLine(String text) {
+        return text.lines().toList();
     }
 }

@@ -40,62 +40,62 @@ class TranslationProviderTest {
 
     @Test
     void externalToInternal_noProtocol_returnsResult() {
-        testCorrectURL(TestData.noProtocol());
+        testInvalidURL(TestData.Translation.noProtocol(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_validRepoHttpWithoutOrganizationWithoutGitSuffix_returnsResult() {
-        testCorrectURL(TestData.httpWithoutOrganizationWithoutGitSuffix());
+        testCorrectURL(TestData.Translation.httpWithoutOrganizationWithoutGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoHttpsWithoutOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.httpsWithoutOrganizationWithGitSuffix());
+        testCorrectURL(TestData.Translation.httpsWithoutOrganizationWithGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoHttpWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.httpsWithOrganizationAndGitSuffix());
+        testCorrectURL(TestData.Translation.httpsWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoGitWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.gitWithOrganizationAndGitSuffix());
+        testCorrectURL(TestData.Translation.gitWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoGitPlusSshWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.gitPlusSshWithOrganizationAndGitSuffix());
+        testCorrectURL(TestData.Translation.gitPlusSshWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoSshWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.sshWithOrganizationAndGitSuffix());
+        testCorrectURL(TestData.Translation.sshWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoSshWithPort_returnsResult() {
-        testCorrectURL(TestData.sshWithOrganizationAndPort());
+        testCorrectURL(TestData.Translation.sshWithOrganizationAndPort());
     }
 
     @Test
     void externalToInternal_invalidScpLikeURL_throwsException() {
-        testInvalidURL(TestData.invalidScpLikeWithoutSemicolon(), InvalidExternalUrlException.class);
+        testInvalidURL(TestData.Translation.invalidScpLikeWithoutSemicolon(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_noRepositoryProvided_throwsException() {
-        testInvalidURL(TestData.withoutRepository(), InvalidExternalUrlException.class);
+        testInvalidURL(TestData.Translation.withoutRepository(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_nonScpLikeWithUser_throwsException() {
-        testInvalidURL(TestData.nonScpLikeWithUser(), InvalidExternalUrlException.class);
+        testInvalidURL(TestData.Translation.nonScpLikeWithUser(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_unknownSchema_throwsException() {
-        testInvalidURL(TestData.withUnavailableSchema(), InvalidExternalUrlException.class);
+        testInvalidURL(TestData.Translation.withUnavailableSchema(), InvalidExternalUrlException.class);
     }
 
     private void testCorrectURL(TranslateResponse expectedResponse) {

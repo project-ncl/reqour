@@ -15,25 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.model;
+package org.jboss.pnc.reqour.rest.providers;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import jakarta.validation.ValidationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.dto.ErrorResponse;
 
-@Getter
-@Builder
-public class GitBackend {
+@Provider
+@Slf4j
+public class ValidationExceptionMapper implements ExceptionMapper<ValidationException> {
 
-    String name;
-    String gitUrlInternalTemplate;
-    String username;
-
-    public static GitBackend fromConfig(String name, GitBackendConfig config) {
-        return GitBackend.builder()
-                .name(name)
-                .gitUrlInternalTemplate(config.gitUrlInternalTemplate())
-                .username(config.username())
+    @Override
+    public Response toResponse(ValidationException exception) {
+        log.debug("Bad format of the request", exception);
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity(new ErrorResponse(exception))
+                .type(MediaType.APPLICATION_JSON_TYPE)
                 .build();
     }
 }
