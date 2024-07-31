@@ -26,9 +26,9 @@ import jakarta.ws.rs.core.Response.Status;
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
+import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
 
@@ -36,13 +36,13 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @QuarkusTest
-@TestHTTPEndpoint(TranslationEndpoint.class)
+@TestHTTPEndpoint(TranslateEndpoint.class)
 @TestProfile(TranslationProfile.class)
 public class TranslationEndpointIT {
 
     @Test
     void externalToInternal_validURL_returnsResponse() {
-        TranslateResponse expectedResponse = TestData.httpsWithOrganizationAndGitSuffix();
+        TranslateResponse expectedResponse = TestData.Translation.httpsWithOrganizationAndGitSuffix();
         TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
 
         Response response = given().contentType(MediaType.APPLICATION_JSON)
@@ -57,9 +57,10 @@ public class TranslationEndpointIT {
 
     @Test
     void externalToInternal_invalidURL_returnsErrorDTO() {
-        TranslateRequest request = TestData.withoutRepository();
+        TranslateRequest request = TestData.Translation.withoutRepository();
         ErrorResponse expectedResponse = new ErrorResponse(
-                new InvalidExternalUrlException("Invalid external URL provided: " + request.getExternalUrl()));
+                "ResteasyReactiveViolationException",
+                "externalToInternal.arg0.externalUrl: Invalid URL of the git repository");
 
         Response response = given().contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

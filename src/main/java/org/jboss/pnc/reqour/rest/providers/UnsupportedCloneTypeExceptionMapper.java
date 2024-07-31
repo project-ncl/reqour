@@ -23,15 +23,15 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.dto.ErrorResponse;
-import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
+import org.jboss.pnc.reqour.common.exceptions.UnsupportedCloneTypeException;
 
 @Provider
 @Slf4j
-public class InvalidExternalUrlExceptionMapper implements ExceptionMapper<InvalidExternalUrlException> {
+public class UnsupportedCloneTypeExceptionMapper implements ExceptionMapper<UnsupportedCloneTypeException> {
 
     @Override
-    public Response toResponse(InvalidExternalUrlException exception) {
-        log.debug("Attempt to translate invalid external URL: ", exception);
+    public Response toResponse(UnsupportedCloneTypeException exception) {
+        log.debug("Unsupported clone type provided: ", exception);
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(new ErrorResponse(exception))
                 .type(MediaType.APPLICATION_JSON_TYPE)

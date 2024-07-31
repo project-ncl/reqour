@@ -15,34 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.rest.providers;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.ext.ExceptionMapper;
+import jakarta.ws.rs.ext.Provider;
+import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.dto.ErrorResponse;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+@Provider
+@Slf4j
+public class AllOtherExceptionsMapper implements ExceptionMapper<Throwable> {
 
-/**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
- */
-public interface GitConfig {
-
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
-
-    Set<String> acceptableSchemes();
-
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
+    @Override
+    public Response toResponse(Throwable exception) {
+        log.error("Unexpected error occurred: ", exception);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                .entity(new ErrorResponse(exception))
+                .type(MediaType.APPLICATION_JSON_TYPE)
+                .build();
     }
 }

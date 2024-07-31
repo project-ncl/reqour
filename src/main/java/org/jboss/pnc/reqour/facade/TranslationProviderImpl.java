@@ -22,13 +22,11 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.api.reqour.dto.validation.ExternalURLValidator;
+import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.facade.api.TranslationProvider;
 import org.jboss.pnc.reqour.model.GitBackend;
-
-import javax.validation.Valid;
 
 @ApplicationScoped
 @Slf4j
@@ -45,23 +43,23 @@ public class TranslationProviderImpl implements TranslationProvider {
     }
 
     @Override
-    public TranslateResponse externalToInternal(@Valid TranslateRequest request) {
+    public TranslateResponse externalToInternal(TranslateRequest request) {
         String externalUrl = request.getExternalUrl();
 
-        ExternalURLValidator.ParsedURL url = ExternalURLValidator.parseURL(request.getExternalUrl());
+        GitRepositoryURLValidator.ParsedURL url = GitRepositoryURLValidator.parseURL(request.getExternalUrl());
         if (url == null) {
-            log.warn("Invalid external URL provided: {}", externalUrl);
+            log.debug("Invalid external URL provided: {}", externalUrl);
             throw new InvalidExternalUrlException("Invalid external URL provided: " + externalUrl);
         }
 
         if (url.getProtocol() != null && !configUtils.getAcceptableSchemes().contains(url.getProtocol())) {
-            log.warn("Invalid protocol of external URL provided: {}", externalUrl);
+            log.debug("Invalid protocol of external URL provided: {}", externalUrl);
             throw new InvalidExternalUrlException(
                     "Invalid protocol (" + url.getProtocol() + ") given. Available protocols are: "
                             + configUtils.getAcceptableSchemes());
         }
 
-        log.info("Raw external URL: {}, was successfully parsed: {}", request.getExternalUrl(), url);
+        log.debug("Provided external URL ({}), was successfully parsed to: {}", request.getExternalUrl(), url);
 
         String repository = adjustRepository(url.getRepository());
         String gitServer = adjustGitServer(configUtils.getActiveGitBackend().getGitUrlInternalTemplate());

@@ -17,32 +17,32 @@
  */
 package org.jboss.pnc.reqour.config;
 
+import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 /**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
+ * Configuration for callback sending.
  */
-public interface GitConfig {
+public interface CallbackSenderConfig {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
+    @WithName("retries")
+    RetryConfig retryConfig();
 
-    Set<String> acceptableSchemes();
+    /**
+     * All units are in seconds (except absolute ones, e.g. {@link RetryConfig#maxRetries()}).
+     */
+    interface RetryConfig {
 
-    Optional<String> privateGithubUser();
+        @WithDefault("1")
+        int backoffInitialDelay();
 
-    @WithExistingActive
-    interface GitBackendsConfig {
+        @WithDefault("30")
+        int backoffMaxDelay();
 
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
+        @WithDefault("-1")
+        int maxRetries();
 
-        @WithName("active")
-        String activeGitBackend();
+        @WithDefault("120")
+        int maxDuration();
     }
 }

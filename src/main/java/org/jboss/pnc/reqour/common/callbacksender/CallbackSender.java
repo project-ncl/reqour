@@ -15,34 +15,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.common.callbacksender;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import jakarta.validation.Valid;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
 
 /**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
+ * Sending the callback to the location provided by the notifier of the operation.
  */
-public interface GitConfig {
+public interface CallbackSender {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
-
-    Set<String> acceptableSchemes();
-
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
-    }
+    /**
+     * Send the callback to the given URL using the given method.
+     *
+     * @param method method to use
+     * @param url URL where to send the callback
+     * @param callback callback to send
+     */
+    void sendRepositoryCloneCallback(String method, String url, @Valid RepositoryCloneResponseCallback callback);
 }

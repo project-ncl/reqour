@@ -15,34 +15,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.config;
+package org.jboss.pnc.reqour.model;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
+import lombok.Builder;
+import lombok.Value;
 
+import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.function.Consumer;
 
-/**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
- */
-public interface GitConfig {
+@Value
+@Builder(builderClassName = "Builder", toBuilder = true)
+public class ProcessContext {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
-
-    Set<String> acceptableSchemes();
-
-    Optional<String> privateGithubUser();
-
-    @WithExistingActive
-    interface GitBackendsConfig {
-
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
-
-        @WithName("active")
-        String activeGitBackend();
-    }
+    List<String> command;
+    Path workingDirectory;
+    Map<String, String> extraEnvVariables;
+    Consumer<String> stdoutConsumer;
+    Consumer<String> stderrConsumer;
 }

@@ -22,22 +22,12 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.api.TranslationEndpoint;
-import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
-import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.facade.api.TranslationProvider;
-import org.jboss.pnc.reqour.model.GitBackend;
-
-import java.net.URI;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Predicate;
-import java.util.regex.Pattern;
 
 @ApplicationScoped
 @Slf4j
-public class TranslationEndpointImpl implements TranslationEndpoint {
+public class TranslationEndpointImpl implements TranslateEndpoint {
 
     private final TranslationProvider provider;
 

@@ -25,4 +25,6 @@ public interface ReqourConfig {
 
     @WithName("git")
     GitConfig gitConfigs();
+
+    CallbackSenderConfig callbackSender();
 }
