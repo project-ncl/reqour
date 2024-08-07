@@ -23,16 +23,15 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.dto.ErrorResponse;
-import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 
 @Provider
 @Slf4j
-public class InvalidExternalUrlExceptionMapper implements ExceptionMapper<InvalidExternalUrlException> {
+public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException> {
 
     @Override
-    public Response toResponse(InvalidExternalUrlException exception) {
-        log.warn("Attempt to translate invalid external URL: ", exception);
-        return Response.status(Response.Status.BAD_REQUEST)
+    public Response toResponse(RuntimeException exception) {
+        log.warn("Runtime exception occurred", exception);
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .entity(new ErrorResponse(exception))
                 .type(MediaType.APPLICATION_JSON_TYPE)
                 .build();

@@ -19,25 +19,27 @@ package org.jboss.pnc.reqour.rest.endpoints;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.api.reqour.dto.TranslateRequest;
-import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.api.TranslationEndpoint;
-import org.jboss.pnc.reqour.facade.api.TranslationProvider;
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
+import org.jboss.pnc.reqour.api.RepositoryCloneEndpoint;
+import org.jboss.pnc.reqour.facade.api.RepositoryCloneProvider;
 
 @ApplicationScoped
-@Slf4j
-public class TranslationEndpointImpl implements TranslationEndpoint {
+public class RepositoryCloneEndpointImpl implements RepositoryCloneEndpoint {
 
-    private final TranslationProvider provider;
+    private final RepositoryCloneProvider provider;
 
     @Inject
-    public TranslationEndpointImpl(TranslationProvider provider) {
+    // @VirtualThreads
+    ManagedExecutor executor;
+
+    @Inject
+    public RepositoryCloneEndpointImpl(RepositoryCloneProvider provider) {
         this.provider = provider;
     }
 
     @Override
-    public TranslateResponse externalToInternal(TranslateRequest externalToInternalRequestDto) {
-        return provider.externalToInternal(externalToInternalRequestDto);
+    public void clone(RepositoryCloneRequest cloneRequest) {
+        executor.execute(() -> provider.clone(cloneRequest));
     }
 }

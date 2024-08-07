@@ -61,7 +61,7 @@ public class TranslationProviderImpl implements TranslationProvider {
                             + configUtils.getAcceptableSchemes());
         }
 
-        log.info("Raw external URL: {}, was successfully parsed: {}", request.getExternalUrl(), url);
+        log.info("Provided external URL ({}), was successfully parsed to: {}", request.getExternalUrl(), url);
 
         String repository = adjustRepository(url.getRepository());
         String gitServer = adjustGitServer(configUtils.getActiveGitBackend().getGitUrlInternalTemplate());

@@ -25,4 +25,7 @@ public interface ReqourConfig {
 
     @WithName("git")
     GitConfig gitConfigs();
+
+    @WithName("clone")
+    CloneConfig cloneConfig();
 }
