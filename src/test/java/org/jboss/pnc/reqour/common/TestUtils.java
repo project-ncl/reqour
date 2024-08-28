@@ -17,21 +17,29 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.TagOpt;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 
 import java.net.URI;
 import java.nio.file.Path;
+
+import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
 
 public class TestUtils {
 
@@ -66,16 +74,79 @@ public class TestUtils {
                 .build();
     }
 
-    public static RepositoryCloneResponseCallback createRepositoryCloneResponseCallback(
+    public static RepositoryCloneResponse createRepositoryCloneResponse(
             String originRepoUrl,
             String targetRepoUrl,
             ResultStatus status,
             String taskId) {
-        return RepositoryCloneResponseCallback.builder()
+        return RepositoryCloneResponse.builder()
                 .originRepoUrl(originRepoUrl)
                 .targetRepoUrl(targetRepoUrl)
                 .callback(ReqourCallback.builder().status(status).id(taskId).build())
                 .build();
+    }
+
+    public static InternalSCMCreationResponse newlyCreatedSuccess(String projectPath, String taskId) {
+        return createResponse(projectPath, taskId, InternalSCMCreationStatus.SUCCESS_CREATED, ResultStatus.SUCCESS);
+    }
+
+    public static InternalSCMCreationResponse alreadyExistsSuccess(String projectPath, String taskId) {
+        return createResponse(
+                projectPath,
+                taskId,
+                InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS,
+                ResultStatus.SUCCESS);
+    }
+
+    public static InternalSCMCreationResponse failed(String projectPath, String taskId) {
+        return createResponse(projectPath, taskId, InternalSCMCreationStatus.FAILED, ResultStatus.FAILED);
+    }
+
+    private static InternalSCMCreationResponse createResponse(
+            String projectPath,
+            String taskId,
+            InternalSCMCreationStatus creationStatus,
+            ResultStatus operationStatus) {
+        return InternalSCMCreationResponse.builder()
+                .readonlyUrl("http://localhost/test-workspace/" + projectPath + ".git")
+                .readwriteUrl("git@localhost:test-workspace/" + projectPath + ".git")
+                .status(creationStatus)
+                .callback(ReqourCallback.builder().id(taskId).status(operationStatus).build())
+                .build();
+    }
+
+    public static InternalSCMCreationRequest createInternalSCMRepoCreationRequest(
+            String projectPath,
+            String taskId,
+            String callbackPath) {
+        return InternalSCMCreationRequest.builder()
+                .project(projectPath)
+                .taskId(taskId)
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create(getWiremockBaseUrl() + callbackPath))
+                                .build())
+                .build();
+    }
+
+    public static String getWiremockBaseUrl() {
+        return ConfigProvider.getConfig().getValue("wiremock.base-url", String.class);
+    }
+
+    public static void registerGet(WireMock wireMock, String url, String expectedJson) {
+        wireMock.register(
+                WireMock.get(url)
+                        .willReturn(
+                                WireMock.ok(expectedJson).withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
+    }
+
+    public static void verifyThatCallbackWasSent(WireMock wireMock, String callbackPath, String expectedBody) {
+        wireMock.verifyThat(
+                1,
+                WireMock.postRequestedFor(WireMock.urlEqualTo(callbackPath))
+                        .withHeader(CONTENT_TYPE_STRING, WireMock.equalTo(MediaType.APPLICATION_JSON))
+                        .withRequestBody(WireMock.equalToJson(expectedBody)));
     }
 
     public static void cloneSourceRepoFromGithub() throws GitAPIException {
@@ -108,5 +179,4 @@ public class TestUtils {
             throw new RuntimeException(e);
         }
     }
-
 }

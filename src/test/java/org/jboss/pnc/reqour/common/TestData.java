@@ -18,10 +18,12 @@
 package org.jboss.pnc.reqour.common;
 
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.gitlab4j.api.models.Group;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
+import org.jboss.pnc.reqour.config.GitBackendConfig;
 
 import java.net.URI;
 
@@ -124,5 +126,71 @@ public class TestData {
                                     .build())
                     .build();
         }
+    }
+
+    public static class InternalSCMRepositoryCreation {
+
+        public static Group workspaceGroup() {
+            String workspaceName = ConfigProvider.getConfig()
+                    .getValue("reqour.git.git-backends.available.gitlab.workspace", String.class);
+            Long workspaceId = ConfigProvider.getConfig()
+                    .getValue("reqour.git.git-backends.available.gitlab.workspace-id", Long.class);
+
+            return new Group().withId(workspaceId).withName(workspaceName);
+        }
+    }
+
+    public static GitBackendConfig dummyGitBackendConfig() {
+        return new GitBackendConfig() {
+            @Override
+            public String username() {
+                return "";
+            }
+
+            @Override
+            public String url() {
+                return "";
+            }
+
+            @Override
+            public String workspaceName() {
+                return "";
+            }
+
+            @Override
+            public long workspaceId() {
+                return 0;
+            }
+
+            @Override
+            public String hostname() {
+                return "";
+            }
+
+            @Override
+            public String readOnlyTemplate() {
+                return "";
+            }
+
+            @Override
+            public String readWriteTemplate() {
+                return "";
+            }
+
+            @Override
+            public String gitUrlInternalTemplate() {
+                return "";
+            }
+
+            @Override
+            public String token() {
+                return "";
+            }
+
+            @Override
+            public ProtectedTagsConfig protectedTags() {
+                return null;
+            }
+        };
     }
 }

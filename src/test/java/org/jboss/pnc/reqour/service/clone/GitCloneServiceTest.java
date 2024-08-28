@@ -21,10 +21,12 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.reqour.common.GitCommands;
+import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -71,8 +73,9 @@ class GitCloneServiceTest {
     ProcessExecutor processExecutor;
 
     @BeforeAll
-    static void setUpCloneRepo() throws IOException {
+    static void setUpCloneRepo() throws IOException, GitAPIException {
         Files.createDirectory(SOURCE_REPO_ABSOLUTE_PATH);
+        TestUtils.cloneSourceRepoFromGithub();
     }
 
     @AfterAll

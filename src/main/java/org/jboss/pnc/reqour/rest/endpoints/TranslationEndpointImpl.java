@@ -22,7 +22,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
+import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 
 @ApplicationScoped

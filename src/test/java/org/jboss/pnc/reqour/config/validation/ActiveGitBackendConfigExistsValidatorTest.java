@@ -20,7 +20,7 @@ package org.jboss.pnc.reqour.config.validation;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.validation.ConstraintValidatorContext;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.config.GitConfig;
 import org.jboss.pnc.reqour.profile.ConfigProfile;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @QuarkusTest
 @TestProfile(ConfigProfile.class)
-class ActiveGitBackendExistsValidatorTest {
+class ActiveGitBackendConfigExistsValidatorTest {
 
     GitConfig.GitBackendsConfig gitBackendsConfigMock;
 
@@ -45,17 +45,7 @@ class ActiveGitBackendExistsValidatorTest {
         // Not normal-scoped bean, @InjectMock cannot be used
         gitBackendsConfigMock = Mockito.mock(GitConfig.GitBackendsConfig.class);
         Mockito.when(gitBackendsConfigMock.availableGitBackends())
-                .thenReturn(Map.of("existing", new GitBackendConfig() {
-                    @Override
-                    public String gitUrlInternalTemplate() {
-                        return "";
-                    }
-
-                    @Override
-                    public String username() {
-                        return "";
-                    }
-                }));
+                .thenReturn(Map.of("existing", TestData.dummyGitBackendConfig()));
 
         // Not normal-scoped bean, @InjectMock cannot be used
         validatorContextMock = Mockito.mock(ConstraintValidatorContext.class);

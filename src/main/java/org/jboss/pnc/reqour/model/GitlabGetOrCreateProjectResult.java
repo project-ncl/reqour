@@ -17,23 +17,12 @@
  */
 package org.jboss.pnc.reqour.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.gitlab4j.api.models.Project;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 
-@Getter
-@Builder
-public class GitBackend {
-
-    String name;
-    String gitUrlInternalTemplate;
-    String username;
-
-    public static GitBackend fromConfig(String name, GitBackendConfig config) {
-        return GitBackend.builder()
-                .name(name)
-                .gitUrlInternalTemplate(config.gitUrlInternalTemplate())
-                .username(config.username())
-                .build();
-    }
+/**
+ * Aggregated model for storing the project together with another metadata, e.g. whether the project has already been
+ * existing in the internal SCM repository before.
+ */
+public record GitlabGetOrCreateProjectResult(Project project, InternalSCMCreationResponse result) {
 }

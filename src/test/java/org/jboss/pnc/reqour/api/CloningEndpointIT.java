@@ -21,7 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
-import io.quarkiverse.wiremock.devservice.WireMockConfigKey;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -29,11 +28,11 @@ import io.restassured.response.Response;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.rest.CloneEndpoint;
+import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
@@ -66,9 +65,6 @@ class CloningEndpointIT {
 
     private static final String CALLBACK_PATH = "/callback";
 
-    @ConfigProperty(name = WireMockConfigKey.PORT)
-    Integer port;
-
     WireMock invokerWireMock;
 
     @Inject
@@ -78,19 +74,20 @@ class CloningEndpointIT {
     ObjectMapper objectMapper;
 
     @BeforeAll
-    static void setUpCloneRepo() throws IOException {
+    static void setUpCloneRepo() throws IOException, GitAPIException {
         Files.createDirectory(SOURCE_REPO_ABSOLUTE_PATH);
-    }
-
-    @AfterAll
-    static void removeCloneRepo() throws IOException {
-        FileUtils.deleteDirectory(SOURCE_REPO_ABSOLUTE_PATH.toFile());
+        TestUtils.cloneSourceRepoFromGithub();
     }
 
     @BeforeEach
     void setUp() throws IOException {
         setUpEmptyDestRepo();
         configureWireMockStubbing();
+    }
+
+    @AfterAll
+    static void removeCloneRepo() throws IOException {
+        FileUtils.deleteDirectory(SOURCE_REPO_ABSOLUTE_PATH.toFile());
     }
 
     private void configureWireMockStubbing() {
@@ -116,7 +113,7 @@ class CloningEndpointIT {
     @Test
     void clone_validCloneRequest_sendsCallback() throws InterruptedException, JsonProcessingException {
         String expectedBody = objectMapper.writeValueAsString(
-                TestUtils.createRepositoryCloneResponseCallback(
+                TestUtils.createRepositoryCloneResponse(
                         SOURCE_REPO_URL,
                         EMPTY_DEST_REPO_URL,
                         ResultStatus.SUCCESS,
@@ -136,11 +133,7 @@ class CloningEndpointIT {
                 .statusCode(202);
 
         Thread.sleep(1_000);
-        invokerWireMock.verifyThat(
-                1,
-                WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))
-                        .withHeader("Content-Type", WireMock.equalTo(MediaType.APPLICATION_JSON))
-                        .withRequestBody(WireMock.equalTo(expectedBody)));
+        TestUtils.verifyThatCallbackWasSent(invokerWireMock, CALLBACK_PATH, expectedBody);
     }
 
     @Test
@@ -148,7 +141,7 @@ class CloningEndpointIT {
             throws InterruptedException, JsonProcessingException {
         String nonExistentRepoUrl = "git@github.com:user/non-existent.git";
         String expectedBody = objectMapper.writeValueAsString(
-                TestUtils.createRepositoryCloneResponseCallback(
+                TestUtils.createRepositoryCloneResponse(
                         nonExistentRepoUrl,
                         EMPTY_DEST_REPO_URL,
                         ResultStatus.FAILED,
@@ -168,11 +161,7 @@ class CloningEndpointIT {
                 .statusCode(202);
 
         Thread.sleep(2_000);
-        invokerWireMock.verifyThat(
-                1,
-                WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))
-                        .withHeader("Content-Type", WireMock.equalTo(MediaType.APPLICATION_JSON))
-                        .withRequestBody(WireMock.equalTo(expectedBody)));
+        TestUtils.verifyThatCallbackWasSent(invokerWireMock, CALLBACK_PATH, expectedBody);
     }
 
     @Test
@@ -189,6 +178,6 @@ class CloningEndpointIT {
     }
 
     private String getCallbackUrl() {
-        return "http://localhost:" + port + CALLBACK_PATH;
+        return TestUtils.getWiremockBaseUrl() + CALLBACK_PATH;
     }
 }

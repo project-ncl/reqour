@@ -1,3 +1,6 @@
+# Runtime configuration
+config/
+
 #Maven
 target/
 pom.xml.tag

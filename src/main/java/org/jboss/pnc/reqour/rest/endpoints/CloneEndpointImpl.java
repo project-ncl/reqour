@@ -22,12 +22,11 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
-import org.jboss.pnc.api.reqour.dto.rest.CloneEndpoint;
+import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.callbacksender.CallbackSenderImpl;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
@@ -57,12 +56,12 @@ public class CloneEndpointImpl implements CloneEndpoint {
                 cloneRequest,
                 service::clone,
                 this::handleError,
-                this::fireCallback);
+                callbackSender::sendRepositoryCloneCallback);
 
         throw new WebApplicationException(Response.Status.ACCEPTED);
     }
 
-    private RepositoryCloneResponseCallback handleError(RepositoryCloneRequest request, Throwable t) {
+    private RepositoryCloneResponse handleError(RepositoryCloneRequest request, Throwable t) {
         t = t.getCause();
 
         ResultStatus status;
@@ -74,16 +73,11 @@ public class CloneEndpointImpl implements CloneEndpoint {
             log.error("Async cloning task ended with unexpected exception", t);
         }
 
-        return RepositoryCloneResponseCallback.builder()
+        return RepositoryCloneResponse.builder()
                 .originRepoUrl(request.getOriginRepoUrl())
                 .targetRepoUrl(request.getTargetRepoUrl())
                 .ref(request.getRef())
                 .callback(ReqourCallback.builder().status(status).id(request.getTaskId()).build())
                 .build();
     }
-
-    private void fireCallback(Request request, RepositoryCloneResponseCallback callback) {
-        callbackSender.sendRepositoryCloneCallback(request, callback);
-    }
-
 }
