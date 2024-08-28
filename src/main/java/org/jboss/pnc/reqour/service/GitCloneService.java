@@ -22,7 +22,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
@@ -53,7 +53,7 @@ public class GitCloneService implements CloneService {
     }
 
     @Override
-    public RepositoryCloneResponseCallback clone(RepositoryCloneRequest cloneRequest) {
+    public RepositoryCloneResponse clone(RepositoryCloneRequest cloneRequest) {
         Path cloneDir = IOUtils.createTempDirForCloning();
 
         String adjustedUrl = URLUtils
@@ -73,7 +73,7 @@ public class GitCloneService implements CloneService {
             log.warn("Could not delete the temporary directory", ex);
         }
 
-        return RepositoryCloneResponseCallback.builder()
+        return RepositoryCloneResponse.builder()
                 .originRepoUrl(cloneRequest.getOriginRepoUrl())
                 .targetRepoUrl(cloneRequest.getTargetRepoUrl())
                 .callback(ReqourCallback.builder().id(cloneRequest.getTaskId()).status(ResultStatus.SUCCESS).build())

@@ -22,7 +22,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 
@@ -41,7 +42,12 @@ public class CallbackSenderImpl implements CallbackSender {
     }
 
     @Override
-    public void sendRepositoryCloneCallback(Request request, RepositoryCloneResponseCallback callback) {
+    public void sendRepositoryCloneCallback(Request request, RepositoryCloneResponse callback) {
+        sendCallback(request, callback);
+    }
+
+    @Override
+    public void sendInternalSCMRepositoryCreationCallback(Request request, InternalSCMCreationResponse callback) {
         sendCallback(request, callback);
     }
 

@@ -15,21 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.service.api;
+package org.jboss.pnc.reqour.profile;
 
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
+import java.util.Set;
 
-/**
- * Clone service used for cloning of the repository to the internal repository.
- */
-public interface CloneService {
+public class InternalSCMRepositoryCreationProfile extends CommonTestProfile {
 
-    /**
-     * Clone the external repository (either completely or partially - depending on the
-     * {@link RepositoryCloneRequest#ref} to the internal repository.
-     *
-     * @param cloneRequest cloning request describing the way it should be cloned
-     */
-    RepositoryCloneResponse clone(RepositoryCloneRequest cloneRequest);
+    @Override
+    public Set<String> tags() {
+        return Set.of("internal-scm-creation");
+    }
 }

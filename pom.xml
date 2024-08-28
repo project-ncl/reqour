@@ -88,7 +88,6 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.14.1</quarkus.platform.version>
-        <skipITs>true</skipITs>
 
         <!-- Plugin versions -->
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
@@ -146,6 +145,12 @@
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-common</artifactId>
             <version>3.0.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jboss.pnc</groupId>
+                    <artifactId>pnc-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -158,6 +163,11 @@
             <artifactId>quarkus-wiremock</artifactId>
             <version>${wiremock.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.gitlab4j</groupId>
+            <artifactId>gitlab4j-api</artifactId>
+            <version>6.0.0-rc.5</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>

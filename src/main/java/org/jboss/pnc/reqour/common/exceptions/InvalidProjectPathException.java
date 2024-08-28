@@ -15,21 +15,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.service.api;
+package org.jboss.pnc.reqour.common.exceptions;
 
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
+import jakarta.validation.ValidationException;
 
 /**
- * Clone service used for cloning of the repository to the internal repository.
+ * Exception thrown in case invalid project path is given.<br/>
+ * Project path is used for instance as {@link org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest#project}.<br/>
+ * Valid project paths are:<br/>
+ * 1) 'project'<br/>
+ * 2) 'subgroup/project'
  */
-public interface CloneService {
+public class InvalidProjectPathException extends ValidationException {
 
-    /**
-     * Clone the external repository (either completely or partially - depending on the
-     * {@link RepositoryCloneRequest#ref} to the internal repository.
-     *
-     * @param cloneRequest cloning request describing the way it should be cloned
-     */
-    RepositoryCloneResponse clone(RepositoryCloneRequest cloneRequest);
+    public InvalidProjectPathException(String message) {
+        super(message);
+    }
 }

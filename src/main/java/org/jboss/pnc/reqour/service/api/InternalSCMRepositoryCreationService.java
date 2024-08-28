@@ -17,19 +17,18 @@
  */
 package org.jboss.pnc.reqour.service.api;
 
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
-import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
+import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 
 /**
- * Clone service used for cloning of the repository to the internal repository.
+ * Service used for creating new internal SCM repository.
  */
-public interface CloneService {
+public interface InternalSCMRepositoryCreationService {
 
     /**
-     * Clone the external repository (either completely or partially - depending on the
-     * {@link RepositoryCloneRequest#ref} to the internal repository.
+     * Create new internal SCM repository based on the given request.
      *
-     * @param cloneRequest cloning request describing the way it should be cloned
+     * @param creationRequest internal SCM repository creation request
      */
-    RepositoryCloneResponse clone(RepositoryCloneRequest cloneRequest);
+    InternalSCMCreationResponse createInternalSCMRepository(InternalSCMCreationRequest creationRequest);
 }

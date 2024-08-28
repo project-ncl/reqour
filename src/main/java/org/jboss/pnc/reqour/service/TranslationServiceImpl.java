@@ -26,7 +26,6 @@ import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.service.api.TranslationService;
-import org.jboss.pnc.reqour.model.GitBackend;
 
 @ApplicationScoped
 @Slf4j
@@ -82,20 +81,15 @@ public class TranslationServiceImpl implements TranslationService {
     }
 
     private String computeOrganization(String organization, String gitServer) {
-        if (organization == null) {
+        if (organization == null || isInternalPncOrganization(gitServer, organization)) {
             return null;
         }
 
-        GitBackend activeGitBackend = configUtils.getActiveGitBackend();
-        if (activeGitBackend.getName().equals("gitlab")
-                && !repositoryOrganizationManagesGitServer(gitServer, organization)) {
-            return organization;
-        }
-        return null;
+        return organization;
     }
 
-    private boolean repositoryOrganizationManagesGitServer(String gitServer, String repositoryOrganization) {
-        return gitServer.endsWith(repositoryOrganization);
+    private boolean isInternalPncOrganization(String gitServer, String repositoryOrganization) {
+        return configUtils.getActiveGitBackendName().equals("gitlab") && gitServer.endsWith(repositoryOrganization);
     }
 
     private String computeInternalUrlFromRepositoryName(String repositoryName, String gitServer) {

@@ -26,7 +26,7 @@ import jakarta.ws.rs.core.Response.Status;
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
+import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
