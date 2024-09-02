@@ -1,6 +1,10 @@
 quarkus:
   swagger-ui:
     always-include: true
+  log:
+    category:
+      "org.jboss.pnc":
+        level: DEBUG
 
 reqour:
   git:

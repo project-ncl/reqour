@@ -17,10 +17,27 @@
  */
 package org.jboss.pnc.reqour.common.executor.task;
 
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+
 /**
  * This executor is used for starting long-running tasks. It assigns every task to the provided task ID.
  */
 public interface TaskExecutor {
 
-    // TODO
+    /**
+     * Execute the task asynchronously.
+     *
+     * @param taskID ID of the task
+     * @param request request
+     * @param syncExecutor executor, which runs the operation synchronously
+     * @param callbackSender callback sender
+     * @param <T> request type
+     * @param <R> result type
+     */
+    <T, R> void executeAsync(
+            String taskID,
+            T request,
+            Function<T, R> syncExecutor,
+            BiConsumer<R, Throwable> callbackSender);
 }
