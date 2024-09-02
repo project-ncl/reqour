@@ -22,13 +22,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.reqour.dto.Callback;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
 import org.jboss.pnc.api.reqour.dto.rest.CloneEndpoint;
-import org.jboss.pnc.reqour.common.callbacksender.CallbackSender;
+import org.jboss.pnc.reqour.common.callbacksender.CallbackSenderImpl;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
+import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.facade.api.CloneProvider;
 import org.jboss.pnc.reqour.facade.clone.CloneProviderPicker;
 
@@ -37,33 +37,26 @@ import org.jboss.pnc.reqour.facade.clone.CloneProviderPicker;
 public class CloneEndpointImpl implements CloneEndpoint {
 
     private final CloneProviderPicker delegatePicker;
-    private final ManagedExecutor executor;
-    private final CallbackSender callbackSender;
+    private final TaskExecutor taskExecutor;
+    private final CallbackSenderImpl callbackSender;
 
     @Inject
     public CloneEndpointImpl(
             CloneProviderPicker delegatePicker,
-            ManagedExecutor executor,
-            CallbackSender callbackSender) {
+            TaskExecutor taskExecutor,
+            CallbackSenderImpl callbackSender) {
         this.delegatePicker = delegatePicker;
-        this.executor = executor;
+        this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
     }
 
     @Override
     public void clone(RepositoryCloneRequest cloneRequest) {
-        var taskID = cloneRequest.getTaskId();
 
         // Picking of the correct delegate (based on request) is better to be done in the current thread
         // In order to fail in case the cloneRequest.getType() is invalid
         CloneProvider cloneProvider = delegatePicker.pickProvider(cloneRequest.getType());
 
-<<<<<<< Updated upstream
-        executor.runAsync(() -> {
-            log.info("Starting the task with ID={}", taskID);
-            cloneProvider.clone(cloneRequest);
-        }).whenComplete((_res, ex) -> fireCallback(cloneRequest, ex));
-=======
         taskExecutor.executeAsync(
                 cloneRequest.getTaskId(),
                 cloneRequest,
@@ -71,7 +64,6 @@ public class CloneEndpointImpl implements CloneEndpoint {
                 (_res, ex) -> fireCallback(cloneRequest, ex));
 
         throw new WebApplicationException(Response.Status.ACCEPTED);
->>>>>>> Stashed changes
     }
 
     private void fireCallback(RepositoryCloneRequest cloneRequest, Throwable t) {

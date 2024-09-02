@@ -30,7 +30,7 @@ public interface CloneProvider {
      *
      * @param cloneRequest cloning request describing the way it should be cloned
      */
-    void clone(RepositoryCloneRequest cloneRequest);
+    RepositoryCloneRequest clone(RepositoryCloneRequest cloneRequest);
 
     /**
      * Name of the clone provider.

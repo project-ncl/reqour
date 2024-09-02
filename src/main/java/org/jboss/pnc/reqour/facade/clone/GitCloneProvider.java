@@ -49,7 +49,7 @@ public class GitCloneProvider implements CloneProvider {
     }
 
     @Override
-    public void clone(RepositoryCloneRequest cloneRequest) {
+    public RepositoryCloneRequest clone(RepositoryCloneRequest cloneRequest) {
         Path cloneDir = IOUtils.createTempDirForCloning();
 
         String adjustedUrl = URLUtils
@@ -62,6 +62,8 @@ public class GitCloneProvider implements CloneProvider {
         } else {
             cloneRefOnly(cloneRequest, cloneDir);
         }
+
+        return cloneRequest;
     }
 
     @Override
