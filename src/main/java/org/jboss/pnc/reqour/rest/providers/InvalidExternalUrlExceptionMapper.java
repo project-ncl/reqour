@@ -31,7 +31,7 @@ public class InvalidExternalUrlExceptionMapper implements ExceptionMapper<Invali
 
     @Override
     public Response toResponse(InvalidExternalUrlException exception) {
-        log.debug("Attempt to translate invalid external URL: ", exception);
+        log.warn("Attempt to translate invalid external URL: ", exception);
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(new ErrorResponse(exception))
                 .type(MediaType.APPLICATION_JSON_TYPE)

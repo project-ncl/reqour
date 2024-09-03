@@ -20,8 +20,10 @@ package org.jboss.pnc.reqour.rest.endpoints;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.Callback;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
@@ -31,6 +33,8 @@ import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.facade.api.CloneProvider;
 import org.jboss.pnc.reqour.facade.clone.CloneProviderPicker;
+
+import java.net.URI;
 
 @ApplicationScoped
 @Slf4j
@@ -80,8 +84,11 @@ public class CloneEndpointImpl implements CloneEndpoint {
         }
 
         callbackSender.sendRepositoryCloneCallback(
-                cloneRequest.getCallback().getMethod().toString(),
-                cloneRequest.getCallback().getUri().toString(),
+                Request.builder()
+                        .header(new Request.Header("Content-Type", MediaType.APPLICATION_JSON))
+                        .method(cloneRequest.getCallback().getMethod())
+                        .uri(cloneRequest.getCallback().getUri())
+                        .build(),
                 createCallback(cloneRequest, status));
     }
 

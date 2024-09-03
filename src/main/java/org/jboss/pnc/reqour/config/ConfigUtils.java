@@ -20,6 +20,7 @@ package org.jboss.pnc.reqour.config;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.common.http.PNCHttpClientConfig;
 import org.jboss.pnc.reqour.model.GitBackend;
 
 import java.util.Set;
@@ -42,8 +43,8 @@ public class ConfigUtils {
                 config.gitConfigs().gitBackendsConfig().availableGitBackends().get(activeGitBackendName));
     }
 
-    public CallbackSenderConfig getCallbackSenderConfig() {
-        return config.callbackSender();
+    public PNCHttpClientConfig getPncHttpClientConfig() {
+        return config.pncHttpClientConfig();
     }
 
     private String getActiveGitBackendName() {

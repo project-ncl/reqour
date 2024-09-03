@@ -31,7 +31,7 @@ public class ValidationExceptionMapper implements ExceptionMapper<ValidationExce
 
     @Override
     public Response toResponse(ValidationException exception) {
-        log.debug("Bad format of the request", exception);
+        log.warn("Bad format of the request", exception);
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(new ErrorResponse(exception))
                 .type(MediaType.APPLICATION_JSON_TYPE)

@@ -143,6 +143,11 @@
             <classifier>jakarta</classifier>
         </dependency>
         <dependency>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>pnc-common</artifactId>
+            <version>3.0.2-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.32</version>
