@@ -17,13 +17,11 @@
  */
 package org.jboss.pnc.reqour.common.exceptions;
 
-public class InvalidExternalUrlException extends RuntimeException {
+import jakarta.validation.ValidationException;
+
+public class InvalidExternalUrlException extends ValidationException {
 
     public InvalidExternalUrlException(String message) {
         super(message);
-    }
-
-    public InvalidExternalUrlException(String message, Throwable cause) {
-        super(message, cause);
     }
 }

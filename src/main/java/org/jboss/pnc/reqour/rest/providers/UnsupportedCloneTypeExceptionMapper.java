@@ -31,7 +31,7 @@ public class UnsupportedCloneTypeExceptionMapper implements ExceptionMapper<Unsu
 
     @Override
     public Response toResponse(UnsupportedCloneTypeException exception) {
-        log.debug("Unsupported clone type provided: ", exception);
+        log.warn("Unsupported clone type provided: ", exception);
         return Response.status(Response.Status.BAD_REQUEST)
                 .entity(new ErrorResponse(exception))
                 .type(MediaType.APPLICATION_JSON_TYPE)

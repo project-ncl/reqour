@@ -19,6 +19,7 @@ package org.jboss.pnc.reqour.config;
 
 import io.smallrye.config.ConfigMapping;
 import io.smallrye.config.WithName;
+import org.jboss.pnc.common.http.PNCHttpClientConfig;
 
 @ConfigMapping(prefix = "reqour")
 public interface ReqourConfig {
@@ -26,5 +27,5 @@ public interface ReqourConfig {
     @WithName("git")
     GitConfig gitConfigs();
 
-    CallbackSenderConfig callbackSender();
+    PNCHttpClientConfig pncHttpClientConfig();
 }

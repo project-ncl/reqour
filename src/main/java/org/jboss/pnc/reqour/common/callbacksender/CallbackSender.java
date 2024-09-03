@@ -18,6 +18,7 @@
 package org.jboss.pnc.reqour.common.callbacksender;
 
 import jakarta.validation.Valid;
+import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
 
 /**
@@ -28,9 +29,8 @@ public interface CallbackSender {
     /**
      * Send the callback to the given URL using the given method.
      *
-     * @param method method to use
-     * @param url URL where to send the callback
+     * @param request request
      * @param callback callback to send
      */
-    void sendRepositoryCloneCallback(String method, String url, @Valid RepositoryCloneResponseCallback callback);
+    void sendRepositoryCloneCallback(Request request, @Valid RepositoryCloneResponseCallback callback);
 }
