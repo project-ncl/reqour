@@ -15,12 +15,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade.api;
+package org.jboss.pnc.reqour.service.api;
 
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 
-public interface TranslationProvider {
+public interface TranslationService {
 
     /**
      * Translates the external URL (provided in the request) into corresponding internal URL.

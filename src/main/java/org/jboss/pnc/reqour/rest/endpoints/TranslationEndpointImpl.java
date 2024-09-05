@@ -23,21 +23,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
-import org.jboss.pnc.reqour.facade.api.TranslationProvider;
+import org.jboss.pnc.reqour.service.api.TranslationService;
 
 @ApplicationScoped
 @Slf4j
 public class TranslationEndpointImpl implements TranslateEndpoint {
 
-    private final TranslationProvider provider;
+    private final TranslationService service;
 
     @Inject
-    public TranslationEndpointImpl(TranslationProvider provider) {
-        this.provider = provider;
+    public TranslationEndpointImpl(TranslationService service) {
+        this.service = service;
     }
 
     @Override
     public TranslateResponse externalToInternal(TranslateRequest externalToInternalRequestDto) {
-        return provider.externalToInternal(externalToInternalRequestDto);
+        return service.externalToInternal(externalToInternalRequestDto);
     }
 }

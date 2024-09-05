@@ -15,41 +15,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade.clone;
+package org.jboss.pnc.reqour.service.clone;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.facade.api.CloneProvider;
 import org.jboss.pnc.reqour.model.ProcessContext;
+import org.jboss.pnc.reqour.service.api.CloneService;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 
 /**
- * Clone provider using git.
+ * Clone service using git.
  */
 @ApplicationScoped
 @Slf4j
-public class GitCloneProvider implements CloneProvider {
+public class GitCloneService implements CloneService {
 
     private final ConfigUtils configUtils;
     private final GitCommands gitCommands;
 
     @Inject
-    public GitCloneProvider(ConfigUtils configUtils, GitCommands gitCommands) {
+    public GitCloneService(ConfigUtils configUtils, GitCommands gitCommands) {
         this.configUtils = configUtils;
         this.gitCommands = gitCommands;
     }
 
     @Override
-    public RepositoryCloneRequest clone(RepositoryCloneRequest cloneRequest) {
+    public RepositoryCloneResponseCallback clone(RepositoryCloneRequest cloneRequest) {
         Path cloneDir = IOUtils.createTempDirForCloning();
 
         String adjustedUrl = URLUtils
@@ -63,12 +67,17 @@ public class GitCloneProvider implements CloneProvider {
             cloneRefOnly(cloneRequest, cloneDir);
         }
 
-        return cloneRequest;
-    }
+        try {
+            IOUtils.deleteTempDir(cloneDir);
+        } catch (IOException ex) {
+            log.warn("Could not delete the temporary directory", ex);
+        }
 
-    @Override
-    public String name() {
-        return "git";
+        return RepositoryCloneResponseCallback.builder()
+                .originRepoUrl(cloneRequest.getOriginRepoUrl())
+                .targetRepoUrl(cloneRequest.getTargetRepoUrl())
+                .callback(ReqourCallback.builder().id(cloneRequest.getTaskId()).status(ResultStatus.SUCCESS).build())
+                .build();
     }
 
     private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {

@@ -24,23 +24,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
 import org.jboss.pnc.common.http.PNCHttpClient;
-import org.jboss.pnc.common.http.PNCHttpClientConfig;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 
 /**
- * Sender using {@link java.net.http.HttpClient}, together with {@link dev.failsafe.Failsafe} for increased resiliency.
+ * Sender which uses {@link PNCHttpClient} to send callbacks.
  */
 @ApplicationScoped
 @Slf4j
 public class CallbackSenderImpl implements CallbackSender {
 
-    private final ConfigUtils configUtils;
-    private final ObjectMapper objectMapper;
+    private final PNCHttpClient pncHttpClient;
 
     @Inject
     public CallbackSenderImpl(ConfigUtils configUtils, ObjectMapper objectMapper) {
-        this.configUtils = configUtils;
-        this.objectMapper = objectMapper;
+        pncHttpClient = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
     }
 
     @Override
@@ -49,7 +46,6 @@ public class CallbackSenderImpl implements CallbackSender {
     }
 
     private void sendCallback(Request request, Object payload) {
-        PNCHttpClientConfig pncHttpClientConfig = configUtils.getPncHttpClientConfig();
-        new PNCHttpClient(objectMapper, pncHttpClientConfig).sendRequest(request, payload);
+        pncHttpClient.sendRequest(request, payload);
     }
 }

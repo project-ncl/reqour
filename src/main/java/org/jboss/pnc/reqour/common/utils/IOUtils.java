@@ -17,6 +17,8 @@
  */
 package org.jboss.pnc.reqour.common.utils;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +35,10 @@ public class IOUtils {
         } catch (IOException e) {
             throw new RuntimeException("Cannot create temporary directory for cloning", e);
         }
+    }
+
+    public static void deleteTempDir(Path dir) throws IOException {
+        FileUtils.deleteDirectory(dir.toFile());
     }
 
     public static long countLines(String text) {

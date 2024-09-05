@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade;
+package org.jboss.pnc.reqour.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -25,12 +25,12 @@ import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.facade.api.TranslationProvider;
+import org.jboss.pnc.reqour.service.api.TranslationService;
 import org.jboss.pnc.reqour.model.GitBackend;
 
 @ApplicationScoped
 @Slf4j
-public class TranslationProviderImpl implements TranslationProvider {
+public class TranslationServiceImpl implements TranslationService {
 
     private static final String URL_PATH_SEPARATOR = "/";
     private static final String GIT_SUFFIX = ".git";
@@ -38,7 +38,7 @@ public class TranslationProviderImpl implements TranslationProvider {
     private final ConfigUtils configUtils;
 
     @Inject
-    public TranslationProviderImpl(ConfigUtils configUtils) {
+    public TranslationServiceImpl(ConfigUtils configUtils) {
         this.configUtils = configUtils;
     }
 

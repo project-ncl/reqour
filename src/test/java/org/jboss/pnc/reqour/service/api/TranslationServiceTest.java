@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade.api;
+package org.jboss.pnc.reqour.service.api;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
@@ -33,10 +33,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @QuarkusTest
 @TestProfile(TranslationProfile.class)
-class TranslationProviderTest {
+class TranslationServiceTest {
 
     @Inject
-    TranslationProvider provider;
+    TranslationService service;
 
     @Test
     void externalToInternal_noProtocol_returnsResult() {
@@ -99,13 +99,13 @@ class TranslationProviderTest {
     }
 
     private void testCorrectURL(TranslateResponse expectedResponse) {
-        TranslateResponse response = provider
+        TranslateResponse response = service
                 .externalToInternal(TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl()));
 
         assertThat(response).isEqualTo(expectedResponse);
     }
 
     private void testInvalidURL(TranslateRequest request, Class<? extends Throwable> expectedException) {
-        assertThatThrownBy(() -> provider.externalToInternal(request)).isInstanceOf(expectedException);
+        assertThatThrownBy(() -> service.externalToInternal(request)).isInstanceOf(expectedException);
     }
 }

@@ -23,15 +23,15 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.TagOpt;
 import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.api.reqour.dto.Callback;
+import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
+import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.UUID;
 
 public class TestUtils {
 
@@ -59,7 +59,6 @@ public class TestUtils {
             String callbackUrl,
             String taskId) {
         return RepositoryCloneRequest.builder()
-                .type("git")
                 .originRepoUrl(originRepoUrl)
                 .targetRepoUrl(targetRepoUrl)
                 .taskId(taskId)
@@ -70,13 +69,12 @@ public class TestUtils {
     public static RepositoryCloneResponseCallback createRepositoryCloneResponseCallback(
             String originRepoUrl,
             String targetRepoUrl,
-            int status,
+            ResultStatus status,
             String taskId) {
         return RepositoryCloneResponseCallback.builder()
-                .type("git")
                 .originRepoUrl(originRepoUrl)
                 .targetRepoUrl(targetRepoUrl)
-                .callback(Callback.builder().status(status).id(taskId).build())
+                .callback(ReqourCallback.builder().status(status).id(taskId).build())
                 .build();
     }
 

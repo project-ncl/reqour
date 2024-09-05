@@ -32,12 +32,12 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.ErrorResponse;
+import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.exceptions.UnsupportedCloneTypeException;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.profile.CloningProfile;
 import org.junit.jupiter.api.AfterAll;
@@ -118,7 +118,11 @@ class CloningEndpointIT {
     @Test
     void clone_validCloneRequest_sendsCallback() throws InterruptedException, JsonProcessingException {
         String expectedBody = objectMapper.writeValueAsString(
-                TestUtils.createRepositoryCloneResponseCallback(SOURCE_REPO_URL, EMPTY_DEST_REPO_URL, 200, TASK_ID));
+                TestUtils.createRepositoryCloneResponseCallback(
+                        SOURCE_REPO_URL,
+                        EMPTY_DEST_REPO_URL,
+                        ResultStatus.SUCCESS,
+                        TASK_ID));
 
         given().when()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +150,11 @@ class CloningEndpointIT {
             throws InterruptedException, JsonProcessingException {
         String nonExistentRepoUrl = "git@github.com:user/non-existent.git";
         String expectedBody = objectMapper.writeValueAsString(
-                TestUtils.createRepositoryCloneResponseCallback(nonExistentRepoUrl, EMPTY_DEST_REPO_URL, 409, TASK_ID));
+                TestUtils.createRepositoryCloneResponseCallback(
+                        nonExistentRepoUrl,
+                        EMPTY_DEST_REPO_URL,
+                        ResultStatus.FAILED,
+                        TASK_ID));
 
         given().when()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -175,22 +183,6 @@ class CloningEndpointIT {
         ErrorResponse expectedResponse = new ErrorResponse(
                 "ResteasyReactiveViolationException",
                 "clone.arg0.targetRepoUrl: Invalid URL of the git repository");
-
-        Response response = given().contentType(MediaType.APPLICATION_JSON).body(request).when().post();
-
-        assertThat(response.statusCode()).isEqualTo(BAD_REQUEST.getStatusCode());
-        assertThat(response.body().as(ErrorResponse.class)).isEqualTo(expectedResponse);
-    }
-
-    @Test
-    void clone_invalidCloneType_returnsErrorDTO() {
-        RepositoryCloneRequest request = TestData.Cloning.unsupportedCloneType();
-        ErrorResponse expectedResponse = new ErrorResponse(
-                new UnsupportedCloneTypeException(
-                        String.format(
-                                "Clone type '%s' is not supported. Available clone types are: %s.",
-                                request.getType(),
-                                "git")));
 
         Response response = given().contentType(MediaType.APPLICATION_JSON).body(request).when().post();
 
