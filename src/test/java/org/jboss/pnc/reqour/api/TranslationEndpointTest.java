@@ -30,7 +30,7 @@ import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.dto.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.facade.api.TranslationProvider;
+import org.jboss.pnc.reqour.service.api.TranslationService;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -45,13 +45,13 @@ import static org.mockito.ArgumentMatchers.any;
 class TranslationEndpointTest {
 
     @InjectMock
-    TranslationProvider provider;
+    TranslationService service;
 
     @Test
     void externalToInternal_validURL_returnsResponse() {
         TranslateResponse expectedResponse = TestData.Translation.httpsWithOrganizationAndGitSuffix();
         TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
-        Mockito.when(provider.externalToInternal(any())).thenReturn(expectedResponse);
+        Mockito.when(service.externalToInternal(any())).thenReturn(expectedResponse);
 
         Response response = given().contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)

@@ -15,13 +15,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade.clone;
+package org.jboss.pnc.reqour.service.clone;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.reqour.common.GitCommands;
@@ -59,13 +60,13 @@ import static org.jboss.pnc.reqour.common.TestUtils.SOURCE_REPO_URL;
 
 @QuarkusTest
 @TestProfile(CloningProfile.class)
-class GitCloneProviderTest {
+class GitCloneServiceTest {
 
     @Inject
     GitCommands gitCommands;
 
     @Inject
-    GitCloneProvider provider;
+    GitCloneService service;
 
     @Inject
     ProcessExecutor processExecutor;
@@ -144,9 +145,8 @@ class GitCloneProviderTest {
                 "branch2-tag2",
                 "branch2-merged");
 
-        provider.clone(
+        service.clone(
                 RepositoryCloneRequest.builder()
-                        .type("git")
                         .originRepoUrl(SOURCE_REPO_URL)
                         .callback(Request.builder().build())
                         .targetRepoUrl(EMPTY_DEST_REPO_URL)
@@ -168,9 +168,8 @@ class GitCloneProviderTest {
                 "branch2-tag2",
                 "branch2-merged");
 
-        provider.clone(
+        service.clone(
                 RepositoryCloneRequest.builder()
-                        .type("git")
                         .originRepoUrl(SOURCE_REPO_URL)
                         .callback(Request.builder().build())
                         .targetRepoUrl(EMPTY_DEST_REPO_URL)
@@ -186,9 +185,8 @@ class GitCloneProviderTest {
         Set<String> expectedBranches = Set.of("main", "branch1");
         Set<String> expectedTags = Set.of();
 
-        provider.clone(
+        service.clone(
                 RepositoryCloneRequest.builder()
-                        .type("git")
                         .originRepoUrl(SOURCE_REPO_URL)
                         .callback(Request.builder().build())
                         .targetRepoUrl(DEST_REPO_WITH_MAIN_BRANCH_URL)
@@ -204,9 +202,8 @@ class GitCloneProviderTest {
         Set<String> expectedBranches = Set.of("main");
         Set<String> expectedTags = Set.of("branch2-tag2", "branch2-tag1", "initial-commit");
 
-        provider.clone(
+        service.clone(
                 RepositoryCloneRequest.builder()
-                        .type("git")
                         .originRepoUrl(SOURCE_REPO_URL)
                         .callback(Request.builder().build())
                         .targetRepoUrl(DEST_REPO_WITH_MAIN_BRANCH_URL)
@@ -230,9 +227,8 @@ class GitCloneProviderTest {
                 .strip();
         Set<String> expectedTags = Set.of("reqour-" + afterInitialAtMainSha);
 
-        provider.clone(
+        service.clone(
                 RepositoryCloneRequest.builder()
-                        .type("git")
                         .originRepoUrl(SOURCE_REPO_URL)
                         .callback(Request.builder().build())
                         .targetRepoUrl(DEST_REPO_WITH_MAIN_BRANCH_URL)
@@ -247,9 +243,8 @@ class GitCloneProviderTest {
     void clone_nonExistingRefToClone_throwsGitException() {
         String nonExistingRef = "non-existing";
         assertThatThrownBy(
-                () -> provider.clone(
+                () -> service.clone(
                         RepositoryCloneRequest.builder()
-                                .type("git")
                                 .originRepoUrl(SOURCE_REPO_URL)
                                 .callback(Request.builder().build())
                                 .targetRepoUrl(DEST_REPO_WITH_MAIN_BRANCH_URL)
@@ -262,11 +257,11 @@ class GitCloneProviderTest {
     @Test
     void clone_cloningFromPrivateGithubRepo_throwsGitException() {
         String originUrl = "git@github.com:user/non-existent.git";
+        String testUser = ConfigProvider.getConfig().getValue("reqour.git.private-github-user", String.class);
 
         assertThatThrownBy(
-                () -> provider.clone(
+                () -> service.clone(
                         RepositoryCloneRequest.builder()
-                                .type("git")
                                 .originRepoUrl(originUrl)
                                 .targetRepoUrl(EMPTY_DEST_REPO_URL)
                                 .ref("main")
@@ -274,8 +269,8 @@ class GitCloneProviderTest {
                                 .build()))
                 .isInstanceOf(GitException.class)
                 .hasMessageContaining(
-                        "If the Github repository is a private repository, you need to add the Github user 'test-user' with read-permissions to '"
-                                + originUrl + "'");
+                        "If the Github repository is a private repository, you need to add the Github user '" + testUser
+                                + "' with read-permissions to '" + originUrl + "'");
     }
 
     private static Set<String> getRepositoryBranches(Path repoPath) {

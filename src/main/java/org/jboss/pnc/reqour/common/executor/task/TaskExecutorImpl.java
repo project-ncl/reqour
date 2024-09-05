@@ -21,11 +21,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.api.dto.Request;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -45,12 +47,18 @@ public class TaskExecutorImpl implements TaskExecutor {
     }
 
     @Override
-    public <REQ, RES> void executeAsync(
+    public <T, R> void executeAsync(
             String taskID,
-            REQ request,
-            Function<REQ, RES> syncExecutor,
-            BiConsumer<RES, Throwable> callbackSender) {
+            Request callbackRequest,
+            T request,
+            Function<T, R> syncExecutor,
+            BiFunction<T, Throwable, R> errorHandler,
+            BiConsumer<Request, R> callbackSender) {
         log.debug("Starting the task with ID={}", taskID);
-        runningTasks.put(taskID, executor.supplyAsync(() -> syncExecutor.apply(request)).whenComplete(callbackSender));
+        runningTasks.put(
+                taskID,
+                executor.supplyAsync(() -> syncExecutor.apply(request))
+                        .exceptionally(t -> errorHandler.apply(request, t))
+                        .thenAccept(res -> callbackSender.accept(callbackRequest, res)));
     }
 }

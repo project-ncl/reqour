@@ -17,6 +17,7 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
@@ -32,6 +33,9 @@ public class TestData {
     public static final String TASK_ID = "task-id";
 
     public static class Translation {
+
+        private static final String INTERNAL_URL = ConfigProvider.getConfig()
+                .getValue("reqour.git.git-backends.available.gitlab.git-url-internal-template", String.class);
 
         public static TranslateResponse noProtocol() {
             return createTranslateResponseFromExternalUrl("github.com/repo", getInternalUrlWithoutOrganization());
@@ -98,11 +102,11 @@ public class TestData {
         }
 
         private static String getInternalUrlWithoutOrganization() {
-            return "git@gitlab.cee.redhat.com:test-workspace/repo.git";
+            return INTERNAL_URL + "/repo.git";
         }
 
         public static String getInternalUrlWithOrganization() {
-            return "git@gitlab.cee.redhat.com:test-workspace/project/repo.git";
+            return INTERNAL_URL + "/project/repo.git";
         }
     }
 
@@ -110,23 +114,7 @@ public class TestData {
 
         public static RepositoryCloneRequest withMissingTargetUrl() {
             return RepositoryCloneRequest.builder()
-                    .type("git")
                     .originRepoUrl("https://github.com/project/repo")
-                    .ref("main")
-                    .taskId(TASK_ID)
-                    .callback(
-                            Request.builder()
-                                    .method(Request.Method.POST)
-                                    .uri(URI.create("https://example.com/operation"))
-                                    .build())
-                    .build();
-        }
-
-        public static RepositoryCloneRequest unsupportedCloneType() {
-            return RepositoryCloneRequest.builder()
-                    .type("unsupported")
-                    .originRepoUrl("https://github.com/repo")
-                    .targetRepoUrl("git@gitlab.com:my-project/repo.git")
                     .ref("main")
                     .taskId(TASK_ID)
                     .callback(

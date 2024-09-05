@@ -15,14 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.pnc.reqour.facade.api;
+package org.jboss.pnc.reqour.service.api;
 
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
+import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponseCallback;
 
 /**
- * Clone provider used for cloning of the repository to the internal repository. <br/>
+ * Clone service used for cloning of the repository to the internal repository. <br/>
  */
-public interface CloneProvider {
+public interface CloneService {
 
     /**
      * Clone the external repository (either completely or partially - depending on the
@@ -30,12 +31,5 @@ public interface CloneProvider {
      *
      * @param cloneRequest cloning request describing the way it should be cloned
      */
-    RepositoryCloneRequest clone(RepositoryCloneRequest cloneRequest);
-
-    /**
-     * Name of the clone provider.
-     *
-     * @return name of the clone provider
-     */
-    String name();
+    RepositoryCloneResponseCallback clone(RepositoryCloneRequest cloneRequest);
 }

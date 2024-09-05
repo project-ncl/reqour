@@ -3,8 +3,8 @@ reqour:
     git-backends:
       available:
         gitlab:
-          git-url-internal-template: git@gitlab.com:test-workspace
-          username: test-user
+          git-url-internal-template: git@gitlab.com:workspace
+          username: dev-user
       active: gitlab
     acceptable-schemes:
       - https
@@ -12,4 +12,3 @@ reqour:
       - git
       - git+ssh
       - ssh
-    private-github-user: test-bot

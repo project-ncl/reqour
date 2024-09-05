@@ -8,16 +8,4 @@ quarkus:
 
 reqour:
   git:
-    git-backends:
-      available:
-        gitlab:
-          git-url-internal-template: git@gitlab.cee.redhat.com:pnc-workspace
-          username: user
-      active: gitlab
-    acceptable-schemes:
-      - https
-      - http
-      - git
-      - git+ssh
-      - ssh
     private-github-user: ${PRIVATE_GITHUB_USER}
