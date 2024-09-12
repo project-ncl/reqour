@@ -48,9 +48,9 @@ public interface GitBackendConfig {
     String token();
 
     @WithParentName
-    ProtectedTagsConfig protectedTags();
+    TagProtectionConfig tagProtection();
 
-    interface ProtectedTagsConfig {
+    interface TagProtectionConfig {
 
         Optional<String> protectedTagsPattern();
 
