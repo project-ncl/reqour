@@ -34,10 +34,11 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.model.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.rest.providers.GitlabApiRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +55,7 @@ public class GitlabApiService {
     @Inject
     public GitlabApiService(ConfigUtils configUtils) {
         gitlabConfig = configUtils.getActiveGitBackend();
-        delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitlabConfig.getUrl(), gitlabConfig.getToken());
+        delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitlabConfig.url(), gitlabConfig.token());
     }
 
     public Group createGroup(String name, long parentId) {
@@ -80,7 +81,7 @@ public class GitlabApiService {
 
     public Group getOrCreateSubgroup(long parentId, String subgroupName) {
         try {
-            return delegate.getGroupApi().getGroup(gitlabConfig.getWorkspace() + "/" + subgroupName);
+            return delegate.getGroupApi().getGroup(gitlabConfig.workspaceName() + "/" + subgroupName);
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
                 return createGroup(subgroupName, parentId);
@@ -140,7 +141,8 @@ public class GitlabApiService {
 
     public void configureProtectedTags(Project project, boolean projectAlreadyExisted) {
         try {
-            if (gitlabConfig.getProtectedTagsPattern().isEmpty()) {
+            GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
+            if (tagProtectionConfig.protectedTagsPattern().isEmpty()) {
                 return;
             }
 
@@ -150,15 +152,20 @@ public class GitlabApiService {
             }
 
             delegate.getTagsApi()
-                    .protectTag(project.getId(), gitlabConfig.getProtectedTagsPattern().get(), AccessLevel.DEVELOPER);
+                    .protectTag(
+                            project.getId(),
+                            tagProtectionConfig.protectedTagsPattern().get(),
+                            AccessLevel.DEVELOPER);
         } catch (GitLabApiException e) {
             throw new GitlabApiRuntimeException(e);
         }
     }
 
     private boolean doesTagProtectionAlreadyExist(Project project) {
-        Optional<String> protectedTagsPattern = gitlabConfig.getProtectedTagsPattern();
-        List<String> protectedTagsAcceptedPatterns = gitlabConfig.getProtectedTagsAcceptedPatterns();
+        GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
+        Optional<String> protectedTagsPattern = tagProtectionConfig.protectedTagsPattern();
+        List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns()
+                .orElse(new ArrayList<>(List.of()));
 
         if (protectedTagsPattern.isPresent() && !protectedTagsAcceptedPatterns.contains(protectedTagsPattern.get())) {
             protectedTagsAcceptedPatterns.add(protectedTagsPattern.get());

@@ -27,7 +27,7 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.model.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 
@@ -53,7 +53,7 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
     @Override
     public InternalSCMCreationResponse createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
         GitBackendConfig gitlabConfig = configUtils.getActiveGitBackend();
-        long workspaceId = gitlabConfig.getWorkspaceId();
+        long workspaceId = gitlabConfig.workspaceId();
         Group workspaceGroup = gitlabApiService.getGroup(workspaceId);
         Project project = parseProjectPath(creationRequest.getProject());
 
@@ -75,8 +75,8 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
                 project.projectName(),
                 parentId,
                 pathWithinWorkspace,
-                completeTemplateWithProjectPath(gitlabConfig.getReadOnlyTemplate(), pathToTemplate),
-                completeTemplateWithProjectPath(gitlabConfig.getReadWriteTemplate(), pathToTemplate),
+                completeTemplateWithProjectPath(gitlabConfig.readOnlyTemplate(), pathToTemplate),
+                completeTemplateWithProjectPath(gitlabConfig.readWriteTemplate(), pathToTemplate),
                 creationRequest.getTaskId());
 
         // gitlabApiService.configureProtectedTags(

@@ -57,7 +57,7 @@ public class GitCloneService implements CloneService {
         Path cloneDir = IOUtils.createTempDirForCloning();
 
         String adjustedUrl = URLUtils
-                .addUsernameToUrl(cloneRequest.getTargetRepoUrl(), configUtils.getActiveGitBackend().getUsername());
+                .addUsernameToUrl(cloneRequest.getTargetRepoUrl(), configUtils.getActiveGitBackend().username());
         boolean isInternalRepoNew = isInternalRepoNew(adjustedUrl);
         log.info("Internal repository with adjusted URL '{}' is considered new: {}", adjustedUrl, isInternalRepoNew);
 

@@ -33,7 +33,7 @@ import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutorImpl;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.model.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.rest.providers.GitlabApiRuntimeException;
 import org.jboss.pnc.reqour.service.GitlabRepositoryCreationService;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
@@ -91,11 +91,11 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
         return InternalSCMCreationResponse.builder()
                 .readonlyUrl(
                         GitlabRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitlabConfig.getReadOnlyTemplate(),
+                                gitlabConfig.readOnlyTemplate(),
                                 creationRequest.getProject()))
                 .readwriteUrl(
                         GitlabRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitlabConfig.getReadWriteTemplate(),
+                                gitlabConfig.readWriteTemplate(),
                                 creationRequest.getProject()))
                 .status(InternalSCMCreationStatus.FAILED)
                 .callback(ReqourCallback.builder().status(status).id(creationRequest.getTaskId()).build())

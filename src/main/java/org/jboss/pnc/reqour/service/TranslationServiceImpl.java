@@ -61,7 +61,7 @@ public class TranslationServiceImpl implements TranslationService {
         log.debug("Provided external URL ({}), was successfully parsed to: {}", request.getExternalUrl(), url);
 
         String repository = adjustRepository(url.getRepository());
-        String gitServer = adjustGitServer(configUtils.getActiveGitBackend().getGitUrlInternalTemplate());
+        String gitServer = adjustGitServer(configUtils.getActiveGitBackend().gitUrlInternalTemplate());
         String organization = computeOrganization(url.getOrganization(), gitServer);
 
         String repositoryName = (organization == null) ? repository : organization + URL_PATH_SEPARATOR + repository;
