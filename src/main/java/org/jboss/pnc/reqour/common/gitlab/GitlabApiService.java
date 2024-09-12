@@ -138,13 +138,13 @@ public class GitlabApiService {
         }
     }
 
-    public void configureProtectedTags(Project project, boolean projectAlreadyExists) {
+    public void configureProtectedTags(Project project, boolean projectAlreadyExisted) {
         try {
             if (gitlabConfig.getProtectedTagsPattern().isEmpty()) {
                 return;
             }
 
-            boolean tagsAlreadyExist = projectAlreadyExists && doProtectedAlreadyExist(project);
+            boolean tagsAlreadyExist = projectAlreadyExisted && doesTagProtectionAlreadyExist(project);
             if (tagsAlreadyExist) {
                 return;
             }
@@ -156,7 +156,7 @@ public class GitlabApiService {
         }
     }
 
-    private boolean doProtectedAlreadyExist(Project project) {
+    private boolean doesTagProtectionAlreadyExist(Project project) {
         Optional<String> protectedTagsPattern = gitlabConfig.getProtectedTagsPattern();
         List<String> protectedTagsAcceptedPatterns = gitlabConfig.getProtectedTagsAcceptedPatterns();
 

@@ -51,9 +51,9 @@ public class GitBackendConfig {
                 .readWriteTemplate(config.readWriteTemplate())
                 .gitUrlInternalTemplate(config.gitUrlInternalTemplate())
                 .token(config.token())
-                .protectedTagsPattern(config.protectedTags().protectedTagsPattern())
+                .protectedTagsPattern(config.tagProtection().protectedTagsPattern())
                 .protectedTagsAcceptedPatterns(
-                        config.protectedTags().protectedTagsAcceptedPatterns().orElse(new ArrayList<>(List.of())))
+                        config.tagProtection().protectedTagsAcceptedPatterns().orElse(new ArrayList<>(List.of())))
                 .build();
     }
 }

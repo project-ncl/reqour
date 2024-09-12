@@ -188,7 +188,7 @@ public class TestData {
             }
 
             @Override
-            public ProtectedTagsConfig protectedTags() {
+            public TagProtectionConfig tagProtection() {
                 return null;
             }
         };
