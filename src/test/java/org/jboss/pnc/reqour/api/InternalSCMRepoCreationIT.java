@@ -27,12 +27,12 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.utils.UrlEncoder;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
 import org.jboss.pnc.reqour.common.TestData;
 import org.jboss.pnc.reqour.common.TestUtils;
+import org.jboss.pnc.reqour.common.TestWorkspaceSupplier;
 import org.jboss.pnc.reqour.profile.InternalSCMRepositoryCreationProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.jboss.pnc.api.constants.HttpHeaders.ACCEPT_STRING;
 import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
-import static org.jboss.pnc.reqour.common.TestData.InternalSCMRepositoryCreation.workspaceGroup;
 import static org.jboss.pnc.reqour.common.TestUtils.alreadyExistsSuccess;
 import static org.jboss.pnc.reqour.common.TestUtils.createInternalSCMRepoCreationRequest;
 import static org.jboss.pnc.reqour.common.TestUtils.failed;
@@ -54,12 +53,12 @@ public class InternalSCMRepoCreationIT {
 
     private static final String CALLBACK_PATH = "/callback";
     private static final String GITLAB_API_PATH = "/api/v4";
-    private static final Group DIFFERENT_WORKSPACE = new Group().withId(2L)
-            .withName("different-workspace")
-            .withParentId(workspaceGroup().getId());
 
     @Inject
     ObjectMapper objectMapper;
+
+    @Inject
+    TestWorkspaceSupplier testWorkspaceSupplier;
 
     WireMock wireMock;
 
@@ -74,8 +73,8 @@ public class InternalSCMRepoCreationIT {
         String projectPath = "project";
         TestUtils.registerGet(
                 wireMock,
-                GITLAB_API_PATH + "/groups/" + workspaceGroup().getId(),
-                objectMapper.writeValueAsString(workspaceGroup()));
+                GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()));
         wireMock.register(
                 WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode("test-workspace/" + projectPath))
                         .willReturn(
@@ -88,14 +87,18 @@ public class InternalSCMRepoCreationIT {
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         wireMock.register(
                 WireMock.post(GITLAB_API_PATH + "/projects")
-                        .withFormParam("namespace_id", WireMock.equalTo(String.valueOf(workspaceGroup().getId())))
+                        .withFormParam(
+                                "namespace_id",
+                                WireMock.equalTo(String.valueOf(testWorkspaceSupplier.getWorkspaceGroup().getId())))
                         .withFormParam("name", WireMock.equalTo(projectPath))
                         .withHeader(ACCEPT_STRING, WireMock.equalTo(MediaType.APPLICATION_JSON))
                         .withHeader(CONTENT_TYPE_STRING, WireMock.equalTo(MediaType.APPLICATION_FORM_URLENCODED))
                         .willReturn(
                                 WireMock.ok(
                                         objectMapper.writeValueAsString(
-                                                new Project().withNamespaceId(workspaceGroup().getId())
+                                                new Project()
+                                                        .withNamespaceId(
+                                                                testWorkspaceSupplier.getWorkspaceGroup().getId())
                                                         .withName(projectPath)))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
 
@@ -120,13 +123,14 @@ public class InternalSCMRepoCreationIT {
         String projectPath = "project";
         TestUtils.registerGet(
                 wireMock,
-                GITLAB_API_PATH + "/groups/" + workspaceGroup().getId(),
-                objectMapper.writeValueAsString(workspaceGroup()));
+                GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()));
         TestUtils.registerGet(
                 wireMock,
                 GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode("test-workspace/" + projectPath),
                 objectMapper.writeValueAsString(
-                        new Project().withNamespaceId(workspaceGroup().getId()).withName("project")));
+                        new Project().withNamespaceId(testWorkspaceSupplier.getWorkspaceGroup().getId())
+                                .withName("project")));
 
         given().when()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -149,8 +153,8 @@ public class InternalSCMRepoCreationIT {
         String projectPath = "test-workspace/project";
         TestUtils.registerGet(
                 wireMock,
-                GITLAB_API_PATH + "/groups/" + workspaceGroup().getId(),
-                objectMapper.writeValueAsString(workspaceGroup()));
+                GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()));
         wireMock.register(
                 WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath))
                         .willReturn(
@@ -163,14 +167,18 @@ public class InternalSCMRepoCreationIT {
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         wireMock.register(
                 WireMock.post(GITLAB_API_PATH + "/projects")
-                        .withFormParam("namespace_id", WireMock.equalTo(String.valueOf(workspaceGroup().getId())))
+                        .withFormParam(
+                                "namespace_id",
+                                WireMock.equalTo(String.valueOf(testWorkspaceSupplier.getWorkspaceGroup().getId())))
                         .withFormParam("name", WireMock.equalTo("project"))
                         .withHeader(ACCEPT_STRING, WireMock.equalTo(MediaType.APPLICATION_JSON))
                         .withHeader(CONTENT_TYPE_STRING, WireMock.equalTo(MediaType.APPLICATION_FORM_URLENCODED))
                         .willReturn(
                                 WireMock.ok(
                                         objectMapper.writeValueAsString(
-                                                new Project().withNamespaceId(workspaceGroup().getId())
+                                                new Project()
+                                                        .withNamespaceId(
+                                                                testWorkspaceSupplier.getWorkspaceGroup().getId())
                                                         .withName("project")))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
 
@@ -195,17 +203,18 @@ public class InternalSCMRepoCreationIT {
         String projectPath = "different-workspace/project";
         TestUtils.registerGet(
                 wireMock,
-                GITLAB_API_PATH + "/groups/" + workspaceGroup().getId(),
-                objectMapper.writeValueAsString(workspaceGroup()));
+                GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()));
         TestUtils.registerGet(
                 wireMock,
                 GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode("test-workspace/" + projectPath),
                 objectMapper.writeValueAsString(
-                        new Project().withNamespaceId(workspaceGroup().getId()).withName(projectPath)));
+                        new Project().withNamespaceId(testWorkspaceSupplier.getWorkspaceGroup().getId())
+                                .withName(projectPath)));
         TestUtils.registerGet(
                 wireMock,
                 GITLAB_API_PATH + "/groups/" + UrlEncoder.urlEncode("test-workspace/different-workspace"),
-                objectMapper.writeValueAsString(DIFFERENT_WORKSPACE));
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getDifferentWorkspaceGroup()));
 
         given().when()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -228,8 +237,8 @@ public class InternalSCMRepoCreationIT {
         String projectPath = "different-workspace/project";
         TestUtils.registerGet(
                 wireMock,
-                GITLAB_API_PATH + "/groups/" + workspaceGroup().getId(),
-                objectMapper.writeValueAsString(workspaceGroup()));
+                GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()));
         wireMock.register(
                 WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath))
                         .willReturn(
@@ -252,18 +261,24 @@ public class InternalSCMRepoCreationIT {
                         .withHeader(CONTENT_TYPE_STRING, WireMock.equalTo(MediaType.APPLICATION_FORM_URLENCODED))
                         .withFormParam("name", WireMock.equalTo("different-workspace"))
                         .willReturn(
-                                WireMock.ok(objectMapper.writeValueAsString(DIFFERENT_WORKSPACE))
+                                WireMock.ok(
+                                        objectMapper
+                                                .writeValueAsString(testWorkspaceSupplier.getDifferentWorkspaceGroup()))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         wireMock.register(
                 WireMock.post(GITLAB_API_PATH + "/projects")
-                        .withFormParam("namespace_id", WireMock.equalTo(String.valueOf(DIFFERENT_WORKSPACE.getId())))
+                        .withFormParam(
+                                "namespace_id",
+                                WireMock.equalTo(
+                                        String.valueOf(testWorkspaceSupplier.getDifferentWorkspaceGroup().getId())))
                         .withFormParam("name", WireMock.equalTo("project"))
                         .withHeader(ACCEPT_STRING, WireMock.equalTo(MediaType.APPLICATION_JSON))
                         .withHeader(CONTENT_TYPE_STRING, WireMock.equalTo(MediaType.APPLICATION_FORM_URLENCODED))
                         .willReturn(
                                 WireMock.ok(
                                         objectMapper.writeValueAsString(
-                                                new Project().withNamespaceId(DIFFERENT_WORKSPACE.getId())
+                                                new Project().withNamespaceId(
+                                                        testWorkspaceSupplier.getDifferentWorkspaceGroup().getId())
                                                         .withName("project")))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
 
@@ -286,9 +301,9 @@ public class InternalSCMRepoCreationIT {
     void createInternalSCMRepository_invalidRequestWithTooDeepHierarchy_sendsFailInCallback()
             throws JsonProcessingException, InterruptedException {
         wireMock.register(
-                WireMock.get(GITLAB_API_PATH + "/groups/" + workspaceGroup().getId())
+                WireMock.get(GITLAB_API_PATH + "/groups/" + testWorkspaceSupplier.getWorkspaceGroup().getId())
                         .willReturn(
-                                WireMock.ok(objectMapper.writeValueAsString(workspaceGroup()))
+                                WireMock.ok(objectMapper.writeValueAsString(testWorkspaceSupplier.getWorkspaceGroup()))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         String projectPath = "group/subgroup/project.git";
         String expectedBody = objectMapper.writeValueAsString(failed(projectPath, TestData.TASK_ID));

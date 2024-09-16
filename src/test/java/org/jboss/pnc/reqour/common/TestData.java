@@ -18,7 +18,6 @@
 package org.jboss.pnc.reqour.common;
 
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.gitlab4j.api.models.Group;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
@@ -125,18 +124,6 @@ public class TestData {
                                     .uri(URI.create("https://example.com/operation"))
                                     .build())
                     .build();
-        }
-    }
-
-    public static class InternalSCMRepositoryCreation {
-
-        public static Group workspaceGroup() {
-            String workspaceName = ConfigProvider.getConfig()
-                    .getValue("reqour.git.git-backends.available.gitlab.workspace", String.class);
-            Long workspaceId = ConfigProvider.getConfig()
-                    .getValue("reqour.git.git-backends.available.gitlab.workspace-id", Long.class);
-
-            return new Group().withId(workspaceId).withName(workspaceName);
         }
     }
 
