@@ -38,7 +38,6 @@ import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.rest.providers.GitlabApiRuntimeException;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -131,47 +130,43 @@ public class GitlabApiService {
         }
     }
 
-    public List<ProtectedTag> getProtectedTags(Project project) {
+    public List<ProtectedTag> getProtectedTags(Long projectId) {
         try {
-            return delegate.getTagsApi().getProtectedTags(project.getId());
+            return delegate.getTagsApi().getProtectedTags(projectId, 1, 100);
         } catch (GitLabApiException e) {
             throw new GitlabApiRuntimeException(e);
         }
     }
 
-    public void configureProtectedTags(Project project, boolean projectAlreadyExisted) {
+    public void configureProtectedTags(Long projectId, boolean projectAlreadyExisted) {
         try {
             GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
             if (tagProtectionConfig.protectedTagsPattern().isEmpty()) {
                 return;
             }
 
-            boolean tagsAlreadyExist = projectAlreadyExisted && doesTagProtectionAlreadyExist(project);
+            boolean tagsAlreadyExist = projectAlreadyExisted && doesTagProtectionAlreadyExist(projectId);
             if (tagsAlreadyExist) {
                 return;
             }
 
             delegate.getTagsApi()
-                    .protectTag(
-                            project.getId(),
-                            tagProtectionConfig.protectedTagsPattern().get(),
-                            AccessLevel.DEVELOPER);
+                    .protectTag(projectId, tagProtectionConfig.protectedTagsPattern().get(), AccessLevel.DEVELOPER);
         } catch (GitLabApiException e) {
             throw new GitlabApiRuntimeException(e);
         }
     }
 
-    private boolean doesTagProtectionAlreadyExist(Project project) {
+    public boolean doesTagProtectionAlreadyExist(Long projectId) {
         GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
         Optional<String> protectedTagsPattern = tagProtectionConfig.protectedTagsPattern();
-        List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns()
-                .orElse(new ArrayList<>(List.of()));
+        List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns();
 
         if (protectedTagsPattern.isPresent() && !protectedTagsAcceptedPatterns.contains(protectedTagsPattern.get())) {
             protectedTagsAcceptedPatterns.add(protectedTagsPattern.get());
         }
 
-        return getProtectedTags(project).stream()
+        return getProtectedTags(projectId).stream()
                 .map(ProtectedTag::getName)
                 .anyMatch(protectedTagsAcceptedPatterns::contains);
     }

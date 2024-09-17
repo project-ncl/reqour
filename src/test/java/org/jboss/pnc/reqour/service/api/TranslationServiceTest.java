@@ -22,7 +22,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.common.TestData;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
@@ -40,62 +40,64 @@ class TranslationServiceTest {
 
     @Test
     void externalToInternal_noProtocol_returnsResult() {
-        testInvalidURL(TestData.Translation.noProtocol(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.noProtocol(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_validRepoHttpWithoutOrganizationWithoutGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.httpWithoutOrganizationWithoutGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.httpWithoutOrganizationWithoutGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoHttpsWithoutOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.httpsWithoutOrganizationWithGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.httpsWithoutOrganizationWithGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoHttpWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.httpsWithOrganizationAndGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.httpsWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoGitWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.gitWithOrganizationAndGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.gitWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoGitPlusSshWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.gitPlusSshWithOrganizationAndGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.gitPlusSshWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoSshWithOrganizationWithGitSuffix_returnsResult() {
-        testCorrectURL(TestData.Translation.sshWithOrganizationAndGitSuffix());
+        testCorrectURL(TestDataSupplier.Translation.sshWithOrganizationAndGitSuffix());
     }
 
     @Test
     void externalToInternal_validRepoSshWithPort_returnsResult() {
-        testCorrectURL(TestData.Translation.sshWithOrganizationAndPort());
+        testCorrectURL(TestDataSupplier.Translation.sshWithOrganizationAndPort());
     }
 
     @Test
     void externalToInternal_invalidScpLikeURL_throwsException() {
-        testInvalidURL(TestData.Translation.invalidScpLikeWithoutSemicolon(), InvalidExternalUrlException.class);
+        testInvalidURL(
+                TestDataSupplier.Translation.invalidScpLikeWithoutSemicolon(),
+                InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_noRepositoryProvided_throwsException() {
-        testInvalidURL(TestData.Translation.withoutRepository(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.withoutRepository(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_nonScpLikeWithUser_throwsException() {
-        testInvalidURL(TestData.Translation.nonScpLikeWithUser(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.nonScpLikeWithUser(), InvalidExternalUrlException.class);
     }
 
     @Test
     void externalToInternal_unknownSchema_throwsException() {
-        testInvalidURL(TestData.Translation.withUnavailableSchema(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.withUnavailableSchema(), InvalidExternalUrlException.class);
     }
 
     private void testCorrectURL(TranslateResponse expectedResponse) {

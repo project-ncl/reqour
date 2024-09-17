@@ -34,7 +34,7 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.GitCommands;
-import org.jboss.pnc.reqour.common.TestData;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.profile.CloningProfile;
@@ -51,7 +51,7 @@ import java.util.Collections;
 import static io.restassured.RestAssured.given;
 import static jakarta.ws.rs.core.Response.Status.BAD_REQUEST;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.common.TestData.TASK_ID;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 import static org.jboss.pnc.reqour.common.TestUtils.EMPTY_DEST_REPO_ABSOLUTE_PATH;
 import static org.jboss.pnc.reqour.common.TestUtils.EMPTY_DEST_REPO_URL;
 import static org.jboss.pnc.reqour.common.TestUtils.SOURCE_REPO_ABSOLUTE_PATH;
@@ -85,6 +85,12 @@ class CloningEndpointIT {
         configureWireMockStubbing();
     }
 
+    @AfterEach
+    void tearDown() throws IOException {
+        FileUtils.deleteDirectory(EMPTY_DEST_REPO_ABSOLUTE_PATH.toFile());
+        invokerWireMock.resetRequests();
+    }
+
     @AfterAll
     static void removeCloneRepo() throws IOException {
         FileUtils.deleteDirectory(SOURCE_REPO_ABSOLUTE_PATH.toFile());
@@ -103,11 +109,6 @@ class CloningEndpointIT {
                         .extraEnvVariables(Collections.emptyMap())
                         .stdoutConsumer(System.out::println)
                         .stderrConsumer(System.err::println));
-    }
-
-    @AfterEach
-    void tearDown() throws IOException {
-        FileUtils.deleteDirectory(EMPTY_DEST_REPO_ABSOLUTE_PATH.toFile());
     }
 
     @Test
@@ -132,7 +133,7 @@ class CloningEndpointIT {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(1_000);
+        Thread.sleep(1_500);
         TestUtils.verifyThatCallbackWasSent(invokerWireMock, CALLBACK_PATH, expectedBody);
     }
 
@@ -160,13 +161,13 @@ class CloningEndpointIT {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(1_500);
         TestUtils.verifyThatCallbackWasSent(invokerWireMock, CALLBACK_PATH, expectedBody);
     }
 
     @Test
     void clone_invalidRequest_returnsErrorDTO() {
-        RepositoryCloneRequest request = TestData.Cloning.withMissingTargetUrl();
+        RepositoryCloneRequest request = TestDataSupplier.Cloning.withMissingTargetUrl();
         ErrorResponse expectedResponse = new ErrorResponse(
                 "ResteasyReactiveViolationException",
                 "clone.arg0.targetRepoUrl: Invalid URL of the git repository");

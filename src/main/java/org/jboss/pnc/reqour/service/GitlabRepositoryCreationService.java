@@ -22,6 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.gitlab4j.api.models.Group;
+import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
@@ -79,9 +80,9 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
                 completeTemplateWithProjectPath(gitlabConfig.readWriteTemplate(), pathToTemplate),
                 creationRequest.getTaskId());
 
-        // gitlabApiService.configureProtectedTags(
-        // fetchedProjectResult.project(),
-        // fetchedProjectResult.result().getStatus().equals(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS));
+        gitlabApiService.configureProtectedTags(
+                fetchedProjectResult.project().getId(),
+                fetchedProjectResult.result().getStatus().equals(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS));
 
         return fetchedProjectResult.result();
     }

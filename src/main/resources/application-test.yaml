@@ -15,6 +15,7 @@ reqour:
           read-write-template: git@${reqour.git.git-backends.available.gitlab.hostname}:${reqour.git.git-backends.available.gitlab.workspace}/%s.git
           protected-tags-pattern: '*'
           protected-tags-accepted-patterns:
+            - 'protected-'
       active: gitlab
     acceptable-schemes:
       - https
