@@ -54,6 +54,6 @@ public interface GitBackendConfig {
 
         Optional<String> protectedTagsPattern();
 
-        Optional<List<String>> protectedTagsAcceptedPatterns();
+        List<String> protectedTagsAcceptedPatterns();
     }
 }

@@ -22,16 +22,11 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.gitlab4j.api.GitLabApiException;
-import org.gitlab4j.api.models.Group;
-import org.gitlab4j.api.models.Project;
 import org.jboss.pnc.api.dto.Request;
-import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
-import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
-import org.jboss.pnc.api.reqour.dto.ReqourCallback;
-import org.jboss.pnc.reqour.common.TestData;
-import org.jboss.pnc.reqour.common.TestWorkspaceSupplier;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
+import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
@@ -44,12 +39,12 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.jboss.pnc.reqour.common.TestUtils.alreadyExistsSuccess;
-import static org.jboss.pnc.reqour.common.TestUtils.newlyCreatedSuccess;
 
 @QuarkusTest
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 class GitlabRepositoryCreationServiceTest {
+
+    private static final String CALLBACK_PATH = "/callback";
 
     @InjectMock
     GitlabApiService gitlabApiService;
@@ -57,15 +52,18 @@ class GitlabRepositoryCreationServiceTest {
     @Inject
     GitlabRepositoryCreationService service;
 
-    @Inject
-    TestWorkspaceSupplier testWorkspaceSupplier;
-
     @Test
     void createInternalSCMRepository_newProjectWithoutSubgroup_createsNewProject() {
-        InternalSCMCreationResponse expectedResponse = newlyCreatedSuccess("project", TestData.TASK_ID);
+        String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
+                + TestDataSupplier.InternalSCM.PROJECT_NAME;
+        InternalSCMCreationResponse expectedResponse = TestUtils
+                .newlyCreatedSuccess(projectPath, TestDataSupplier.TASK_ID);
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
-        Mockito.doReturn(new GitlabGetOrCreateProjectResult(new Project().withName("project"), expectedResponse))
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
+        Mockito.doReturn(
+                new GitlabGetOrCreateProjectResult(
+                        TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
+                        expectedResponse))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
@@ -74,27 +72,38 @@ class GitlabRepositoryCreationServiceTest {
                         Mockito.anyString(),
                         Mockito.anyString(),
                         Mockito.anyString());
+        Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
-                InternalSCMCreationRequest.builder().project("project").taskId(TestData.TASK_ID).build());
+                InternalSCMCreationRequest.builder()
+                        .project(TestDataSupplier.InternalSCM.PROJECT_NAME)
+                        .taskId(TestDataSupplier.TASK_ID)
+                        .build());
 
         assertThat(response).isEqualTo(expectedResponse);
         Mockito.verify(gitlabApiService)
                 .getOrCreateProject(
-                        "project",
-                        testWorkspaceSupplier.getWorkspaceGroup().getId(),
-                        "test-workspace/project",
+                        TestDataSupplier.InternalSCM.PROJECT_NAME,
+                        TestDataSupplier.InternalSCM.WORKSPACE_ID,
+                        projectPath,
                         expectedResponse.getReadonlyUrl(),
                         expectedResponse.getReadwriteUrl(),
-                        TestData.TASK_ID);
+                        TestDataSupplier.TASK_ID);
+        Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
     @Test
     void createInternalSCMRepository_projectWithoutSubgroupContainingGitSuffix_removesGitSuffixAndCreatesNewProject() {
-        InternalSCMCreationResponse expectedResponse = newlyCreatedSuccess("project", TestData.TASK_ID);
+        String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
+                + TestDataSupplier.InternalSCM.PROJECT_NAME;
+        InternalSCMCreationResponse expectedResponse = TestUtils
+                .newlyCreatedSuccess(projectPath, TestDataSupplier.TASK_ID);
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
-        Mockito.doReturn(new GitlabGetOrCreateProjectResult(new Project().withName("project"), expectedResponse))
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
+        Mockito.doReturn(
+                new GitlabGetOrCreateProjectResult(
+                        TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
+                        expectedResponse))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
@@ -103,27 +112,38 @@ class GitlabRepositoryCreationServiceTest {
                         Mockito.anyString(),
                         Mockito.anyString(),
                         Mockito.anyString());
+        Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
-                InternalSCMCreationRequest.builder().project("project").taskId(TestData.TASK_ID).build());
+                InternalSCMCreationRequest.builder()
+                        .project(TestDataSupplier.InternalSCM.PROJECT_NAME)
+                        .taskId(TestDataSupplier.TASK_ID)
+                        .build());
 
         assertThat(response).isEqualTo(expectedResponse);
         Mockito.verify(gitlabApiService)
                 .getOrCreateProject(
-                        "project",
-                        testWorkspaceSupplier.getWorkspaceGroup().getId(),
-                        "test-workspace/project",
+                        TestDataSupplier.InternalSCM.PROJECT_NAME,
+                        TestDataSupplier.InternalSCM.WORKSPACE_ID,
+                        projectPath,
                         expectedResponse.getReadonlyUrl(),
                         expectedResponse.getReadwriteUrl(),
-                        TestData.TASK_ID);
+                        TestDataSupplier.TASK_ID);
+        Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
     @Test
     void createInternalSCMRepository_existingProjectWithoutSubgroup_successWithAlreadyExists() {
-        InternalSCMCreationResponse expectedResponse = alreadyExistsSuccess("project", TestData.TASK_ID);
+        String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
+                + TestDataSupplier.InternalSCM.PROJECT_NAME;
+        InternalSCMCreationResponse expectedResponse = TestUtils
+                .alreadyExistsSuccess(projectPath, TestDataSupplier.TASK_ID);
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
-        Mockito.doReturn(new GitlabGetOrCreateProjectResult(new Project().withName("project"), expectedResponse))
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
+        Mockito.doReturn(
+                new GitlabGetOrCreateProjectResult(
+                        TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
+                        expectedResponse))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
@@ -132,28 +152,38 @@ class GitlabRepositoryCreationServiceTest {
                         Mockito.anyString(),
                         Mockito.anyString(),
                         Mockito.anyString());
+        Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
-                InternalSCMCreationRequest.builder().project("project").taskId(TestData.TASK_ID).build());
+                InternalSCMCreationRequest.builder()
+                        .project(TestDataSupplier.InternalSCM.PROJECT_NAME)
+                        .taskId(TestDataSupplier.TASK_ID)
+                        .build());
 
         assertThat(response).isEqualTo(expectedResponse);
         Mockito.verify(gitlabApiService)
                 .getOrCreateProject(
-                        "project",
-                        testWorkspaceSupplier.getWorkspaceGroup().getId(),
-                        "test-workspace/project",
+                        TestDataSupplier.InternalSCM.PROJECT_NAME,
+                        TestDataSupplier.InternalSCM.WORKSPACE_ID,
+                        projectPath,
                         expectedResponse.getReadonlyUrl(),
                         expectedResponse.getReadwriteUrl(),
-                        TestData.TASK_ID);
+                        TestDataSupplier.TASK_ID);
+        Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, true);
     }
 
     @Test
     void createInternalSCMRepository_newProjectContainingSubgroupSameToWorkspace_createsNewProject() {
-        String projectPath = "test-workspace/project";
-        InternalSCMCreationResponse expectedResponse = newlyCreatedSuccess("project", TestData.TASK_ID);
+        String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
+                + TestDataSupplier.InternalSCM.PROJECT_NAME;
+        InternalSCMCreationResponse expectedResponse = TestUtils
+                .newlyCreatedSuccess(projectPath, TestDataSupplier.TASK_ID);
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
-        Mockito.doReturn(new GitlabGetOrCreateProjectResult(new Project().withName("project"), expectedResponse))
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
+        Mockito.doReturn(
+                new GitlabGetOrCreateProjectResult(
+                        TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
+                        expectedResponse))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
@@ -162,63 +192,68 @@ class GitlabRepositoryCreationServiceTest {
                         Mockito.anyString(),
                         Mockito.anyString(),
                         Mockito.anyString());
+        Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
-                InternalSCMCreationRequest.builder().project(projectPath).taskId(TestData.TASK_ID).build());
+                InternalSCMCreationRequest.builder().project(projectPath).taskId(TestDataSupplier.TASK_ID).build());
 
         assertThat(response).isEqualTo(expectedResponse);
         Mockito.verify(gitlabApiService)
                 .getOrCreateProject(
-                        "project",
-                        testWorkspaceSupplier.getWorkspaceGroup().getId(),
+                        TestDataSupplier.InternalSCM.PROJECT_NAME,
+                        TestDataSupplier.InternalSCM.WORKSPACE_ID,
                         projectPath,
                         expectedResponse.getReadonlyUrl(),
                         expectedResponse.getReadwriteUrl(),
-                        TestData.TASK_ID);
+                        TestDataSupplier.TASK_ID);
+        Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
     @Test
     void createInternalSCMRepository_newProjectWithSubgroupFromDifferentWorkspace_successWithAlreadyExists() {
-        Group differentGroup = testWorkspaceSupplier.getDifferentWorkspaceGroup();
-        InternalSCMCreationResponse expectedResponse = InternalSCMCreationResponse.builder()
-                .readonlyUrl("http://localhost/test-workspace/" + differentGroup.getName() + "/project.git")
-                .readwriteUrl("git@localhost:test-workspace/" + differentGroup.getName() + "/project.git")
-                .status(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS)
-                .callback(ReqourCallback.builder().id(TestData.TASK_ID).status(ResultStatus.SUCCESS).build())
-                .build();
+        String projectPath = TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME + "/"
+                + TestDataSupplier.InternalSCM.PROJECT_NAME;
+        InternalSCMCreationResponse expectedResponse = TestUtils.alreadyExistsSuccess(
+                TestDataSupplier.InternalSCM.projectFromDifferentWorkspace().getPathWithNamespace(),
+                TestDataSupplier.TASK_ID);
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
-        Mockito.doReturn(differentGroup)
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
+        Mockito.doReturn(TestDataSupplier.InternalSCM.differentWorkspaceGroup())
                 .when(gitlabApiService)
                 .getOrCreateSubgroup(Mockito.anyLong(), Mockito.anyString());
-        Mockito.when(
-                gitlabApiService.getOrCreateProject(
+        Mockito.doReturn(
+                new GitlabGetOrCreateProjectResult(
+                        TestDataSupplier.InternalSCM.projectFromDifferentWorkspace(),
+                        expectedResponse))
+                .when(gitlabApiService)
+                .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
                         Mockito.anyString(),
                         Mockito.anyString(),
                         Mockito.anyString(),
-                        Mockito.anyString()))
-                .thenReturn(new GitlabGetOrCreateProjectResult(new Project(), expectedResponse));
+                        Mockito.anyString());
+        Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
-                InternalSCMCreationRequest.builder()
-                        .project(differentGroup.getName() + "/project")
-                        .taskId(TestData.TASK_ID)
-                        .build());
+                InternalSCMCreationRequest.builder().project(projectPath).taskId(TestDataSupplier.TASK_ID).build());
 
         assertThat(response).isEqualTo(expectedResponse);
-        Mockito.verify(gitlabApiService).getGroup(testWorkspaceSupplier.getWorkspaceGroup().getId());
+        Mockito.verify(gitlabApiService).getGroup(TestDataSupplier.InternalSCM.WORKSPACE_ID);
         Mockito.verify(gitlabApiService)
-                .getOrCreateSubgroup(testWorkspaceSupplier.getWorkspaceGroup().getId(), differentGroup.getName());
+                .getOrCreateSubgroup(
+                        TestDataSupplier.InternalSCM.WORKSPACE_ID,
+                        TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME);
         Mockito.verify(gitlabApiService)
                 .getOrCreateProject(
-                        "project",
-                        differentGroup.getId(),
-                        "test-workspace/" + differentGroup.getName() + "/project",
+                        TestDataSupplier.InternalSCM.PROJECT_NAME,
+                        TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_ID,
+                        TestDataSupplier.InternalSCM.projectFromDifferentWorkspace().getPathWithNamespace(),
                         expectedResponse.getReadonlyUrl(),
                         expectedResponse.getReadwriteUrl(),
-                        TestData.TASK_ID);
+                        TestDataSupplier.TASK_ID);
+        Mockito.verify(gitlabApiService)
+                .configureProtectedTags(TestDataSupplier.InternalSCM.DIFFERENT_PROJECT_ID, true);
     }
 
     @Test
@@ -231,12 +266,12 @@ class GitlabRepositoryCreationServiceTest {
         assertThatThrownBy(
                 () -> service.createInternalSCMRepository(
                         InternalSCMCreationRequest.builder()
-                                .project("project")
-                                .taskId(TestData.TASK_ID)
+                                .project("doesn't really matter")
+                                .taskId(TestDataSupplier.TASK_ID)
                                 .callback(
                                         Request.builder()
                                                 .method(Request.Method.POST)
-                                                .uri(URI.create("/callback"))
+                                                .uri(URI.create(CALLBACK_PATH))
                                                 .build())
                                 .build()))
                 .hasMessageContaining(errorMessage);
@@ -246,17 +281,17 @@ class GitlabRepositoryCreationServiceTest {
     void createInternalSCMRepository_projectContainsTooManySlashes_throwsException() {
         String project = "group/subgroup/project";
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
-                .thenReturn(testWorkspaceSupplier.getWorkspaceGroup());
+                .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
 
         assertThatThrownBy(
                 () -> service.createInternalSCMRepository(
                         InternalSCMCreationRequest.builder()
                                 .project(project)
-                                .taskId(TestData.TASK_ID)
+                                .taskId(TestDataSupplier.TASK_ID)
                                 .callback(
                                         Request.builder()
                                                 .method(Request.Method.POST)
-                                                .uri(URI.create("/callback"))
+                                                .uri(URI.create(CALLBACK_PATH))
                                                 .build())
                                 .build()))
                 .isInstanceOf(InvalidProjectPathException.class)

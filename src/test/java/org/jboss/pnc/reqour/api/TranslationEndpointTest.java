@@ -28,7 +28,7 @@ import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
-import org.jboss.pnc.reqour.common.TestData;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 import org.jboss.pnc.reqour.profile.TranslationProfile;
@@ -49,7 +49,7 @@ class TranslationEndpointTest {
 
     @Test
     void externalToInternal_validURL_returnsResponse() {
-        TranslateResponse expectedResponse = TestData.Translation.httpsWithOrganizationAndGitSuffix();
+        TranslateResponse expectedResponse = TestDataSupplier.Translation.httpsWithOrganizationAndGitSuffix();
         TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
         Mockito.when(service.externalToInternal(any())).thenReturn(expectedResponse);
 
@@ -65,7 +65,7 @@ class TranslationEndpointTest {
 
     @Test
     void externalToInternal_invalidURL_returnsErrorDTO() {
-        TranslateRequest request = TestData.Translation.withoutRepository();
+        TranslateRequest request = TestDataSupplier.Translation.withoutRepository();
         ErrorResponse expectedResponse = new ErrorResponse(
                 "ResteasyReactiveViolationException",
                 "externalToInternal.arg0.externalUrl: Invalid URL of the git repository");

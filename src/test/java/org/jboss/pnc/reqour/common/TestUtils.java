@@ -108,8 +108,8 @@ public class TestUtils {
             InternalSCMCreationStatus creationStatus,
             ResultStatus operationStatus) {
         return InternalSCMCreationResponse.builder()
-                .readonlyUrl("http://localhost/test-workspace/" + projectPath + ".git")
-                .readwriteUrl("git@localhost:test-workspace/" + projectPath + ".git")
+                .readonlyUrl("http://localhost/" + projectPath + ".git")
+                .readwriteUrl("git@localhost:" + projectPath + ".git")
                 .status(creationStatus)
                 .callback(ReqourCallback.builder().id(taskId).status(operationStatus).build())
                 .build();

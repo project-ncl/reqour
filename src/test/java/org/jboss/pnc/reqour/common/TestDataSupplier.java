@@ -17,7 +17,13 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.gitlab4j.api.models.Group;
+import org.gitlab4j.api.models.Namespace;
+import org.gitlab4j.api.models.Project;
+import org.gitlab4j.api.models.ProtectedTag;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
@@ -25,11 +31,26 @@ import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Optional;
 
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromExternalUrl;
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
 
-public class TestData {
+@ApplicationScoped
+public class TestDataSupplier {
+
+    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.workspace-id")
+    Long workspaceId;
+
+    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.workspace")
+    String workspaceName;
+
+    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.protected-tags-pattern")
+    Optional<String> protectedTagsPattern;
+
+    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.protected-tags-accepted-patterns")
+    List<String> protectedTagsAccepted;
 
     public static final String TASK_ID = "task-id";
 
@@ -124,6 +145,61 @@ public class TestData {
                                     .uri(URI.create("https://example.com/operation"))
                                     .build())
                     .build();
+        }
+    }
+
+    public static class InternalSCM {
+
+        public static final String WORKSPACE_NAME = "test-workspace";
+        public static final long WORKSPACE_ID = 1L;
+        public static final String DIFFERENT_WORKSPACE_NAME = "different-workspace";
+        public static final long DIFFERENT_WORKSPACE_ID = 2L;
+        public static final String PROJECT_NAME = "project";
+        public static final long PROJECT_ID = 42L;
+        public static final long DIFFERENT_PROJECT_ID = 100L;
+
+        public static Group workspaceGroup() {
+            return new Group().withId(WORKSPACE_ID).withName(WORKSPACE_NAME).withFullPath(WORKSPACE_NAME);
+        }
+
+        public static Group differentWorkspaceGroup() {
+            return new Group().withId(DIFFERENT_WORKSPACE_ID)
+                    .withName(DIFFERENT_WORKSPACE_NAME)
+                    .withFullPath(WORKSPACE_NAME + "/" + DIFFERENT_WORKSPACE_NAME)
+                    .withParentId(WORKSPACE_ID);
+        }
+
+        public static Project projectFromTestWorkspace() {
+            Project project = new Project().withId(42L)
+                    .withName(PROJECT_NAME)
+                    .withNamespace(
+                            new Namespace().withId(WORKSPACE_ID).withName(WORKSPACE_NAME).withFullPath(WORKSPACE_NAME));
+            project.setPathWithNamespace(WORKSPACE_NAME + "/" + PROJECT_NAME);
+
+            return project;
+        }
+
+        public static Project projectFromDifferentWorkspace() {
+            Project project = new Project().withId(DIFFERENT_PROJECT_ID)
+                    .withName(PROJECT_NAME)
+                    .withNamespace(
+                            new Namespace().withId(DIFFERENT_WORKSPACE_ID)
+                                    .withName(DIFFERENT_WORKSPACE_NAME)
+                                    .withFullPath(WORKSPACE_NAME + "/" + DIFFERENT_WORKSPACE_NAME));
+            project.setPathWithNamespace(WORKSPACE_NAME + "/" + DIFFERENT_WORKSPACE_NAME + "/" + PROJECT_NAME);
+
+            return project;
+        }
+
+        public static List<ProtectedTag> protectedTags() {
+            return List.of(createdProtectedTag());
+        }
+
+        public static ProtectedTag createdProtectedTag() {
+            var protectedTag = new ProtectedTag();
+            protectedTag.setName("*");
+
+            return protectedTag;
         }
     }
 
