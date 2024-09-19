@@ -19,7 +19,6 @@ package org.jboss.pnc.reqour.common;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Namespace;
 import org.gitlab4j.api.models.Project;
@@ -32,25 +31,12 @@ import org.jboss.pnc.reqour.config.GitBackendConfig;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromExternalUrl;
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
 
 @ApplicationScoped
 public class TestDataSupplier {
-
-    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.workspace-id")
-    Long workspaceId;
-
-    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.workspace")
-    String workspaceName;
-
-    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.protected-tags-pattern")
-    Optional<String> protectedTagsPattern;
-
-    @ConfigProperty(name = "reqour.git.git-backends.available.gitlab.protected-tags-accepted-patterns")
-    List<String> protectedTagsAccepted;
 
     public static final String TASK_ID = "task-id";
 
