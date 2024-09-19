@@ -38,6 +38,7 @@ import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.rest.providers.GitlabApiRuntimeException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -160,7 +161,8 @@ public class GitlabApiService {
     public boolean doesTagProtectionAlreadyExist(Long projectId) {
         GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
         Optional<String> protectedTagsPattern = tagProtectionConfig.protectedTagsPattern();
-        List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns();
+        List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns()
+                .orElse(new ArrayList<>());
 
         if (protectedTagsPattern.isPresent() && !protectedTagsAcceptedPatterns.contains(protectedTagsPattern.get())) {
             protectedTagsAcceptedPatterns.add(protectedTagsPattern.get());
