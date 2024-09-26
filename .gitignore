@@ -1,6 +1,9 @@
 # Runtime configuration
 config/
 
+# Ignore code-generated class that will change on every build
+src/main/java/org/jboss/pnc/reqour/rest/BuildInformationConstants.java
+
 #Maven
 target/
 pom.xml.tag
