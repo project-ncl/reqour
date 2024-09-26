@@ -17,3 +17,10 @@ reqour:
           read-write-template: git@${reqour.git.git-backends.available.gitlab.hostname}:${reqour.git.git-backends.available.gitlab.workspace}/%s.git
           token: ${GITLAB_TOKEN}
     private-github-user: ${PRIVATE_GITHUB_USER}
+
+mp:
+  openapi:
+    scan:
+      exclude:
+        classes:
+          - org.jboss.pnc.reqour.rest.endpoints.BaseUrlEndpoint
