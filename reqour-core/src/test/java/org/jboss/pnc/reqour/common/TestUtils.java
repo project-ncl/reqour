@@ -17,11 +17,6 @@
  */
 package org.jboss.pnc.reqour.common;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.ListBranchCommand;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.transport.TagOpt;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
@@ -35,19 +30,8 @@ import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 
 import java.net.URI;
-import java.nio.file.Path;
 
 public class TestUtils {
-
-    public static final Path CLONE_TEST_PATH = Path.of("src", "test", "resources");
-    public static final Path SOURCE_REPO_ABSOLUTE_PATH = CLONE_TEST_PATH.resolve("source-repo").toAbsolutePath();
-    public static final String SOURCE_REPO_URL = "file://" + SOURCE_REPO_ABSOLUTE_PATH;
-    public static final Path EMPTY_DEST_REPO_ABSOLUTE_PATH = CLONE_TEST_PATH.resolve("empty-dest-repo")
-            .toAbsolutePath();
-    public static final String EMPTY_DEST_REPO_URL = "file://" + EMPTY_DEST_REPO_ABSOLUTE_PATH;
-    public static final Path DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH = CLONE_TEST_PATH.resolve("main-branch-dest-repo")
-            .toAbsolutePath();
-    public static final String DEST_REPO_WITH_MAIN_BRANCH_URL = "file://" + DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH;
 
     public static TranslateResponse createTranslateResponseFromExternalUrl(String externalUrl, String internalUrl) {
         return TranslateResponse.builder().externalUrl(externalUrl).internalUrl(internalUrl).build();
@@ -128,36 +112,5 @@ public class TestUtils {
 
     public static String getWiremockBaseUrl() {
         return ConfigProvider.getConfig().getValue("wiremock.base-url", String.class);
-    }
-
-    public static void cloneSourceRepoFromGithub() throws GitAPIException {
-        Git sourceRepo = Git.cloneRepository()
-                .setURI("https://github.com/project-ncl/test-repo-for-reqour")
-                .setDirectory(SOURCE_REPO_ABSOLUTE_PATH.toFile())
-                .setCloneAllBranches(true)
-                .setTagOption(TagOpt.FETCH_TAGS)
-                .call();
-
-        setTrackingOfBranches(sourceRepo);
-    }
-
-    private static void setTrackingOfBranches(Git sourceRepo) throws GitAPIException {
-        sourceRepo.branchList()
-                .setListMode(ListBranchCommand.ListMode.ALL)
-                .call()
-                .stream()
-                .map(Ref::getName)
-                .filter(b -> b.contains("remotes"))
-                .filter(b -> !b.contains("main"))
-                .map(b -> b.substring(b.lastIndexOf("/") + 1))
-                .forEach(b -> checkoutToBranch(sourceRepo, b));
-    }
-
-    private static void checkoutToBranch(Git sourceRepo, String branch) {
-        try {
-            sourceRepo.checkout().setCreateBranch(true).setName(branch).call();
-        } catch (GitAPIException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

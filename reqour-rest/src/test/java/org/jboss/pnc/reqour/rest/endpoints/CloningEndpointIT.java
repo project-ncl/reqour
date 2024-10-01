@@ -34,10 +34,11 @@ import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
-import org.jboss.pnc.reqour.common.profile.CloningProfile;
+import org.jboss.pnc.reqour.common.CloneTestUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
+import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -69,8 +70,8 @@ class CloningEndpointIT {
 
     @BeforeAll
     static void setUpCloneRepo() throws IOException, GitAPIException {
-        Files.createDirectory(TestUtils.SOURCE_REPO_ABSOLUTE_PATH);
-        TestUtils.cloneSourceRepoFromGithub();
+        Files.createDirectory(CloneTestUtils.SOURCE_REPO_PATH);
+        CloneTestUtils.cloneSourceRepoFromGithub();
     }
 
     @BeforeEach
@@ -81,13 +82,13 @@ class CloningEndpointIT {
 
     @AfterEach
     void tearDown() throws IOException {
-        FileUtils.deleteDirectory(TestUtils.EMPTY_DEST_REPO_ABSOLUTE_PATH.toFile());
+        FileUtils.deleteDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH.toFile());
         invokerWireMock.resetRequests();
     }
 
     @AfterAll
     static void removeCloneRepo() throws IOException {
-        FileUtils.deleteDirectory(TestUtils.SOURCE_REPO_ABSOLUTE_PATH.toFile());
+        FileUtils.deleteDirectory(CloneTestUtils.SOURCE_REPO_PATH.toFile());
     }
 
     private void configureWireMockStubbing() {
@@ -95,11 +96,11 @@ class CloningEndpointIT {
     }
 
     private void setUpEmptyDestRepo() throws IOException {
-        Files.createDirectory(TestUtils.EMPTY_DEST_REPO_ABSOLUTE_PATH);
+        Files.createDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH);
         gitCommands.init(
                 true,
                 ProcessContext.builder()
-                        .workingDirectory(TestUtils.EMPTY_DEST_REPO_ABSOLUTE_PATH)
+                        .workingDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH)
                         .extraEnvVariables(Collections.emptyMap())
                         .stdoutConsumer(System.out::println)
                         .stderrConsumer(System.err::println));
@@ -109,8 +110,8 @@ class CloningEndpointIT {
     void clone_validCloneRequest_sendsCallback() throws InterruptedException, JsonProcessingException {
         String expectedBody = objectMapper.writeValueAsString(
                 TestUtils.createRepositoryCloneResponse(
-                        TestUtils.SOURCE_REPO_URL,
-                        TestUtils.EMPTY_DEST_REPO_URL,
+                        CloneTestUtils.SOURCE_REPO_URL,
+                        CloneTestUtils.EMPTY_DEST_REPO_URL,
                         ResultStatus.SUCCESS,
                         TestDataSupplier.TASK_ID));
 
@@ -119,8 +120,8 @@ class CloningEndpointIT {
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(
                         TestUtils.createRepositoryCloneRequest(
-                                TestUtils.SOURCE_REPO_URL,
-                                TestUtils.EMPTY_DEST_REPO_URL,
+                                CloneTestUtils.SOURCE_REPO_URL,
+                                CloneTestUtils.EMPTY_DEST_REPO_URL,
                                 getCallbackUrl(),
                                 TestDataSupplier.TASK_ID))
                 .when()
@@ -139,7 +140,7 @@ class CloningEndpointIT {
         String expectedBody = objectMapper.writeValueAsString(
                 TestUtils.createRepositoryCloneResponse(
                         nonExistentRepoUrl,
-                        TestUtils.EMPTY_DEST_REPO_URL,
+                        CloneTestUtils.EMPTY_DEST_REPO_URL,
                         ResultStatus.FAILED,
                         TestDataSupplier.TASK_ID));
 
@@ -149,7 +150,7 @@ class CloningEndpointIT {
                 .body(
                         TestUtils.createRepositoryCloneRequest(
                                 nonExistentRepoUrl,
-                                TestUtils.EMPTY_DEST_REPO_URL,
+                                CloneTestUtils.EMPTY_DEST_REPO_URL,
                                 getCallbackUrl(),
                                 TestDataSupplier.TASK_ID))
                 .when()
