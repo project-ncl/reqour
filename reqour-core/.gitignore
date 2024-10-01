@@ -1,3 +1,6 @@
+# Ignore code-generated class that will change on every build
+src/main/java/org/jboss/pnc/reqour/BuildInformationConstants.java
+
 #Maven
 target/
 pom.xml.tag
@@ -41,3 +44,5 @@ nb-configuration.xml
 
 # Plugin directory
 /.quarkus/cli/plugins/
+# TLS Certificates
+.certs/

@@ -1,0 +1,8 @@
+reqour:
+  git:
+    git-backends:
+      available:
+        gitlab:
+          url: http://${reqour.git.git-backends.available.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+wiremock:
+  base-url: http://localhost:${quarkus.wiremock.devservices.port}

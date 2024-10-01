@@ -1,3 +1,6 @@
+# Runtime configuration
+config/
+
 #Maven
 target/
 pom.xml.tag
@@ -41,3 +44,5 @@ nb-configuration.xml
 
 # Plugin directory
 /.quarkus/cli/plugins/
+# TLS Certificates
+.certs/
