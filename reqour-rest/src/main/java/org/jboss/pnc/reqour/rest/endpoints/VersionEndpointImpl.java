@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.ComponentVersion;
 import org.jboss.pnc.api.endpoints.VersionEndpoint;
-import org.jboss.pnc.reqour.rest.BuildInformationConstants;
+import org.jboss.pnc.reqour.BuildInformationConstants;
 
 import java.time.ZonedDateTime;
 
