@@ -25,13 +25,13 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
+import org.jboss.pnc.reqour.common.CloneTestUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
-import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
-import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.service.GitCloneService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -52,12 +52,12 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.jboss.pnc.reqour.common.TestUtils.DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH;
-import static org.jboss.pnc.reqour.common.TestUtils.DEST_REPO_WITH_MAIN_BRANCH_URL;
-import static org.jboss.pnc.reqour.common.TestUtils.EMPTY_DEST_REPO_ABSOLUTE_PATH;
-import static org.jboss.pnc.reqour.common.TestUtils.EMPTY_DEST_REPO_URL;
-import static org.jboss.pnc.reqour.common.TestUtils.SOURCE_REPO_ABSOLUTE_PATH;
-import static org.jboss.pnc.reqour.common.TestUtils.SOURCE_REPO_URL;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_URL;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_URL;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_URL;
 
 @QuarkusTest
 @TestProfile(CloningProfile.class)
@@ -74,13 +74,13 @@ class GitCloneServiceTest {
 
     @BeforeAll
     static void setUpCloneRepo() throws IOException, GitAPIException {
-        Files.createDirectory(SOURCE_REPO_ABSOLUTE_PATH);
-        TestUtils.cloneSourceRepoFromGithub();
+        Files.createDirectory(SOURCE_REPO_PATH);
+        CloneTestUtils.cloneSourceRepoFromGithub();
     }
 
     @AfterAll
     static void removeCloneRepo() throws IOException {
-        FileUtils.deleteDirectory(SOURCE_REPO_ABSOLUTE_PATH.toFile());
+        FileUtils.deleteDirectory(SOURCE_REPO_PATH.toFile());
     }
 
     @BeforeEach
@@ -90,20 +90,20 @@ class GitCloneServiceTest {
     }
 
     void setUpEmptyDestRepo() throws IOException {
-        Files.createDirectory(EMPTY_DEST_REPO_ABSOLUTE_PATH);
+        Files.createDirectory(EMPTY_DEST_REPO_PATH);
         gitCommands.init(
                 true,
                 ProcessContext.builder()
-                        .workingDirectory(EMPTY_DEST_REPO_ABSOLUTE_PATH)
+                        .workingDirectory(EMPTY_DEST_REPO_PATH)
                         .extraEnvVariables(Collections.emptyMap())
                         .stdoutConsumer(System.out::println)
                         .stderrConsumer(System.err::println));
     }
 
     void setUpDestRepoWithOnlyMainBranch() throws IOException {
-        Files.createDirectory(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH);
+        Files.createDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH);
         ProcessContext.Builder pcb = ProcessContext.builder()
-                .workingDirectory(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)
+                .workingDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH)
                 .extraEnvVariables(Collections.emptyMap())
                 .stdoutConsumer(System.out::println)
                 .stderrConsumer(System.err::println);
@@ -130,8 +130,8 @@ class GitCloneServiceTest {
 
     @AfterEach
     void tearDown() throws IOException {
-        FileUtils.deleteDirectory(EMPTY_DEST_REPO_ABSOLUTE_PATH.toFile());
-        FileUtils.deleteDirectory(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH.toFile());
+        FileUtils.deleteDirectory(EMPTY_DEST_REPO_PATH.toFile());
+        FileUtils.deleteDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH.toFile());
     }
 
     @Test
@@ -153,8 +153,8 @@ class GitCloneServiceTest {
                         .targetRepoUrl(EMPTY_DEST_REPO_URL)
                         .build());
 
-        assertThat(getRepositoryBranches(EMPTY_DEST_REPO_ABSOLUTE_PATH)).isEqualTo(expectedBranches);
-        assertThat(getRepositoryTags(EMPTY_DEST_REPO_ABSOLUTE_PATH)).isEqualTo(expectedTags);
+        assertThat(getRepositoryBranches(EMPTY_DEST_REPO_PATH)).isEqualTo(expectedBranches);
+        assertThat(getRepositoryTags(EMPTY_DEST_REPO_PATH)).isEqualTo(expectedTags);
     }
 
     @Test
@@ -177,8 +177,8 @@ class GitCloneServiceTest {
                         .ref("main")
                         .build());
 
-        assertThat(getRepositoryBranches(EMPTY_DEST_REPO_ABSOLUTE_PATH)).isEqualTo(expectedBranches);
-        assertThat(getRepositoryTags(EMPTY_DEST_REPO_ABSOLUTE_PATH)).isEqualTo(expectedTags);
+        assertThat(getRepositoryBranches(EMPTY_DEST_REPO_PATH)).isEqualTo(expectedBranches);
+        assertThat(getRepositoryTags(EMPTY_DEST_REPO_PATH)).isEqualTo(expectedTags);
     }
 
     @Test
@@ -194,8 +194,8 @@ class GitCloneServiceTest {
                         .ref("branch1")
                         .build());
 
-        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedBranches);
-        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedTags);
+        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedBranches);
+        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedTags);
     }
 
     @Test
@@ -211,8 +211,8 @@ class GitCloneServiceTest {
                         .ref("branch2-tag2")
                         .build());
 
-        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedBranches);
-        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedTags);
+        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedBranches);
+        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedTags);
     }
 
     @Test
@@ -222,7 +222,7 @@ class GitCloneServiceTest {
                 .stdout(
                         ProcessContext.builder()
                                 .command(List.of("/bin/sh", "-c", "git rev-list main | tac | sed -n '2 p'"))
-                                .workingDirectory(SOURCE_REPO_ABSOLUTE_PATH)
+                                .workingDirectory(SOURCE_REPO_PATH)
                                 .extraEnvVariables(Collections.emptyMap())
                                 .stderrConsumer(IOUtils::ignoreOutput))
                 .strip();
@@ -236,8 +236,8 @@ class GitCloneServiceTest {
                         .ref(afterInitialAtMainSha)
                         .build());
 
-        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedBranches);
-        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_ABSOLUTE_PATH)).isEqualTo(expectedTags);
+        assertThat(getRepositoryBranches(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedBranches);
+        assertThat(getRepositoryTags(DEST_REPO_WITH_MAIN_BRANCH_PATH)).isEqualTo(expectedTags);
     }
 
     @Test
