@@ -114,11 +114,20 @@ public class GitCloneService implements CloneService {
                 .stderrConsumer(System.err::println);
 
         gitCommands.clone(url, processContextBuilder);
+
+        final boolean isInternalRepoNew;
         if (IOUtils.countLines(gitCommands.listTags(processContextBuilder)) > 0) {
-            return false;
+            isInternalRepoNew = false;
+        } else {
+            isInternalRepoNew = IOUtils.countLines(gitCommands.listBranches(processContextBuilder)) == 0;
         }
 
-        return IOUtils.countLines(gitCommands.listBranches(processContextBuilder)) == 0;
+        try {
+            IOUtils.deleteTempDir(cloneDir);
+        } catch (IOException ex) {
+            log.warn("Could not delete the temporary directory", ex);
+        }
+        return isInternalRepoNew;
     }
 
     private void pushClonedChanges(String ref, String remote, ProcessContext.Builder processContextBuilder) {
