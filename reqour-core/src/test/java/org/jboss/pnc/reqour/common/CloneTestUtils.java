@@ -21,16 +21,18 @@ import java.nio.file.Path;
 @Slf4j
 public class CloneTestUtils {
 
+    private static final String REQOUR_TEST_PREFIX = "reqour-test-";
     private static final Path CLONE_DIR_PATH = createCloneDir();
-    public static final Path SOURCE_REPO_PATH = CLONE_DIR_PATH.resolve("source-repo");
+    public static final Path SOURCE_REPO_PATH = CLONE_DIR_PATH.resolve(REQOUR_TEST_PREFIX + "source-repo");
     public static final String SOURCE_REPO_URL = "file://" + SOURCE_REPO_PATH;
-    public static final Path EMPTY_DEST_REPO_PATH = CLONE_DIR_PATH.resolve("empty-dest-repo");
+    public static final Path EMPTY_DEST_REPO_PATH = CLONE_DIR_PATH.resolve(REQOUR_TEST_PREFIX + "empty-dest-repo");
     public static final String EMPTY_DEST_REPO_URL = "file://" + EMPTY_DEST_REPO_PATH;
-    public static final Path DEST_REPO_WITH_MAIN_BRANCH_PATH = CLONE_DIR_PATH.resolve("main-branch-dest-repo");
+    public static final Path DEST_REPO_WITH_MAIN_BRANCH_PATH = CLONE_DIR_PATH
+            .resolve(REQOUR_TEST_PREFIX + "main-branch-dest-repo");
     public static final String DEST_REPO_WITH_MAIN_BRANCH_URL = "file://" + DEST_REPO_WITH_MAIN_BRANCH_PATH;
 
     private static Path createCloneDir() {
-        var cloneDirPath = Path.of("/tmp", "clone");
+        var cloneDirPath = Path.of("/tmp");
         try {
             Files.createDirectory(cloneDirPath);
         } catch (FileAlreadyExistsException e) {
