@@ -13,8 +13,8 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>reqour-core</module>
-        <module>reqour-rest</module>
+        <module>core</module>
+        <module>rest</module>
     </modules>
 
     <url>https://github.com/project-ncl/reqour</url>
@@ -137,6 +137,24 @@
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>${quarkus.platform.group-id}</groupId>
+                    <artifactId>quarkus-maven-plugin</artifactId>
+                    <version>${quarkus.platform.version}</version>
+                    <extensions>true</extensions>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>build</goal>
+                                <goal>generate-code</goal>
+                                <goal>generate-code-tests</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <skipOriginalJarRename>true</skipOriginalJarRename>
+                    </configuration>
+                </plugin>
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
