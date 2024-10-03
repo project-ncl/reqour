@@ -1,0 +1,22 @@
+{
+  "ref": "master",
+  "callback": {
+    "method": "POST",
+    "uri": "https://example.com/callback"
+  },
+  "sync": true,
+  "originRepoUrl": "https://github.com/project/repo",
+  "buildConfigParameters": {
+    "ALIGNMENT_PARAMETERS": "-Doverride=user"
+  },
+  "tempBuild": false,
+  "alignmentPreference": "PREFER_PERSISTENT",
+  "taskId": "task-id",
+  "buildType": "GRADLE",
+  "pncDefaultAlignmentParameters": "-Doverride=default",
+  "brewPullActive": false,
+  "internalUrl": {
+    "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+    "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+  }
+}

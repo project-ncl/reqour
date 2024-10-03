@@ -1,0 +1,22 @@
+{
+  "ref": "main",
+  "callback": {
+    "method": "POST",
+    "uri": "https://example.com/callback"
+  },
+  "sync": true,
+  "originRepoUrl": "git@gitlab.com:repo/project.git",
+  "buildConfigParameters": {
+    "ALIGNMENT_PARAMETERS": "-DuserSpecifiedAlignmentParam=foo -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user"
+  },
+  "tempBuild": true,
+  "alignmentPreference": "PREFER_TEMPORARY",
+  "taskId": "task-id",
+  "buildType": "MVN",
+  "pncDefaultAlignmentParameters": "-DdefaultAlignmentParam=foo -DsameKeyInDefaultAndUserParams=default -Doverride=default",
+  "brewPullActive": false,
+  "internalUrl": {
+    "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+    "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+  }
+}

@@ -1,0 +1,13 @@
+reqour-adjuster:
+  adjust:
+    validate: true
+    build-categories:
+      STANDARD:
+        persistent-mode: PERSISTENT
+        temporary-mode: TEMPORARY
+        temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+      SERVICE:
+        persistent-mode: SERVICE
+        temporary-mode: SERVICE_TEMPORARY
+        temporary-prefer-persistent-mode: SERVICE_TEMPORARY_PREFER_PERSISTENT
+        prefix-of-suffix-version: managedsvc

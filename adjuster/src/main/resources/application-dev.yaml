@@ -1,0 +1,24 @@
+reqour-adjuster:
+  input-location: /tmp/input-request.json
+  adjust:
+    validate: false
+    mvn:
+      cli-jar-path: '/foo/pom-manipulation-cli.jar'
+      default-settings-file-path: '/foo/settings.xml'
+      temporary-settings-file-path: '/foo/temporary-settings.xml'
+      alignment-parameters:
+        - '-Dfoo=bar'
+    gradle:
+      gradle-analyzer-plugin-init-file-path: '/foo/analyzer-init.gradle'
+      cli-jar-path: '/foo/gme-cli.jar'
+      default-gradle-path: '/usr/share/gradle-42.42.42'
+      alignment-parameters:
+        - '-Dfoo=bar'
+    scala:
+      sbt-path: '/usr/bin/sbt'
+      alignment-parameters:
+        - '-Dfoo=bar'
+    npm:
+      cli-jar-path: '/foo/project-manipulator-cli.jar'
+      alignment-parameters:
+        - '-Dfoo=bar'
