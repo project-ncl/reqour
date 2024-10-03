@@ -13,6 +13,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>adjuster</module>
         <module>core</module>
         <module>rest</module>
     </modules>
@@ -175,6 +176,7 @@
                             <exclude>**/**.properties</exclude>
                             <exclude>**/application*.yaml</exclude>
                             <exclude>src/test/resources/clone-test/source-repo/*.txt</exclude>
+                            <exclude>src/test/resources/**/*</exclude>
 
                             <!-- Exclude downloaded/generated -->
                             <exclude>**/.cache/**</exclude>
