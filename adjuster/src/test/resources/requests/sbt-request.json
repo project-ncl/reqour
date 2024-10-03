@@ -1,0 +1,22 @@
+{
+  "ref": "v42.42.42",
+  "callback": {
+    "method": "POST",
+    "uri": "https://example.com/callback"
+  },
+  "sync": false,
+  "originRepoUrl": "https://github.com/repo/project",
+  "buildConfigParameters": {
+    "ALIGNMENT_PARAMETERS": "-Doverride=user"
+  },
+  "tempBuild": true,
+  "alignmentPreference": "PREFER_PERSISTENT",
+  "taskId": "task-id",
+  "buildType": "SBT",
+  "pncDefaultAlignmentParameters": "-Doverride=default",
+  "brewPullActive": false,
+  "internalUrl": {
+    "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+    "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+  }
+}
