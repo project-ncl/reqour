@@ -10,6 +10,6 @@ public class UtilsProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("utils");
+        return Set.of(TestTag.UTILS.name());
     }
 }

@@ -1,7 +1,9 @@
 # Ignore code-generated class that will change on every build
 core/src/main/java/org/jboss/pnc/reqour/BuildInformationConstants.java
 
-# Rest (local) runtime configuration
+# Local runtime configs
+adjuster/config/
+core/config/
 rest/config/
 
 #Maven

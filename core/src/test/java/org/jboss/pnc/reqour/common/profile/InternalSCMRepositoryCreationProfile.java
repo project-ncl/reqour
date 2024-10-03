@@ -10,6 +10,6 @@ public class InternalSCMRepositoryCreationProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("internal-scm-creation");
+        return Set.of(TestTag.INTERNAL_SCM_CREATION.name());
     }
 }

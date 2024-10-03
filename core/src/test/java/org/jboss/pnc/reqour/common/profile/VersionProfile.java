@@ -10,6 +10,6 @@ public class VersionProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("version");
+        return Set.of(TestTag.VERSION.name());
     }
 }
