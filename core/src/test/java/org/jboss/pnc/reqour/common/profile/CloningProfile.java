@@ -10,6 +10,6 @@ public class CloningProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("cloning");
+        return Set.of(TestTag.CLONING.name());
     }
 }

@@ -10,6 +10,6 @@ public class ConfigProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("config");
+        return Set.of(TestTag.CONFIG.name());
     }
 }
