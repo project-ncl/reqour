@@ -5,9 +5,11 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.profiles.GradleAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -23,6 +25,7 @@ import static org.jboss.pnc.reqour.adjust.provider.TestUtils.assertSystemPropert
 import static org.jboss.pnc.reqour.adjust.provider.TestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 @QuarkusTest
+@TestProfile(GradleAdjustProfile.class)
 class GradleProviderTest {
 
     @Inject
