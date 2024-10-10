@@ -17,10 +17,18 @@ public class IOUtils {
     }
 
     public static Path createTempDirForCloning() {
+        return createTempDir("clone-", "cloning");
+    }
+
+    public static Path createTempDirForAdjust() {
+        return createTempDir("adjust-", "adjust");
+    }
+
+    private static Path createTempDir(String prefix, String activity) {
         try {
-            return Files.createTempDirectory("clone-");
+            return Files.createTempDirectory(prefix);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot create temporary directory for cloning", e);
+            throw new RuntimeException("Cannot create temporary directory for " + activity, e);
         }
     }
 
