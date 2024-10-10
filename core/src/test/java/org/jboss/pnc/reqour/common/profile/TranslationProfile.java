@@ -10,6 +10,6 @@ public class TranslationProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {
-        return Set.of("translation");
+        return Set.of(TestTag.TRANSLATION.name());
     }
 }
