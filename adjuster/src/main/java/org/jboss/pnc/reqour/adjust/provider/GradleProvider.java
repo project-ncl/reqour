@@ -31,13 +31,9 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements AdjustProvider {
 
     public GradleProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super(adjustConfig, adjustRequest, workdir);
-    }
+        super();
 
-    @Override
-    public void init(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         GradleProviderConfig gradleProviderConfig = adjustConfig.gradleProviderConfig();
-
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest, "t", "target");
 
@@ -56,10 +52,12 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .preferPersistentEnabled(CommonManipulatorConfigUtils.isPreferPersistentEnabled(adjustRequest))
                 .build();
+
+        validateConfigAndPrepareCommand();
     }
 
     @Override
-    public void validateConfig() {
+    void validateConfig() {
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getGradleAnalyzerPluginInitFilePath(),
                 "Gradle init file (specified as '%s') does not exist");
@@ -71,12 +69,10 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getDefaultGradlePath(),
                 "Specified gradle path '%s' is non-existent");
-
-        log.debug("The config was successfully initialized and validated: {}", config);
     }
 
     @Override
-    public List<String> prepareCommand() {
+    List<String> prepareCommand() {
         List<String> computedAlignmentParameters = getComputedAlignmentParameters();
         Path jvmLocation = CommonManipulatorConfigUtils.getJvmLocation(config.getUserSpecifiedAlignmentParameters());
         List<String> targetAndInit = getTargetAndInit();

@@ -32,11 +32,8 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig> implements AdjustProvider {
 
     public NpmProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super(adjustConfig, adjustRequest, workdir);
-    }
+        super();
 
-    @Override
-    public void init(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         NpmProviderConfig npmProviderConfig = adjustConfig.npmProviderConfig();
 
         config = ProjectManipulatorConfig.builder()
@@ -52,18 +49,18 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                 .cliJarPath(npmProviderConfig.cliJarPath())
                 .build();
 
-        log.debug("Successfully initialized, project manipulator config: {}", config);
+        validateConfigAndPrepareCommand();
     }
 
     @Override
-    public void validateConfig() {
+    void validateConfig() {
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getCliJarPath(),
                 "CLI jar file (specified as '%s') does not exist");
     }
 
     @Override
-    public List<String> prepareCommand() {
+    List<String> prepareCommand() {
         Path resultsFile;
         try {
             resultsFile = Files.createFile(Path.of("/tmp").resolve("results" + getGeneratedNumberFromWorkdir()));
