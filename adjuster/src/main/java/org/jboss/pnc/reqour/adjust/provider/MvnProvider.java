@@ -30,11 +30,8 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {
 
     public MvnProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super(adjustConfig, adjustRequest, workdir);
-    }
+        super();
 
-    @Override
-    public void init(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         MvnProviderConfig mvnProviderConfig = adjustConfig.mvnProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
@@ -58,17 +55,12 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .preferPersistentEnabled(CommonManipulatorConfigUtils.isPreferPersistentEnabled(adjustRequest))
                 .build();
-    }
 
-    private Path getPathToSettingsFile(
-            AdjustRequest adjustRequest,
-            Path defaultSettingsFilePath,
-            Path temporarySettingsFilePath) {
-        return (adjustRequest.isTempBuild()) ? temporarySettingsFilePath : defaultSettingsFilePath;
+        validateConfigAndPrepareCommand();
     }
 
     @Override
-    public void validateConfig() {
+    void validateConfig() {
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getCliJarPath(),
                 "CLI jar file (specified at '%s') does not exist");
@@ -76,12 +68,10 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getSettingsFilePath(),
                 "File with default settings (specified at '%s') does not exist");
-
-        log.debug("The config was successfully initialized and validated: {}", config);
     }
 
     @Override
-    public List<String> prepareCommand() {
+    List<String> prepareCommand() {
         List<String> userSpecifiedAlignmentParameters = config.getUserSpecifiedAlignmentParameters();
         if (!config.getSubFolderWithAlignmentFile().equals(config.getWorkdir())) {
             userSpecifiedAlignmentParameters.add("--file=" + config.getSubFolderWithAlignmentFile());
@@ -96,6 +86,13 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters()));
+    }
+
+    private Path getPathToSettingsFile(
+            AdjustRequest adjustRequest,
+            Path defaultSettingsFilePath,
+            Path temporarySettingsFilePath) {
+        return (adjustRequest.isTempBuild()) ? temporarySettingsFilePath : defaultSettingsFilePath;
     }
 
     private List<String> getPmeSettingsParameter() {

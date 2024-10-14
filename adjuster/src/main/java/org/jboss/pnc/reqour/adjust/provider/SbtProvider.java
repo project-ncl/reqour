@@ -29,11 +29,8 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
     public SbtProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super(adjustConfig, adjustRequest, workdir);
-    }
+        super();
 
-    @Override
-    public void init(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         SbtProviderConfig sbtProviderConfig = adjustConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
@@ -50,18 +47,18 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .sbtPath(sbtProviderConfig.sbtPath())
                 .build();
 
-        log.debug("Successfully initialized, SMEG config: {}", config);
+        validateConfigAndPrepareCommand();
     }
 
     @Override
-    public void validateConfig() {
+    void validateConfig() {
         InvalidConfigUtils.validateResourceAtPathExists(
                 config.getSbtPath(),
                 "Scala build tool (specified at '%s') does not exist");
     }
 
     @Override
-    public List<String> prepareCommand() {
+    List<String> prepareCommand() {
 
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(

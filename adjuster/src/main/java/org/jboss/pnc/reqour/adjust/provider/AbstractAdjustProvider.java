@@ -6,12 +6,9 @@ package org.jboss.pnc.reqour.adjust.provider;
 
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
-import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
 
-import java.nio.file.Path;
 import java.util.List;
 
 /**
@@ -23,29 +20,25 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     protected List<String> preparedCommand;
     protected T config;
 
-    public AbstractAdjustProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        init(adjustConfig, adjustRequest, workdir);
-        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
-            log.debug("Validating the config...");
-            validateConfig();
-        }
-        preparedCommand = prepareCommand();
-        log.debug("Generated command: {}", preparedCommand);
+    @Override
+    public AdjustResponse adjust() {
+        // TODO
+        // Will be probably as easy as running the command via process executor, but cannot be 100% sure that it's
+        // actually correct, since don't have the reqour-adjuster containerfile yet.
+        return null;
     }
 
-    abstract void init(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir);
+    void validateConfigAndPrepareCommand() {
+        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+            validateConfig();
+        }
+        log.debug("Config was successfully initialized and validated: {}", config);
+
+        preparedCommand = prepareCommand();
+        log.debug("Prepared command is: {}", preparedCommand);
+    }
 
     abstract void validateConfig();
 
-    /**
-     * Prepare the shell command based on the config.
-     *
-     * @return array representing bash command
-     */
     abstract List<String> prepareCommand();
-
-    @Override
-    public AdjustResponse adjust() {
-        return null;
-    }
 }
