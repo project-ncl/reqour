@@ -8,3 +8,6 @@ mp:
       exclude:
         classes:
           - org.jboss.pnc.reqour.rest.endpoints.BaseUrlEndpoint
+
+reqour-rest:
+  pod-definition-file: 'src/main/resources/pod.yaml'
