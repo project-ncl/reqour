@@ -46,6 +46,10 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-openshift-client</artifactId>
+        </dependency>
 
         <!-- Regular dependencies -->
         <dependency>
@@ -63,6 +67,11 @@
             <artifactId>quarkus-wiremock</artifactId>
             <version>${wiremock.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.12.0</version>
         </dependency>
 
         <!-- Test dependencies -->

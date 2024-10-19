@@ -1,0 +1,127 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: reqour-adjuster
+  annotations:
+    environment: devel
+    kafka-client-secret: kafka-client-truststore
+    reqour-secret: reqour-devel
+  labels:
+    app.openshift.io/name: reqour-adjuster
+    app.openshift.io/instance: reqour-adjuster-devel
+    paas.redhat.com/appcode: PNC-001
+spec:
+  initContainers:
+    - image: "quay.io/rh-newcastle-devel/pnc-vault-secrets:latest"
+      name: get-vault-secrets
+      command:
+        - /bin/bash
+      args:
+        - -c
+        - cd /mnt/secrets;
+          pnc-vault-secrets dump $(REQOUR_SECRET_NAME)-$(APP_ENV);
+          pnc-vault-secrets dump $(KAFKA_CLIENT_SECRET_NAME)-$(APP_ENV)
+      env:
+        - name: VAULT_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-address
+        - name: VAULT_APP_ROLE_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-role-id
+        - name: VAULT_APP_SECRET_ID
+          valueFrom:
+            secretKeyRef:
+              name: vault-connection-info
+              key: vault-app-secret-id
+        - name: REQOUR_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['reqour-secret']
+        - name: KAFKA_CLIENT_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['kafka-client-secret']
+        - name: APP_ENV
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['environment']
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
+      resources:
+        limits:
+          cpu: '0.2'
+          memory: 200Mi
+        requests:
+          cpu: '0.2'
+          memory: 200Mi
+  containers:
+    - image: "quay.io/rh-newcastle-devel/reqour-adjuster-main:latest"
+      name: reqour-adjuster
+      env:
+        - name: KAFKA_CLIENT_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['kafka-client-secret']
+        - name: REQOUR_SECRET_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['reqour-secret']
+        - name: APP_ENV
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['environment']
+        - name: BUILD_TYPE
+          value: "%{buildType}"
+        - name: ADJUST_REQUEST
+          value: "%{adjustRequest}"
+        # TODO: [DEVEL-ONLY] allows for local debugging of app with forwarded target port 5005
+        - name: JAVA_TOOL_OPTIONS
+          value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+      volumeMounts:
+        - name: secrets-workdir
+          mountPath: /mnt/secrets
+          readOnly: true
+        - name: reqour-adjuster-configs
+          mountPath: /mnt/configurations
+          readOnly: true
+        - name: reqour-adjuster-manipulators
+          mountPath: /mnt/manipulators
+      livenessProbe:
+        exec:
+          command:
+            - '/bin/bash'
+            - '-c'
+            - 'exit'
+            - '0'
+      readinessProbe:
+        exec:
+          command:
+            - '/bin/bash'
+            - '-c'
+            - 'exit'
+            - '0'
+      resources:
+        limits:
+          cpu: 500m
+          memory: 700Mi
+        requests:
+          cpu: 500m
+          memory: 700Mi
+  volumes:
+    - name: secrets-workdir
+      emptyDir:
+        medium: Memory
+    - name: reqour-adjuster-configs
+      configMap:
+        defaultMode: 420
+        name: reqour-adjuster-configmap
+    - name: reqour-adjuster-manipulators
+      persistentVolumeClaim:
+        claimName: reqour-adjuster-manipulators-pvc
+  restartPolicy: Always
+  
