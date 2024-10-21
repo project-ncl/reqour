@@ -1,5 +1,4 @@
 reqour-adjuster:
-  input-location: /tmp/input-request.json
   adjust:
     validate: false
     mvn:
