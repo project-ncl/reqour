@@ -1,5 +1,4 @@
 reqour-adjuster:
-  input-location: /opt/app/input-request.json
   adjust:
     validate: true
     mvn:
@@ -25,6 +24,32 @@ reqour-adjuster:
       cli-jar-path: '${test.location.providers.npm}/project-manipulator-cli.jar'
       alignment-parameters:
         - '-Doverride=config'
+
+BUILD_TYPE: MVN
+ADJUST_REQUEST: |
+  {
+    "ref": "main",
+    "callback": {
+      "method": "POST",
+      "uri": "https://example.com/callback"
+    },
+    "sync": true,
+    "originRepoUrl": "git@gitlab.com:repo/project.git",
+    "buildConfigParameters": {
+      "ALIGNMENT_PARAMETERS": "-Doverride=user",
+      "BUILD_CATEGORY": "SERVICE"
+    },
+    "tempBuild": false,
+    "alignmentPreference": "PREFER_PERSISTENT",
+    "taskId": "task-id",
+    "buildType": "MVN",
+    "pncDefaultAlignmentParameters": "-Doverride=default",
+    "brewPullActive": true,
+    "internalUrl": {
+      "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+      "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+    }
+  }
 
 test:
   location:
