@@ -63,6 +63,7 @@ public class App implements Callable<AdjustResponse> {
     @Produces
     @ApplicationScoped
     AdjustProvider pickAdjustProvider() {
+        log.debug("Adjust request I've parsed is: {}", adjustRequest);
         return switch (buildType) {
             case MVN -> new MvnProvider(adjustConfig, adjustRequest, workdir);
             case NPM -> new NpmProvider(adjustConfig, adjustRequest, workdir);
