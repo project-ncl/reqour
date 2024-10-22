@@ -51,13 +51,17 @@ class GradleProviderTest {
         GradleProvider provider = new GradleProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("gradle-request.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 
         assertThat(command).containsSequence(
                 List.of(
-                        "java",
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
                         config.adjust().gradleProviderConfig().cliJarPath().toString(),
                         "--target",
@@ -82,13 +86,17 @@ class GradleProviderTest {
         GradleProvider provider = new GradleProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("gradle-request-2.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 
         assertThat(command).containsSequence(
                 List.of(
-                        "java",
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
                         config.adjust().gradleProviderConfig().cliJarPath().toString(),
                         "--target",

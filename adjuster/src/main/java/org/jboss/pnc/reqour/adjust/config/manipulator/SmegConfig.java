@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.SuperBuilder;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 
 import java.nio.file.Path;
 
@@ -21,7 +22,18 @@ import java.nio.file.Path;
 @ToString(callSuper = true)
 public class SmegConfig extends CommonManipulatorConfig {
 
+    /**
+     * Path of the SBT
+     */
     Path sbtPath;
 
+    /**
+     * Boolean flag whether manipulator should pull from the brew
+     */
     boolean brewPullEnabled;
+
+    /**
+     * Overrides for the root GAV provided by user
+     */
+    ExecutionRootOverrides executionRootOverrides;
 }

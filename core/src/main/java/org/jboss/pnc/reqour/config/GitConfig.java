@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.config;
 import io.smallrye.config.WithName;
 import org.jboss.pnc.reqour.config.validation.WithExistingActive;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,10 @@ public interface GitConfig {
     Set<String> acceptableSchemes();
 
     Optional<String> privateGithubUser();
+
+    Optional<List<String>> internalUrls();
+
+    Committer user();
 
     @WithExistingActive
     interface GitBackendsConfig {

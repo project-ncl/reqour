@@ -7,7 +7,7 @@
   "sync": true,
   "originRepoUrl": "git@gitlab.com:repo/project.git",
   "buildConfigParameters": {
-    "ALIGNMENT_PARAMETERS": "-DuserSpecifiedAlignmentParam=foo -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user"
+    "ALIGNMENT_PARAMETERS": "-DuserSpecifiedAlignmentParam=foo -DRepour_Java=17 -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user"
   },
   "tempBuild": true,
   "alignmentPreference": "PREFER_TEMPORARY",

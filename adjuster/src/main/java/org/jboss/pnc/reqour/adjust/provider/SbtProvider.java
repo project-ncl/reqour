@@ -4,16 +4,22 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.SbtProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.SmegConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
+import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +34,14 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
-    public SbtProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super();
+    public SbtProvider(
+            AdjustConfig adjustConfig,
+            AdjustRequest adjustRequest,
+            Path workdir,
+            ObjectMapper objectMapper,
+            ProcessExecutor processExecutor,
+            AdjustmentPusher adjustmentPusher) {
+        super(objectMapper, processExecutor, adjustmentPusher);
 
         SbtProviderConfig sbtProviderConfig = adjustConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -43,8 +55,9 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(sbtProviderConfig.alignmentParameters())
-                .workdir(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolder()))
+                .workdir(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults()))
                 .sbtPath(sbtProviderConfig.sbtPath())
+                .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
         validateConfigAndPrepareCommand();
@@ -52,7 +65,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
     @Override
     void validateConfig() {
-        InvalidConfigUtils.validateResourceAtPathExists(
+        IOUtils.validateResourceAtPathExists(
                 config.getSbtPath(),
                 "Scala build tool (specified at '%s') does not exist");
     }
@@ -68,6 +81,17 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters(),
                         List.of("manipulate", "writeReport")));
+    }
+
+    @Override
+    ManipulatorResult obtainManipulatorResult() {
+        try {
+            ManipulatorResult manipulatorResult = objectMapper
+                    .readValue(config.getWorkdir().resolve("manipulations.json").toFile(), ManipulatorResult.class);
+            return manipulatorResult;
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to deserialize SMEG result", e);
+        }
     }
 
     private List<String> getComputedAlignmentParameters() {

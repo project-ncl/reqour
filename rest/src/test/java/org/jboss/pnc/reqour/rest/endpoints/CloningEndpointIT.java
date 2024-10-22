@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -84,13 +83,7 @@ class CloningEndpointIT {
 
     private void setUpEmptyDestRepo() throws IOException {
         Files.createDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH);
-        gitCommands.init(
-                true,
-                ProcessContext.builder()
-                        .workingDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH)
-                        .extraEnvVariables(Collections.emptyMap())
-                        .stdoutConsumer(System.out::println)
-                        .stderrConsumer(System.err::println));
+        gitCommands.init(true, ProcessContext.defaultBuilderWithWorkdir(CloneTestUtils.EMPTY_DEST_REPO_PATH));
     }
 
     @Test

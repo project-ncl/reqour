@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.common.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,5 +43,28 @@ public class IOUtils {
 
     public static List<String> splitByNewLine(String text) {
         return text.lines().toList();
+    }
+
+    public static void validateResourceAtPathExists(Path path, String errorMessageTemplate) {
+        if (Files.notExists(path)) {
+            throw new ResourceNotFoundException(String.format(errorMessageTemplate, path));
+        }
+    }
+
+    public static String readFileContent(Path file) {
+        try {
+            return Files.readString(file);
+        } catch (IOException e) {
+            throw new RuntimeException(String.format("Unable to read content of file '%s'", file), e);
+        }
+    }
+
+    public static char transformUppercaseCharToLowercase(char c) {
+        if (!('A' <= c && c <= 'Z')) {
+            throw new IllegalArgumentException("Expected uppercase letter, got: '" + c + "'");
+        }
+
+        int diff = c - 'A';
+        return (char) ('a' + diff);
     }
 }

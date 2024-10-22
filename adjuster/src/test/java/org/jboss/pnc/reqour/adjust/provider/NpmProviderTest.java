@@ -9,7 +9,6 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.profiles.MvnAdjustProfile;
 import org.jboss.pnc.reqour.adjust.profiles.NpmAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -52,12 +51,18 @@ class NpmProviderTest {
         NpmProvider provider = new NpmProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("npm-request.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 
-        assertThat(command)
-                .containsSequence(List.of("java", "-jar", config.adjust().npmProviderConfig().cliJarPath().toString()));
+        assertThat(command).containsSequence(
+                List.of(
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
+                        "-jar",
+                        config.adjust().npmProviderConfig().cliJarPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(

@@ -9,14 +9,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+/**
+ * Utility class for work with adjustment system properties.
+ */
 public class AdjustmentSystemPropertiesUtils {
 
     public static String createAdjustmentSystemProperty(AdjustmentSystemPropertyName name, Object value) {
         return String.format("%s=%s", name.getCliRepresentation(), value);
     }
 
+    public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams) {
+        return streams.filter(p -> p.startsWith(name)).findFirst().map(p -> p.split("=")[1]);
+    }
+
     public static Optional<String> getSystemPropertyValue(AdjustmentSystemPropertyName name, Stream<String> streams) {
-        return streams.filter(p -> p.startsWith(name.getCliRepresentation())).findFirst().map(p -> p.split("=")[1]);
+        return getSystemPropertyValue(name.getCliRepresentation(), streams);
     }
 
     public static Stream<String> joinSystemPropertiesListsIntoStream(List<List<String>> lists) {

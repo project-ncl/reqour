@@ -21,3 +21,6 @@ reqour:
       - git+ssh
       - ssh
     private-github-user: test-bot
+    user:
+      email: test-user@example.com
+      name: ReqourTest

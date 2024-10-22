@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.SuperBuilder;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 
 import java.nio.file.Path;
 
@@ -21,13 +22,34 @@ import java.nio.file.Path;
 @ToString(callSuper = true)
 public class GmeConfig extends CommonManipulatorConfig {
 
+    /**
+     * Path of the {@code analyzer-init.gradle} file
+     */
     Path gradleAnalyzerPluginInitFilePath;
 
+    /**
+     * Location of the GME jar
+     */
     Path cliJarPath;
 
+    /**
+     * Default gradle path used in case a user does not provide the gradle wrapper for the build.
+     */
     Path defaultGradlePath;
 
+    /**
+     * Boolean flag whether manipulator should pull from the brew
+     */
     boolean isBrewPullEnabled;
 
+    /**
+     * Boolean flag whether manipulator should use {@link org.jboss.pnc.api.enums.AlignmentPreference#PREFER_PERSISTENT}
+     * preference
+     */
     boolean preferPersistentEnabled;
+
+    /**
+     * Overrides for the root GAV provided by user
+     */
+    ExecutionRootOverrides executionRootOverrides;
 }

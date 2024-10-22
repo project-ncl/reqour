@@ -4,28 +4,38 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.picocli.runtime.annotations.TopCommand;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.api.enums.BuildType;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
-import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
+import org.jboss.pnc.api.reqour.dto.ReqourCallback;
+import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.model.AdjustmentResult;
+import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.adjust.provider.AdjustProvider;
 import org.jboss.pnc.reqour.adjust.provider.GradleProvider;
 import org.jboss.pnc.reqour.adjust.provider.MvnProvider;
 import org.jboss.pnc.reqour.adjust.provider.NpmProvider;
 import org.jboss.pnc.reqour.adjust.provider.SbtProvider;
+import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
+import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
+import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
+import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.ConfigUtils;
 import picocli.CommandLine;
 
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 
 /**
  * The entrypoint of the reqour adjuster.
@@ -37,37 +47,115 @@ import java.util.concurrent.Callable;
         mixinStandardHelpOptions = true,
         versionProvider = VersionProvider.class)
 @Slf4j
-public class App implements Callable<AdjustResponse> {
+public class App implements Runnable {
 
     @Inject
     ReqourAdjusterConfig config;
 
-    @ConfigProperty(name = "BUILD_TYPE")
-    BuildType buildType;
+    @Inject
+    ConfigUtils configUtils;
 
-    @ConfigProperty(name = "ADJUST_REQUEST")
+    @ConfigProperty(name = "reqour-adjuster.adjust.request")
     AdjustRequest adjustRequest;
 
-    private static AdjustConfig adjustConfig;
-    private static final Path workdir = IOUtils.createTempDirForAdjust();
+    @Inject
+    ObjectMapper objectMapper;
+
+    @Inject
+    ProcessExecutor processExecutor;
+
+    @Inject
+    RepositoryFetcher repositoryFetcher;
+
+    @Inject
+    CommonManipulatorResultExtractor adjustResultExtractor;
+
+    @Inject
+    RootGavExtractor rootGavExtractor;
+
+    @Inject
+    AdjustmentPusher adjustmentPusher;
+
+    private final Path workdir = IOUtils.createTempDirForAdjust();
 
     @Override
-    public AdjustResponse call() throws Exception {
-        adjustConfig = config.adjust();
-        AdjustProvider adjustProvider = pickAdjustProvider();
-        AdjustResponse response = adjustProvider.adjust();
-        FileUtils.deleteDirectory(workdir.toFile());
-        return response;
+    public void run() {
+        AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
+
+        try {
+            CloningResult cloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
+            AdjustProvider adjustProvider = pickAdjustProvider();
+            AdjustmentResult adjustmentResult = adjustProvider.adjust(adjustRequest);
+            adjustResponseBuilder.tag(adjustmentResult.adjustmentPushResult().tag())
+                    .downstreamCommit(adjustmentResult.adjustmentPushResult().commit())
+                    .internalUrl(adjustRequest.getInternalUrl())
+                    .upstreamCommit(cloningResult.upstreamCommit())
+                    .isRefRevisionInternal(cloningResult.isRefRevisionInternal())
+                    .manipulatorResult(adjustmentResult.manipulatorResult())
+                    .callback(
+                            ReqourCallback.builder()
+                                    .id(adjustRequest.getTaskId())
+                                    .status(ResultStatus.SUCCESS)
+                                    .build());
+        } catch (AdjusterException e) {
+            log.warn("Alignment exception occurred, setting the status to FAILED");
+            log.warn("Exception was: " + e);
+            adjustResponseBuilder.callback(
+                    ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());
+        } catch (Throwable e) {
+            log.warn("Unexpected exception occurred, setting the status to SYSTEM_ERROR");
+            log.warn("Exception was: " + e);
+            adjustResponseBuilder.callback(
+                    ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.SYSTEM_ERROR).build());
+        } finally {
+            // FileUtils.deleteDirectory(workdir.toFile());
+        }
+
+        AdjustResponse adjustResponse = adjustResponseBuilder.build();
+        sendCallback(adjustRequest.getCallback(), adjustResponse);
+    }
+
+    private void sendCallback(Request callback, AdjustResponse adjustResponse) {
+        log.debug("Gonna send the callback. Payload is: {}", adjustResponse);
+        PNCHttpClient pncHttpClient = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
+        pncHttpClient.sendRequest(callback, adjustResponse);
     }
 
     @Produces
     @ApplicationScoped
     AdjustProvider pickAdjustProvider() {
-        return switch (buildType) {
-            case MVN -> new MvnProvider(adjustConfig, adjustRequest, workdir);
-            case NPM -> new NpmProvider(adjustConfig, adjustRequest, workdir);
-            case GRADLE -> new GradleProvider(adjustConfig, adjustRequest, workdir);
-            case SBT -> new SbtProvider(adjustConfig, adjustRequest, workdir);
+        return switch (adjustRequest.getBuildType()) {
+            case MVN -> new MvnProvider(
+                    config.adjust(),
+                    adjustRequest,
+                    workdir,
+                    objectMapper,
+                    processExecutor,
+                    adjustResultExtractor,
+                    rootGavExtractor,
+                    adjustmentPusher);
+            case GRADLE -> new GradleProvider(
+                    config.adjust(),
+                    adjustRequest,
+                    workdir,
+                    objectMapper,
+                    processExecutor,
+                    adjustResultExtractor,
+                    adjustmentPusher);
+            case NPM -> new NpmProvider(
+                    config.adjust(),
+                    adjustRequest,
+                    workdir,
+                    objectMapper,
+                    processExecutor,
+                    adjustmentPusher);
+            case SBT -> new SbtProvider(
+                    config.adjust(),
+                    adjustRequest,
+                    workdir,
+                    objectMapper,
+                    processExecutor,
+                    adjustmentPusher);
         };
     }
 }

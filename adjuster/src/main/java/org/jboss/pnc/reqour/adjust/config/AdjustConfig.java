@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.adjust.config;
 
 import io.smallrye.config.WithName;
+import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 
 import java.util.Map;
 
@@ -14,6 +15,8 @@ import java.util.Map;
 public interface AdjustConfig {
 
     boolean validate();
+
+    AdjustRequest request();
 
     @WithName("mvn")
     MvnProviderConfig mvnProviderConfig();

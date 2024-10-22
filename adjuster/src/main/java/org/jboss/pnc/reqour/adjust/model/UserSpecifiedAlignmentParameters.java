@@ -22,20 +22,27 @@ public class UserSpecifiedAlignmentParameters {
 
     private static final Path DEFAULT_SUB_FOLDER = Path.of("");
 
+    /**
+     * Sub-folder where is the manipulation results file located.
+     */
+    Path subFolderWithResults;
+
+    /**
+     * All the remaining user-specified alignment parameters.
+     */
     List<String> alignmentParameters;
-    Path subFolder;
 
     public static UserSpecifiedAlignmentParameters defaultResult() {
         return UserSpecifiedAlignmentParameters.builder()
+                .subFolderWithResults(DEFAULT_SUB_FOLDER)
                 .alignmentParameters(Collections.emptyList())
-                .subFolder(DEFAULT_SUB_FOLDER)
                 .build();
     }
 
     public static UserSpecifiedAlignmentParameters withoutSubFolder(String alignmentParameters) {
         return UserSpecifiedAlignmentParameters.builder()
+                .subFolderWithResults(DEFAULT_SUB_FOLDER)
                 .alignmentParameters(Arrays.asList(alignmentParameters.split(" ")))
-                .subFolder(DEFAULT_SUB_FOLDER)
                 .build();
     }
 }

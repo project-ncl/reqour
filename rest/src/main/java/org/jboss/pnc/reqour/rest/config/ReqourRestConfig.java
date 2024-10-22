@@ -5,11 +5,33 @@
 package org.jboss.pnc.reqour.rest.config;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithDefault;
 
 import java.nio.file.Path;
+import java.time.Duration;
 
 @ConfigMapping(prefix = "reqour-rest")
 public interface ReqourRestConfig {
 
     Path podDefinitionFile();
+
+    String appEnvironment();
+
+    String reqourSecretKey();
+
+    RetryConfig openshiftRetryConfig();
+
+    interface RetryConfig {
+        @WithDefault("PT1s")
+        Duration backoffInitialDelay();
+
+        @WithDefault("PT60s")
+        Duration backoffMaxDelay();
+
+        @WithDefault("-1")
+        int maxRetries();
+
+        @WithDefault("PT20m")
+        Duration maxDuration();
+    }
 }

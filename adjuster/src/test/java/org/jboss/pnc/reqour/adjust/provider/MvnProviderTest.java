@@ -9,7 +9,6 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.profiles.GradleAdjustProfile;
 import org.jboss.pnc.reqour.adjust.profiles.MvnAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -52,13 +51,18 @@ public class MvnProviderTest {
         MvnProvider provider = new MvnProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("mvn-request.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 
         assertThat(command).containsSequence(
                 List.of(
-                        "java",
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
                         config.adjust().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
@@ -93,13 +97,18 @@ public class MvnProviderTest {
         MvnProvider provider = new MvnProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("mvn-request-2.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 
         assertThat(command).containsSequence(
                 List.of(
-                        "java",
+                        "/usr/lib/jvm/java-17-openjdk/bin/java",
                         "-jar",
                         config.adjust().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
@@ -107,6 +116,7 @@ public class MvnProviderTest {
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
+                        MapEntry.entry("Repour_Java", 1),
                         MapEntry.entry("override", 3),
                         MapEntry.entry("defaultAlignmentParam", 1),
                         MapEntry.entry("sameKeyInDefaultAndUserParams", 2),
@@ -116,6 +126,7 @@ public class MvnProviderTest {
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 2),
                         MapEntry.entry("restBrewPullActive", 1)));
+        assertSystemPropertyHasValuesSortedByPriority(command, "Repour_Java", List.of("17"));
         assertSystemPropertyHasValuesSortedByPriority(command, "defaultAlignmentParam", List.of("foo"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
