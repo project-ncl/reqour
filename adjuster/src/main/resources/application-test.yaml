@@ -1,0 +1,64 @@
+reqour-adjuster:
+  adjust:
+    validate: true
+    mvn:
+      cli-jar-path: '${test.location.providers.mvn}/pom-manipulation-cli.jar'
+      default-settings-file-path: '${test.location.providers.mvn}/settings.xml'
+      temporary-settings-file-path: '${test.location.providers.mvn}/temporary-settings.xml'
+      alignment-parameters:
+        - '-DconfigAlignmentParam=foo'
+        - '-DrestURL=https://da.com/rest/v-1'
+        - '-DversionIncrementalSuffix=redhat'
+        - '-Doverride=config'
+    gradle:
+      gradle-analyzer-plugin-init-file-path: '${test.location.providers.gradle}/analyzer-init.gradle'
+      cli-jar-path: '${test.location.providers.gradle}/gme-cli.jar'
+      default-gradle-path: '${test.location.providers.gradle}/gradle-5.5.1'
+      alignment-parameters:
+        - '-Doverride=config'
+    scala:
+      sbt-path: '${test.location.providers.sbt}/sbt'
+      alignment-parameters:
+        - '-Doverride=config'
+    npm:
+      cli-jar-path: '${test.location.providers.npm}/project-manipulator-cli.jar'
+      alignment-parameters:
+        - '-Doverride=config'
+
+BUILD_TYPE: MVN
+ADJUST_REQUEST: |
+  {
+    "ref": "main",
+    "callback": {
+      "method": "POST",
+      "uri": "https://example.com/callback"
+    },
+    "sync": true,
+    "originRepoUrl": "git@gitlab.com:repo/project.git",
+    "buildConfigParameters": {
+      "ALIGNMENT_PARAMETERS": "-Doverride=user",
+      "BUILD_CATEGORY": "SERVICE"
+    },
+    "tempBuild": false,
+    "alignmentPreference": "PREFER_PERSISTENT",
+    "taskId": "task-id",
+    "buildType": "MVN",
+    "pncDefaultAlignmentParameters": "-Doverride=default",
+    "brewPullActive": true,
+    "internalUrl": {
+      "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+      "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+    }
+  }
+
+test:
+  location:
+    test-resources: 'src/test/resources'
+    requests:
+      dir: '${test.location.test-resources}/requests'
+    providers:
+      dir: '${test.location.test-resources}/providers'
+      mvn: '${test.location.providers.dir}/mvn'
+      gradle: '${test.location.providers.dir}/gradle'
+      sbt: '${test.location.providers.dir}/sbt'
+      npm: '${test.location.providers.dir}/npm'
