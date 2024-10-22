@@ -4,8 +4,10 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
@@ -13,6 +15,8 @@ import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorCo
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.model.ProcessContext;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -28,6 +32,9 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
  */
 @Slf4j
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {
+
+    @Inject
+    ProcessExecutor processExecutor;
 
     public MvnProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         super();
@@ -86,6 +93,20 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters()));
+    }
+
+    @Override
+    String callAdjust() {
+        return processExecutor.stdout(ProcessContext
+                .builder()
+                .command(preparedCommand)
+                .workingDirectory(config.getWorkdir())
+        );
+    }
+
+    @Override
+    AdjustResponse parseAdjustResponse(String rawAdjustOutput) {
+        return null;
     }
 
     private Path getPathToSettingsFile(

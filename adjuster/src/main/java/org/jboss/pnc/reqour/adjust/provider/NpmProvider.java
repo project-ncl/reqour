@@ -4,14 +4,18 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.model.ProcessContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,6 +34,9 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
  */
 @Slf4j
 public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig> implements AdjustProvider {
+
+    @Inject
+    ProcessExecutor processExecutor;
 
     public NpmProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
         super();
@@ -76,6 +83,20 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters(),
                         List.of("--result=" + resultsFile)));
+    }
+
+    @Override
+    String callAdjust() {
+        return processExecutor.stdout(ProcessContext
+                .builder()
+                .command(preparedCommand)
+                .workingDirectory(config.getWorkdir())
+        );
+    }
+
+    @Override
+    AdjustResponse parseAdjustResponse(String rawAdjustOutput) {
+        return null;
     }
 
     private List<String> getComputedAlignmentParameters() {

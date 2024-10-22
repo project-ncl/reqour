@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutorImpl;
 
 import java.util.List;
 
@@ -22,10 +24,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
 
     @Override
     public AdjustResponse adjust() {
-        // TODO
-        // Will be probably as easy as running the command via process executor, but cannot be 100% sure that it's
-        // actually correct, since don't have the reqour-adjuster containerfile yet.
-        return null;
+        return parseAdjustResponse(callAdjust());
     }
 
     void validateConfigAndPrepareCommand() {
@@ -41,4 +40,8 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     abstract void validateConfig();
 
     abstract List<String> prepareCommand();
+
+    abstract String callAdjust();
+
+    abstract AdjustResponse parseAdjustResponse(String rawAdjustOutput);
 }
