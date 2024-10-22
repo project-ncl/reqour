@@ -1,6 +1,7 @@
 reqour-adjuster:
   adjust:
     validate: true
+    request: ${ADJUST_REQUEST}
     build-categories:
       STANDARD:
         persistent-mode: PERSISTENT

@@ -14,7 +14,7 @@ public interface CloneService {
 
     /**
      * Clone the external repository (either completely or partially - depending on the
-     * {@link RepositoryCloneRequest#ref} to the internal repository.
+     * {@link RepositoryCloneRequest#getRef()}) to the internal repository.
      *
      * @param cloneRequest cloning request describing the way it should be cloned
      */

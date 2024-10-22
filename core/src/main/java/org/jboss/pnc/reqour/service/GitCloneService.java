@@ -21,7 +21,6 @@ import org.jboss.pnc.reqour.service.api.CloneService;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Collections;
 
 /**
  * Clone service using git.
@@ -70,11 +69,7 @@ public class GitCloneService implements CloneService {
     private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing everything");
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.builder()
-                .workingDirectory(cloneDir)
-                .extraEnvVariables(Collections.emptyMap())
-                .stdoutConsumer(System.out::println)
-                .stderrConsumer(System.err::println);
+        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
 
         String targetRemote = "target";
 
@@ -89,11 +84,7 @@ public class GitCloneService implements CloneService {
     private void cloneRefOnly(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.builder()
-                .workingDirectory(cloneDir)
-                .extraEnvVariables(Collections.emptyMap())
-                .stdoutConsumer(System.out::println)
-                .stderrConsumer(System.err::println);
+        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
 
         String targetRemote = "target";
 
@@ -107,11 +98,7 @@ public class GitCloneService implements CloneService {
         log.info("Checking if internal repository with url '{}' is new", url);
 
         Path cloneDir = IOUtils.createTempDirForCloning();
-        ProcessContext.Builder processContextBuilder = ProcessContext.builder()
-                .workingDirectory(cloneDir)
-                .extraEnvVariables(Collections.emptyMap())
-                .stdoutConsumer(System.out::println)
-                .stderrConsumer(System.err::println);
+        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
 
         gitCommands.clone(url, processContextBuilder);
 
@@ -130,7 +117,7 @@ public class GitCloneService implements CloneService {
         return isInternalRepoNew;
     }
 
-    private void pushClonedChanges(String ref, String remote, ProcessContext.Builder processContextBuilder) {
+    public void pushClonedChanges(String ref, String remote, ProcessContext.Builder processContextBuilder) {
         if (gitCommands.isReferenceBranch(ref, processContextBuilder)) {
             gitCommands.push(remote, ref, false, processContextBuilder);
         } else if (gitCommands.isReferenceTag(ref, processContextBuilder)) {
@@ -145,7 +132,7 @@ public class GitCloneService implements CloneService {
 
     private void addTagAndPush(String ref, String remote, ProcessContext.Builder processContextBuilder) {
         log.info("adding tag and pushing");
-        String newTag = "reqour-" + ref;
+        String newTag = "reqour-sync-" + ref;
 
         if (gitCommands.isReferenceTag(newTag, processContextBuilder)) {
             throw new GitException(
@@ -155,7 +142,7 @@ public class GitCloneService implements CloneService {
                             remote));
         }
 
-        gitCommands.addTag(newTag, processContextBuilder);
+        gitCommands.createLightweightTag(newTag, processContextBuilder);
         gitCommands.push(remote, newTag, false, processContextBuilder);
     }
 }

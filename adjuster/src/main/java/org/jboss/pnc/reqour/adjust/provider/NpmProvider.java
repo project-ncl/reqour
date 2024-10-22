@@ -4,23 +4,30 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.jboss.pnc.api.dto.Gav;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.projectmanipulator.npm.NpmResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
@@ -31,21 +38,36 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 @Slf4j
 public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig> implements AdjustProvider {
 
-    public NpmProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super();
+    public NpmProvider(
+            AdjustConfig adjustConfig,
+            AdjustRequest adjustRequest,
+            Path workdir,
+            ObjectMapper objectMapper,
+            ProcessExecutor processExecutor,
+            AdjustmentPusher adjustmentPusher) {
+        super(objectMapper, processExecutor, adjustmentPusher);
 
         NpmProviderConfig npmProviderConfig = adjustConfig.npmProviderConfig();
+        Path resultsFile = workdir.resolve("results");
+        if (Files.notExists(resultsFile)) {
+            try {
+                Files.createFile(resultsFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create the file for manipulator results", e);
+            }
+        }
 
         config = ProjectManipulatorConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(
-                        CommonManipulatorConfigUtils.getExtraAdjustmentParameters(adjustRequest))
+                        CommonManipulatorConfigUtils.getUserSpecifiedAlignmentParameters(adjustRequest))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(npmProviderConfig.alignmentParameters())
                 .workdir(workdir)
+                .resultsFilePath(resultsFile)
                 .cliJarPath(npmProviderConfig.cliJarPath())
                 .build();
 
@@ -54,28 +76,43 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
     @Override
     void validateConfig() {
-        InvalidConfigUtils.validateResourceAtPathExists(
-                config.getCliJarPath(),
-                "CLI jar file (specified as '%s') does not exist");
+        IOUtils.validateResourceAtPathExists(config.getCliJarPath(), "CLI jar file (specified as '%s') does not exist");
     }
 
     @Override
     List<String> prepareCommand() {
-        Path resultsFile;
-        try {
-            resultsFile = Files.createFile(Path.of("/tmp").resolve("results" + getGeneratedNumberFromWorkdir()));
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot create results file", e);
-        }
-
+        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
-                        List.of("java", "-jar", config.getCliJarPath().toString()),
+                        List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters(),
-                        List.of("--result=" + resultsFile)));
+                        List.of("--result=" + config.getResultsFilePath())));
+    }
+
+    @Override
+    ManipulatorResult obtainManipulatorResult() {
+        return ManipulatorResult.builder()
+                .versioningState(obtainVersioningState())
+                .removedRepositories(Collections.emptyList()) // no support of repos removal by project manipulator
+                .build();
+    }
+
+    private VersioningState obtainVersioningState() {
+        try {
+            NpmResult manipulatorResult = objectMapper.readValue(config.getResultsFilePath().toFile(), NpmResult.class);
+            return VersioningState.builder()
+                    .executionRootModified(
+                            Gav.builder()
+                                    .artifactId(manipulatorResult.getName())
+                                    .version(manipulatorResult.getVersion())
+                                    .build())
+                    .build();
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot deserialize the manipulator result", e);
+        }
     }
 
     private List<String> getComputedAlignmentParameters() {
@@ -99,15 +136,5 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         }
 
         return alignmentParameters;
-    }
-
-    private String getGeneratedNumberFromWorkdir() {
-        Pattern p = Pattern.compile("^.*?(\\d+).*$");
-        Matcher m = p.matcher(config.getWorkdir().toString());
-
-        if (m.matches()) {
-            return "-" + m.group(1);
-        }
-        return "";
     }
 }

@@ -118,9 +118,9 @@ public class GitlabApiService {
         }
     }
 
-    public List<ProtectedTag> getProtectedTags(Long projectId) {
+    public List<ProtectedTag> getProtectedTags(Object projectIdOrPath) {
         try {
-            return delegate.getTagsApi().getProtectedTags(projectId, 1, 100);
+            return delegate.getTagsApi().getProtectedTags(projectIdOrPath, 1, 100);
         } catch (GitLabApiException e) {
             throw new GitlabApiRuntimeException(e);
         }
@@ -145,7 +145,7 @@ public class GitlabApiService {
         }
     }
 
-    public boolean doesTagProtectionAlreadyExist(Long projectId) {
+    public boolean doesTagProtectionAlreadyExist(Object projectIdOrPath) {
         GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
         Optional<String> protectedTagsPattern = tagProtectionConfig.protectedTagsPattern();
         List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns()
@@ -155,7 +155,7 @@ public class GitlabApiService {
             protectedTagsAcceptedPatterns.add(protectedTagsPattern.get());
         }
 
-        return getProtectedTags(projectId).stream()
+        return getProtectedTags(projectIdOrPath).stream()
                 .map(ProtectedTag::getName)
                 .anyMatch(protectedTagsAcceptedPatterns::contains);
     }

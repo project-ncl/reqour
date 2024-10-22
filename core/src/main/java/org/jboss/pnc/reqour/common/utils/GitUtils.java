@@ -18,6 +18,16 @@ import java.util.List;
  */
 public class GitUtils {
 
+    public static final String DEFAULT_REMOTE_NAME = "origin";
+
+    public static List<String> add(String filename) {
+        return List.of("git", "add", filename);
+    }
+
+    public static List<String> addAll() {
+        return List.of("git", "add", "--all");
+    }
+
     public static List<String> branch() {
         return List.of("git", "branch", "-a");
     }
@@ -41,6 +51,18 @@ public class GitUtils {
         return List.of("git", "clone", "--mirror", "--", url, ".");
     }
 
+    public static List<String> commit(String commitMessage) {
+        return List.of("git", "commit", "-m", commitMessage);
+    }
+
+    public static List<String> configureUserEmail(String email) {
+        return List.of("git", "config", "--local", "user.email", email);
+    }
+
+    public static List<String> configureUserName(String username) {
+        return List.of("git", "config", "--local", "user.name", username);
+    }
+
     public static List<String> disableBareRepository() {
         return List.of("git", "config", "--bool", "core.bare", "false");
     }
@@ -60,6 +82,21 @@ public class GitUtils {
 
     public static List<String> isReferenceTag(String ref) {
         return List.of("git", "show-ref", "-q", "--tags", ref);
+    }
+
+    public static List<String> doesShaExists(String ref) {
+        return List.of("git", "cat-file", "-e", ref);
+    }
+
+    public static List<String> fetchRef(String remote, String ref, boolean fetchShallowly, boolean dryRun) {
+        List<String> command = new ArrayList<>(List.of("git", "fetch", remote, ref));
+        if (fetchShallowly) {
+            command.add("--depth=1");
+        }
+        if (dryRun) {
+            command.add("--dry-run");
+        }
+        return command;
     }
 
     public static List<String> push(String remote, String ref, boolean force) {
@@ -106,6 +143,30 @@ public class GitUtils {
         return List.of("git", "remote", "add", remote, url, "--");
     }
 
+    public static List<String> renameRemote(String oldRemote, String newRemote) {
+        return List.of("git", "remote", "rename", oldRemote, newRemote);
+    }
+
+    public static List<String> revParse(String ref) {
+        return List.of("git", "rev-parse", ref);
+    }
+
+    public static List<String> remove(String filename, boolean cached) {
+        List<String> command = new ArrayList<>(List.of("git", "rm", filename));
+        if (cached) {
+            command.add("--cached");
+        }
+        return command;
+    }
+
+    public static List<String> submoduleUpdateInit() {
+        return List.of("git", "submodule", "update", "--init");
+    }
+
+    public static List<String> createBranch(String branchName) {
+        return List.of("git", "switch", "-c", branchName);
+    }
+
     public static List<String> listTags() {
         return List.of("git", "tag");
     }
@@ -114,11 +175,31 @@ public class GitUtils {
         return List.of("git", "tag", "--merged", ref);
     }
 
-    public static List<String> addTag(String name) {
+    public static List<String> createAnnotatedTag(String name, String message) {
+        return List.of("git", "tag", "-a", "-m", message, name);
+    }
+
+    public static List<String> createLightweightTag(String name) {
         return List.of("git", "tag", name);
+    }
+
+    public static List<String> fetchTags(String remote, boolean shallow) {
+        List<String> command = new ArrayList<>(List.of("git", "fetch", remote, "--tags", "-q"));
+        if (shallow) {
+            command.add("--depth=1");
+        }
+        return command;
+    }
+
+    public static List<String> getCommitByTag(String tagName) {
+        return List.of("git", "rev-list", "-n", "1", tagName);
     }
 
     public static List<String> version() {
         return List.of("git", "--version");
+    }
+
+    public static List<String> writeTree() {
+        return List.of("git", "write-tree");
     }
 }

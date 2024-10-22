@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.common.http.PNCHttpClientConfig;
 
+import java.util.Optional;
 import java.util.Set;
 
 @ApplicationScoped
@@ -33,5 +34,13 @@ public class ConfigUtils {
 
     public String getActiveGitBackendName() {
         return config.gitConfigs().gitBackendsConfig().activeGitBackend();
+    }
+
+    public Optional<String> getPrivateGithubUser() {
+        return config.gitConfigs().privateGithubUser();
+    }
+
+    public Committer getCommitter() {
+        return config.gitConfigs().user();
     }
 }

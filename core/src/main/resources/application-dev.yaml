@@ -21,3 +21,8 @@ reqour:
       - git
       - git+ssh
       - ssh
+    internal-urls:
+      - gitlab.com
+    user:
+      email: dev-user@example.com
+      name: ReqourDev

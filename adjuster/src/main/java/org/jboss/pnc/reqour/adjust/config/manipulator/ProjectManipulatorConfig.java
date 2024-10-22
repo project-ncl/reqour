@@ -21,5 +21,13 @@ import java.nio.file.Path;
 @ToString(callSuper = true)
 public class ProjectManipulatorConfig extends CommonManipulatorConfig {
 
+    /**
+     * Location of the Project manipulator jar
+     */
     Path cliJarPath;
+
+    /**
+     * The path to manipulation results file
+     */
+    Path resultsFilePath;
 }

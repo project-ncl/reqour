@@ -4,16 +4,28 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.commonjava.maven.ext.common.json.GAV;
+import org.commonjava.maven.ext.common.json.PME;
+import org.jboss.pnc.api.dto.Gav;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
+import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
+import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
+import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +41,21 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 @Slf4j
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {
 
-    public MvnProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super();
+    private final CommonManipulatorResultExtractor adjustResultExtractor;
+    private final RootGavExtractor rootGavExtractor;
+
+    public MvnProvider(
+            AdjustConfig adjustConfig,
+            AdjustRequest adjustRequest,
+            Path workdir,
+            ObjectMapper objectMapper,
+            ProcessExecutor processExecutor,
+            CommonManipulatorResultExtractor adjustResultExtractor,
+            RootGavExtractor rootGavExtractor,
+            AdjustmentPusher adjustmentPusher) {
+        super(objectMapper, processExecutor, adjustmentPusher);
+        this.adjustResultExtractor = adjustResultExtractor;
+        this.rootGavExtractor = rootGavExtractor;
 
         MvnProviderConfig mvnProviderConfig = adjustConfig.mvnProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -45,7 +70,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
                 .workdir(workdir)
-                .subFolderWithAlignmentFile(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolder()))
+                .subFolderWithAlignmentResultFile(
+                        workdir.resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults()))
                 .cliJarPath(mvnProviderConfig.cliJarPath())
                 .settingsFilePath(
                         getPathToSettingsFile(
@@ -54,6 +80,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                                 mvnProviderConfig.temporarySettingsFilePath()))
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .preferPersistentEnabled(CommonManipulatorConfigUtils.isPreferPersistentEnabled(adjustRequest))
+                .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
         validateConfigAndPrepareCommand();
@@ -61,11 +88,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     @Override
     void validateConfig() {
-        InvalidConfigUtils.validateResourceAtPathExists(
-                config.getCliJarPath(),
-                "CLI jar file (specified at '%s') does not exist");
+        IOUtils.validateResourceAtPathExists(config.getCliJarPath(), "CLI jar file (specified at '%s') does not exist");
 
-        InvalidConfigUtils.validateResourceAtPathExists(
+        IOUtils.validateResourceAtPathExists(
                 config.getSettingsFilePath(),
                 "File with default settings (specified at '%s') does not exist");
     }
@@ -73,19 +98,77 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     @Override
     List<String> prepareCommand() {
         List<String> userSpecifiedAlignmentParameters = config.getUserSpecifiedAlignmentParameters();
-        if (!config.getSubFolderWithAlignmentFile().equals(config.getWorkdir())) {
-            userSpecifiedAlignmentParameters.add("--file=" + config.getSubFolderWithAlignmentFile());
+        if (!config.getSubFolderWithAlignmentResultFile().equals(config.getWorkdir())) {
+            userSpecifiedAlignmentParameters.add("--file=" + config.getSubFolderWithAlignmentResultFile());
         }
-        Path jvmLocation = CommonManipulatorConfigUtils.getJvmLocation(userSpecifiedAlignmentParameters);
-
+        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(userSpecifiedAlignmentParameters);
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
-                        List.of(jvmLocation.toString(), "-jar", config.getCliJarPath().toString()),
+                        List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
                         getPmeSettingsParameter(),
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         getComputedAlignmentParameters()));
+    }
+
+    @Override
+    ManipulatorResult obtainManipulatorResult() {
+        if (pmeIsDisabled()) {
+            log.warn("PME is disabled via extra parameters");
+            createAdjustResultsFile();
+        }
+
+        return ManipulatorResult.builder()
+                .versioningState(
+                        adjustResultExtractor.obtainVersioningState(
+                                getPathToAlignmentResultFile(),
+                                config.getExecutionRootOverrides()))
+                .removedRepositories(
+                        adjustResultExtractor.obtainRemovedRepositories(
+                                config.getSubFolderWithAlignmentResultFile(),
+                                AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoStream(
+                                        List.of(
+                                                config.getPncDefaultAlignmentParameters(),
+                                                config.getUserSpecifiedAlignmentParameters(),
+                                                config.getAlignmentConfigParameters()))))
+                .build();
+    }
+
+    private boolean pmeIsDisabled() {
+        String pmeDisabled = AdjustmentSystemPropertiesUtils
+                .getSystemPropertyValue("-Dmanipulation.disable", config.getUserSpecifiedAlignmentParameters().stream())
+                .orElse("false");
+        return "true".equals(pmeDisabled);
+    }
+
+    private void createAdjustResultsFile() {
+        Path adjustResultsFilePath = getDefaultAlignmentResultFile();
+        try {
+            Files.createFile(adjustResultsFilePath);
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Unable to create file with default alignment results (since PME was disabled)",
+                    e);
+        }
+        try {
+            objectMapper.writeValue(adjustResultsFilePath.toFile(), getResultWhenPmeIsDisabled());
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    String.format("Unable to write extracted GAV into the file '%s'", adjustResultsFilePath),
+                    e);
+        }
+    }
+
+    private PME getResultWhenPmeIsDisabled() {
+        PME manipulatorResult = new PME();
+        GAV gav = new GAV();
+        Gav executionRootGav = rootGavExtractor.extractGav(config.getWorkdir());
+        gav.setGroupId(executionRootGav.getGroupId());
+        gav.setArtifactId(executionRootGav.getArtifactId());
+        gav.setVersion(executionRootGav.getVersion());
+        manipulatorResult.setGav(gav);
+        return manipulatorResult;
     }
 
     private Path getPathToSettingsFile(
@@ -125,5 +208,23 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
 
         return alignmentParameters;
+    }
+
+    private Path getPathToAlignmentResultFile() {
+        return CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
+                getDefaultAlignmentResultFile(),
+                config.getSubFolderWithAlignmentResultFile().resolve("target/manipulation.json"));
+    }
+
+    private Path getDefaultAlignmentResultFile() {
+        Path subFolderTargetDirectory = config.getSubFolderWithAlignmentResultFile().resolve("target");
+        if (Files.notExists(subFolderTargetDirectory)) {
+            try {
+                Files.createDirectory(subFolderTargetDirectory);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create directory for default alignment results file", e);
+            }
+        }
+        return subFolderTargetDirectory.resolve("alignmentReport.json");
     }
 }

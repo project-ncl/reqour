@@ -4,15 +4,20 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
+import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
+import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.InvalidConfigUtils;
+import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,8 +35,18 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 @Slf4j
 public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements AdjustProvider {
 
-    public GradleProvider(AdjustConfig adjustConfig, AdjustRequest adjustRequest, Path workdir) {
-        super();
+    private final CommonManipulatorResultExtractor adjustResultExtractor;
+
+    public GradleProvider(
+            AdjustConfig adjustConfig,
+            AdjustRequest adjustRequest,
+            Path workdir,
+            ObjectMapper objectMapper,
+            ProcessExecutor processExecutor,
+            CommonManipulatorResultExtractor adjustResultExtractor,
+            AdjustmentPusher adjustmentPusher) {
+        super(objectMapper, processExecutor, adjustmentPusher);
+        this.adjustResultExtractor = adjustResultExtractor;
 
         GradleProviderConfig gradleProviderConfig = adjustConfig.gradleProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -45,12 +60,13 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(gradleProviderConfig.alignmentParameters())
-                .workdir(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolder()))
+                .workdir(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults()))
                 .gradleAnalyzerPluginInitFilePath(gradleProviderConfig.gradleAnalyzerPluginInitFilePath())
                 .cliJarPath(gradleProviderConfig.cliJarPath())
                 .defaultGradlePath(gradleProviderConfig.defaultGradlePath())
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .preferPersistentEnabled(CommonManipulatorConfigUtils.isPreferPersistentEnabled(adjustRequest))
+                .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
         validateConfigAndPrepareCommand();
@@ -58,15 +74,12 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     void validateConfig() {
-        InvalidConfigUtils.validateResourceAtPathExists(
+        IOUtils.validateResourceAtPathExists(
                 config.getGradleAnalyzerPluginInitFilePath(),
                 "Gradle init file (specified as '%s') does not exist");
-        InvalidConfigUtils.validateResourceAtPathExists(
-                config.getCliJarPath(),
-                "CLI jar file (specified as '%s') does not exist");
-        InvalidConfigUtils
-                .validateResourceAtPathExists(config.getWorkdir(), "Directory '%s' set as working does not exist");
-        InvalidConfigUtils.validateResourceAtPathExists(
+        IOUtils.validateResourceAtPathExists(config.getCliJarPath(), "CLI jar file (specified as '%s') does not exist");
+        IOUtils.validateResourceAtPathExists(config.getWorkdir(), "Directory '%s' set as working does not exist");
+        IOUtils.validateResourceAtPathExists(
                 config.getDefaultGradlePath(),
                 "Specified gradle path '%s' is non-existent");
     }
@@ -74,17 +87,31 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
     @Override
     List<String> prepareCommand() {
         List<String> computedAlignmentParameters = getComputedAlignmentParameters();
-        Path jvmLocation = CommonManipulatorConfigUtils.getJvmLocation(config.getUserSpecifiedAlignmentParameters());
+        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
         List<String> targetAndInit = getTargetAndInit();
 
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
-                        List.of(jvmLocation.toString(), "-jar", config.getCliJarPath().toString()),
+                        List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
                         targetAndInit,
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         computedAlignmentParameters));
+    }
+
+    @Override
+    ManipulatorResult obtainManipulatorResult() {
+        return ManipulatorResult.builder()
+                .versioningState(
+                        adjustResultExtractor.obtainVersioningState(
+                                getPathToAlignmentResultFile(),
+                                config.getExecutionRootOverrides()))
+                .removedRepositories(
+                        adjustResultExtractor.obtainRemovedRepositories(
+                                config.getWorkdir(),
+                                config.getPncDefaultAlignmentParameters().stream()))
+                .build();
     }
 
     private List<String> getComputedAlignmentParameters() {
@@ -122,14 +149,20 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         "--init-script",
                         config.getGradleAnalyzerPluginInitFilePath().toString()));
 
-        if (!gradleWrapperSpecified()) {
+        if (!gradleWrapperExists()) {
             targetAndInit.addAll(List.of("-l", config.getDefaultGradlePath().toString()));
         }
 
         return targetAndInit;
     }
 
-    private boolean gradleWrapperSpecified() {
+    private boolean gradleWrapperExists() {
         return Files.exists(config.getWorkdir().resolve("gradlew"));
+    }
+
+    private Path getPathToAlignmentResultFile() {
+        return CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
+                config.getWorkdir().resolve("build/alignmentReport.json"),
+                config.getWorkdir().resolve("manipulations.json"));
     }
 }

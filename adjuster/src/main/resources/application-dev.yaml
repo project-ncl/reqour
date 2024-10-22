@@ -1,6 +1,20 @@
 reqour-adjuster:
   adjust:
     validate: false
+    request: |
+      {
+        "callback": {
+          "method": "POST",
+          "uri": "https://example.com/callback"
+        },
+        "originRepoUrl": "git@gitlab.com:repo/project.git",
+        "taskId": "task-id",
+        "buildType": "MVN",
+        "internalUrl": {
+          "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+          "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+        }
+      }
     mvn:
       cli-jar-path: '/foo/pom-manipulation-cli.jar'
       default-settings-file-path: '/foo/settings.xml'

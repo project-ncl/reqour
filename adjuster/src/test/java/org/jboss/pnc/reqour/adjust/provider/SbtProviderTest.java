@@ -9,7 +9,6 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.profiles.NpmAdjustProfile;
 import org.jboss.pnc.reqour.adjust.profiles.SbtAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -52,7 +51,10 @@ class SbtProviderTest {
         SbtProvider provider = new SbtProvider(
                 config.adjust(),
                 testUtils.getAdjustRequest(Path.of("sbt-request.json")),
-                workdir);
+                workdir,
+                null,
+                null,
+                null);
 
         List<String> command = provider.preparedCommand;
 

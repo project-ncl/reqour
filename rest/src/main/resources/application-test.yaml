@@ -4,5 +4,10 @@ reqour:
       available:
         gitlab:
           url: http://${reqour.git.git-backends.available.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+
+reqour-rest:
+  app-environment: test
+  reqour-secret-key: test-secret
+
 wiremock:
   base-url: http://localhost:${quarkus.wiremock.devservices.port}

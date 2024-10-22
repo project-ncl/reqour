@@ -32,7 +32,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
 
     @Override
     public int execute(ProcessContext processContext) {
-        if (!Files.exists(processContext.getWorkingDirectory())) {
+        if (Files.notExists(processContext.getWorkingDirectory())) {
             throw new IllegalArgumentException(
                     "Directory at the path " + processContext.getWorkingDirectory() + " does not exist");
         }

@@ -1,6 +1,20 @@
 reqour-adjuster:
   adjust:
     validate: true
+    request: >
+      {
+        "callback": {
+          "method": "POST",
+          "uri": "https://example.com/callback"
+        },
+        "originRepoUrl": "git@gitlab.com:repo/project.git",
+        "taskId": "task123",
+        "buildType": "MVN",
+        "internalUrl": {
+          "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
+          "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+        }
+      }
     mvn:
       cli-jar-path: '${test.location.providers.mvn}/pom-manipulation-cli.jar'
       default-settings-file-path: '${test.location.providers.mvn}/settings.xml'
@@ -24,32 +38,6 @@ reqour-adjuster:
       cli-jar-path: '${test.location.providers.npm}/project-manipulator-cli.jar'
       alignment-parameters:
         - '-Doverride=config'
-
-BUILD_TYPE: MVN
-ADJUST_REQUEST: |
-  {
-    "ref": "main",
-    "callback": {
-      "method": "POST",
-      "uri": "https://example.com/callback"
-    },
-    "sync": true,
-    "originRepoUrl": "git@gitlab.com:repo/project.git",
-    "buildConfigParameters": {
-      "ALIGNMENT_PARAMETERS": "-Doverride=user",
-      "BUILD_CATEGORY": "SERVICE"
-    },
-    "tempBuild": false,
-    "alignmentPreference": "PREFER_PERSISTENT",
-    "taskId": "task-id",
-    "buildType": "MVN",
-    "pncDefaultAlignmentParameters": "-Doverride=default",
-    "brewPullActive": true,
-    "internalUrl": {
-      "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
-      "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
-    }
-  }
 
 test:
   location:

@@ -1,14 +1,12 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: reqour-adjuster
+  name: %{podName}
   annotations:
-    environment: devel
+    environment: %{appEnvironment}
     kafka-client-secret: kafka-client-truststore
-    reqour-secret: reqour-devel
+    reqour-secret: %{reqourSecretKey}
   labels:
-    app.openshift.io/name: reqour-adjuster
-    app.openshift.io/instance: reqour-adjuster-devel
     paas.redhat.com/appcode: PNC-001
 spec:
   initContainers:
@@ -76,12 +74,10 @@ spec:
             fieldRef:
               fieldPath: metadata.annotations['environment']
         - name: BUILD_TYPE
-          value: "%{buildType}"
+          value: '%{buildType}'
         - name: ADJUST_REQUEST
-          value: "%{adjustRequest}"
-        # TODO: [DEVEL-ONLY] allows for local debugging of app with forwarded target port 5005
-        - name: JAVA_TOOL_OPTIONS
-          value: "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+          value: >
+            %{adjustRequest}
       volumeMounts:
         - name: secrets-workdir
           mountPath: /mnt/secrets
@@ -124,4 +120,3 @@ spec:
       persistentVolumeClaim:
         claimName: reqour-adjuster-manipulators-pvc
   restartPolicy: Always
-  

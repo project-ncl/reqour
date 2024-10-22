@@ -78,22 +78,12 @@ class GitCloneServiceTest {
 
     void setUpEmptyDestRepo() throws IOException {
         Files.createDirectory(EMPTY_DEST_REPO_PATH);
-        gitCommands.init(
-                true,
-                ProcessContext.builder()
-                        .workingDirectory(EMPTY_DEST_REPO_PATH)
-                        .extraEnvVariables(Collections.emptyMap())
-                        .stdoutConsumer(System.out::println)
-                        .stderrConsumer(System.err::println));
+        gitCommands.init(true, ProcessContext.defaultBuilderWithWorkdir(EMPTY_DEST_REPO_PATH));
     }
 
     void setUpDestRepoWithOnlyMainBranch() throws IOException {
         Files.createDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH);
-        ProcessContext.Builder pcb = ProcessContext.builder()
-                .workingDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH)
-                .extraEnvVariables(Collections.emptyMap())
-                .stdoutConsumer(System.out::println)
-                .stderrConsumer(System.err::println);
+        ProcessContext.Builder pcb = ProcessContext.defaultBuilderWithWorkdir(DEST_REPO_WITH_MAIN_BRANCH_PATH);
 
         processExecutor.execute(
                 pcb.command(
@@ -213,7 +203,7 @@ class GitCloneServiceTest {
                                 .extraEnvVariables(Collections.emptyMap())
                                 .stderrConsumer(IOUtils::ignoreOutput))
                 .strip();
-        Set<String> expectedTags = Set.of("reqour-" + afterInitialAtMainSha);
+        Set<String> expectedTags = Set.of("reqour-sync-" + afterInitialAtMainSha);
 
         service.clone(
                 RepositoryCloneRequest.builder()

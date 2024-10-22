@@ -51,6 +51,29 @@
             <artifactId>commons-cli</artifactId>
             <version>1.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.commonjava.maven.ext</groupId>
+            <artifactId>pom-manipulation-common</artifactId>
+            <version>4.19</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun</groupId>
+                    <artifactId>tools</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.project-manipulator</groupId>
+            <artifactId>project-manipulator-npm</artifactId>
+            <version>1.1.1</version>
+            <exclusions>
+                <!-- Exclude every dependency, since we care only about NpmResult.class -->
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>

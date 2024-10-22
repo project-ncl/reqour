@@ -14,4 +14,5 @@ reqour:
           read-only-template: https://${reqour.git.git-backends.available.gitlab.hostname}/${reqour.git.git-backends.available.gitlab.workspace}/%s.git
           read-write-template: git@${reqour.git.git-backends.available.gitlab.hostname}:${reqour.git.git-backends.available.gitlab.workspace}/%s.git
           token: ${GITLAB_TOKEN}
+    internal-urls: []  # overridden in runtime config
     private-github-user: ${PRIVATE_GITHUB_USER}
