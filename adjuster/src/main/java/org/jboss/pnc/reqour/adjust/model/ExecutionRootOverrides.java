@@ -14,7 +14,7 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
  */
 public record ExecutionRootOverrides(String groupId, String artifactId) {
 
-    public static ExecutionRootOverrides getEmpty() {
+    public static ExecutionRootOverrides noOverrides() {
         return new ExecutionRootOverrides(null, null);
     }
 

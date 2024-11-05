@@ -1,0 +1,124 @@
+/**
+ * Copyright 2024 Red Hat, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package org.jboss.pnc.reqour.adjust.service;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import jakarta.inject.Inject;
+import org.jboss.pnc.api.dto.Gav;
+import org.jboss.pnc.api.reqour.dto.RemovedRepository;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
+import org.jboss.pnc.reqour.adjust.profiles.AdjustProfile;
+import org.junit.jupiter.api.Test;
+
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@QuarkusTest
+@TestProfile(AdjustProfile.class)
+class CommonManipulatorResultExtractorTest {
+
+    @Inject
+    CommonManipulatorResultExtractor manipulatorResultExtractor;
+
+    private final Path MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR = Path
+            .of("src/test/resources/service/manipulator-result-extractor");
+    private final Path ALIGNMENT_RESULT_FILE = MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR.resolve("alignmentResult.json");
+
+    @Test
+    void obtainVersioningState_noOverridesProvided_parsesResultWithoutOverrides() {
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootModified(
+                        Gav.builder().groupId("com.example").artifactId("foo").version("1.0.42.rh-7").build())
+                .build();
+
+        VersioningState actualVersioningState = manipulatorResultExtractor
+                .obtainVersioningState(ALIGNMENT_RESULT_FILE, ExecutionRootOverrides.noOverrides());
+
+        assertThat(actualVersioningState).isEqualTo(expectedVersioningState);
+    }
+
+    @Test
+    void obtainVersioningState_overridesProvided_parsesResultAndUsesOverrides() {
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootModified(
+                        Gav.builder().groupId("org.foo.bar").artifactId("baz").version("1.0.42.rh-7").build())
+                .build();
+        ExecutionRootOverrides rootOverrides = new ExecutionRootOverrides("org.foo.bar", "baz");
+
+        VersioningState actualVersioningState = manipulatorResultExtractor
+                .obtainVersioningState(ALIGNMENT_RESULT_FILE, rootOverrides);
+
+        assertThat(actualVersioningState).isEqualTo(expectedVersioningState);
+    }
+
+    @Test
+    void obtainRemovedRepositories_repoRemovalBackupFileNotSpecified_returnsEmptyArray() {
+        Stream<String> manipulatorParameters = Stream.empty();
+        List<RemovedRepository> expectedRemovedRepositories = Collections.emptyList();
+
+        List<RemovedRepository> actualRemovedRepositories = manipulatorResultExtractor
+                .obtainRemovedRepositories(MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR, manipulatorParameters);
+
+        assertThat(actualRemovedRepositories).isEqualTo(expectedRemovedRepositories);
+    }
+
+    @Test
+    void obtainRemovedRepositories_repoRemovalBackupFileNotExists_returnsEmptyArray() {
+        Stream<String> manipulatorParameters = Stream.of(
+                String.format(
+                        "%s=%s",
+                        CommonManipulatorResultExtractor.REMOVED_REPOSITORIES_KEY,
+                        MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR.resolve("non-existent-repo-backup.xml")));
+        List<RemovedRepository> expectedRemovedRepositories = Collections.emptyList();
+
+        List<RemovedRepository> actualRemovedRepositories = manipulatorResultExtractor
+                .obtainRemovedRepositories(MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR, manipulatorParameters);
+
+        assertThat(actualRemovedRepositories).isEqualTo(expectedRemovedRepositories);
+    }
+
+    @Test
+    void obtainRemovedRepositories_repoRemovalBackupPresent_parsesTheFileAndReturnsResult() {
+        Stream<String> manipulatorParameters = Stream.of(
+                String.format("%s=%s", CommonManipulatorResultExtractor.REMOVED_REPOSITORIES_KEY, "repos-backup.xml"));
+        List<RemovedRepository> expectedRemovedRepositories = List.of(
+                RemovedRepository.builder()
+                        .releases(true)
+                        .snapshots(true)
+                        .id("MavenRepo-0")
+                        .name("MavenRepo-0")
+                        .url(URI.create("https://repo.maven.apache.org/maven2/"))
+                        .build(),
+                RemovedRepository.builder()
+                        .releases(false)
+                        .snapshots(true)
+                        .id("MavenRepo-1")
+                        .name("MavenRepo-1")
+                        .url(URI.create("https://repo.maven.apache.org/maven2/"))
+                        .build());
+
+        List<RemovedRepository> actualRemovedRepositories = manipulatorResultExtractor
+                .obtainRemovedRepositories(MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR, manipulatorParameters);
+
+        assertThat(actualRemovedRepositories).isEqualTo(expectedRemovedRepositories);
+    }
+
+    @Test
+    void getAlignmentResultsFilePath_severalFilesProvided_returnsFirstOneExisting() {
+        Path actualAlignmentResultFilePath = CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
+                MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR.resolve("non-existent-file.json"),
+                ALIGNMENT_RESULT_FILE,
+                MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR.resolve("existing.json"));
+
+        assertThat(actualAlignmentResultFilePath).isEqualTo(ALIGNMENT_RESULT_FILE);
+    }
+}

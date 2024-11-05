@@ -65,9 +65,9 @@ public class RepositoryFetcher {
 
         checkTagProtection(adjustRequest);
 
-        boolean isRefInternal = false;
         String gitUsername = configUtils.getActiveGitBackend().username();
 
+        final boolean isRefInternal;
         if (syncEnabled(adjustRequest)) {
             isRefInternal = syncExternalRepo(adjustRequest, workdir, gitUsername);
         } else {
@@ -75,6 +75,7 @@ public class RepositoryFetcher {
                     URLUtils.addUsernameToUrl(adjustRequest.getInternalUrl().getReadwriteUrl(), gitUsername),
                     adjustRequest.getRef(),
                     workdir);
+            isRefInternal = true;
         }
 
         gitCommands.configureCommitter(workdir);

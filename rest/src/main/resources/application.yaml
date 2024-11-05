@@ -12,4 +12,4 @@ mp:
 reqour-rest:
   pod-definition-file: 'src/main/resources/pod.yaml'
   app-environment: ${APP_ENV}
-  reqour-secret-key: ${REQOUR_SECRET}
+  reqour-secret-key: ${REQOUR_SECRET_NAME}

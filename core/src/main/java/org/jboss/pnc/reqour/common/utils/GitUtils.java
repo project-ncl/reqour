@@ -76,6 +76,10 @@ public class GitUtils {
         return command;
     }
 
+    public static List<String> doesBranchExistAtRemote(String remote, String branch) {
+        return List.of("git", "show-branch", String.format("remotes/%s/%s", remote, branch));
+    }
+
     public static List<String> isReferenceBranch(String ref) {
         return List.of("git", "show-ref", "-q", "--heads", ref);
     }
