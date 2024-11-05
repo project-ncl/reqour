@@ -103,10 +103,10 @@ public class GitCloneService implements CloneService {
         gitCommands.clone(url, processContextBuilder);
 
         final boolean isInternalRepoNew;
-        if (IOUtils.countLines(gitCommands.listTags(processContextBuilder)) > 0) {
-            isInternalRepoNew = false;
+        if (gitCommands.listTags(processContextBuilder).isEmpty()) {
+            isInternalRepoNew = gitCommands.listBranches(processContextBuilder).isEmpty();
         } else {
-            isInternalRepoNew = IOUtils.countLines(gitCommands.listBranches(processContextBuilder)) == 0;
+            isInternalRepoNew = false;
         }
 
         try {
@@ -123,7 +123,7 @@ public class GitCloneService implements CloneService {
         } else if (gitCommands.isReferenceTag(ref, processContextBuilder)) {
             gitCommands.pushTags(
                     remote,
-                    IOUtils.splitByNewLine(gitCommands.listTagsReachableFromRef(ref, processContextBuilder)),
+                    gitCommands.listTagsReachableFromRef(ref, processContextBuilder),
                     processContextBuilder);
         } else {
             addTagAndPush(ref, remote, processContextBuilder);

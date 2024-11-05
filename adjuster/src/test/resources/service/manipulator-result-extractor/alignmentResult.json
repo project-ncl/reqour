@@ -1,0 +1,10 @@
+{
+  "executionRoot" : {
+    "groupId" : "com.example",
+    "artifactId" : "foo",
+    "version" : "1.0.42.rh-7",
+    "originalGAV" : "com.github.example:foo:1.0.42-SNAPSHOT"
+  },
+  "modules" : [
+  ]
+}

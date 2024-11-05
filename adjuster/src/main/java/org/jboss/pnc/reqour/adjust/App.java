@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.ResultStatus;
@@ -35,6 +36,7 @@ import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import picocli.CommandLine;
 
+import java.io.IOException;
 import java.nio.file.Path;
 
 /**
@@ -108,7 +110,11 @@ public class App implements Runnable {
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.SYSTEM_ERROR).build());
         } finally {
-            // FileUtils.deleteDirectory(workdir.toFile());
+            try {
+                FileUtils.deleteDirectory(workdir.toFile());
+            } catch (IOException e) {
+                log.error(String.format("Unable to delete directory '%s' after adjustments", workdir));
+            }
         }
 
         AdjustResponse adjustResponse = adjustResponseBuilder.build();
@@ -121,8 +127,6 @@ public class App implements Runnable {
         pncHttpClient.sendRequest(callback, adjustResponse);
     }
 
-    @Produces
-    @ApplicationScoped
     AdjustProvider pickAdjustProvider() {
         return switch (adjustRequest.getBuildType()) {
             case MVN -> new MvnProvider(

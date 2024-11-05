@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.FetchablePRRef;
@@ -42,6 +43,24 @@ public class GitCommands {
         this.processExecutor = processExecutor;
     }
 
+    private void executeGitCommand(
+            List<String> command,
+            ProcessContext.Builder processContextBuilder,
+            String errorMessage) {
+        int exitCode = processExecutor.execute(processContextBuilder.command(command).build());
+        if (exitCode != 0) {
+            throw new GitException(errorMessage);
+        }
+    }
+
+    private String getSingleValueResultOfGitCommand(ProcessContext.Builder processContextBuilder) {
+        return processExecutor.stdout(processContextBuilder).stripTrailing();
+    }
+
+    private List<String> getLinesStdoutOfGitCommand(ProcessContext.Builder processContextBuilder) {
+        return IOUtils.splitByNewLine(processExecutor.stdout(processContextBuilder));
+    }
+
     public void add(String filename, ProcessContext.Builder processContextBuilder) {
         executeGitCommand(
                 GitUtils.add(filename),
@@ -63,8 +82,8 @@ public class GitCommands {
                 String.format("Unable to create new branch '%s'", branchName));
     }
 
-    public String listBranches(ProcessContext.Builder processContextBuilder) {
-        return processExecutor.stdout(processContextBuilder.command(GitUtils.branch()));
+    public List<String> listBranches(ProcessContext.Builder processContextBuilder) {
+        return getLinesStdoutOfGitCommand(processContextBuilder.command(GitUtils.branch()));
     }
 
     public void checkout(String ref, boolean force, ProcessContext.Builder processContextBuilder) {
@@ -131,6 +150,15 @@ public class GitCommands {
                 GitUtils.init(bare),
                 processContextBuilder,
                 "Unable to make this directory as Git repository");
+    }
+
+    public boolean doesBranchExistAtRemote(String branch, ProcessContext.Builder processContextBuilder) {
+        return doesBranchExistAtRemote(DEFAULT_REMOTE_NAME, branch, processContextBuilder);
+    }
+
+    public boolean doesBranchExistAtRemote(String remote, String branch, ProcessContext.Builder processContextBuilder) {
+        return processExecutor
+                .execute(processContextBuilder.command(GitUtils.doesBranchExistAtRemote(remote, branch)).build()) == 0;
     }
 
     public boolean isReferenceBranch(String ref, ProcessContext.Builder processContextBuilder) {
@@ -265,8 +293,8 @@ public class GitCommands {
     }
 
     public String revParse(Path workdir, String ref) {
-        return processExecutor
-                .stdout(ProcessContext.defaultBuilderWithWorkdir(workdir).command(GitUtils.revParse(ref)));
+        return getSingleValueResultOfGitCommand(
+                ProcessContext.defaultBuilderWithWorkdir(workdir).command(GitUtils.revParse(ref)));
     }
 
     public void remove(String filename, boolean cached, ProcessContext.Builder processContextBuilder) {
@@ -294,16 +322,16 @@ public class GitCommands {
                 String.format("Cannot add tag '%s'", name));
     }
 
-    public String listTags(ProcessContext.Builder processContextBuilder) {
-        return processExecutor.stdout(processContextBuilder.command(GitUtils.listTags()));
+    public List<String> listTags(ProcessContext.Builder processContextBuilder) {
+        return getLinesStdoutOfGitCommand(processContextBuilder.command(GitUtils.listTags()));
     }
 
-    public String listTagsReachableFromRef(String ref, ProcessContext.Builder processContextBuilder) {
-        return processExecutor.stdout(processContextBuilder.command(GitUtils.listTagsReachableFromReference(ref)));
+    public List<String> listTagsReachableFromRef(String ref, ProcessContext.Builder processContextBuilder) {
+        return getLinesStdoutOfGitCommand(processContextBuilder.command(GitUtils.listTagsReachableFromReference(ref)));
     }
 
     public String getCommitByTag(String tagName, ProcessContext.Builder processContextBuilder) {
-        return processExecutor.stdout(processContextBuilder.command(GitUtils.getCommitByTag(tagName))).stripTrailing();
+        return getSingleValueResultOfGitCommand(processContextBuilder.command(GitUtils.getCommitByTag(tagName)));
     }
 
     public void fetchRef(
@@ -326,17 +354,7 @@ public class GitCommands {
     }
 
     public String writeTree(ProcessContext.Builder processContextBuilder) {
-        return processExecutor.stdout(processContextBuilder.command(GitUtils.writeTree()));
-    }
-
-    private void executeGitCommand(
-            List<String> command,
-            ProcessContext.Builder processContextBuilder,
-            String errorMessage) {
-        int exitCode = processExecutor.execute(processContextBuilder.command(command).build());
-        if (exitCode != 0) {
-            throw new GitException(errorMessage);
-        }
+        return getSingleValueResultOfGitCommand(processContextBuilder.command(GitUtils.writeTree()));
     }
 
     private static boolean isGithubRepository(String url) {

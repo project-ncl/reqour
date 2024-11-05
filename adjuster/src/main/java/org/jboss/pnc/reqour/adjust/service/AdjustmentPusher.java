@@ -71,12 +71,12 @@ public class AdjustmentPusher {
     /**
      * Try to find the tag corresponding to the provided tree SHA
      */
-    private String findTagByTreeSha(Path workdir, String treeSha) {
+    String findTagByTreeSha(Path workdir, String treeSha) {
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
         List<String> tags = IOUtils.splitByNewLine(
                 processExecutor.stdout(
                         processContextBuilder.command(
-                                List.of("git", "--no-pager", "log", "--pretty=\"%T::%d", "--tags", "--no-walk"))));
+                                List.of("git", "--no-pager", "log", "--pretty=%T::%d", "--tags", "--no-walk"))));
 
         Optional<String> treeReferences = tags.stream()
                 .filter(entry -> entry.startsWith(treeSha))
@@ -130,7 +130,7 @@ public class AdjustmentPusher {
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
         String branchName = "branch-reqour-" + tagName + "-" + commitId;
 
-        boolean doesBranchAlreadyExist = gitCommands.isReferenceBranch(branchName, processContextBuilder);
+        boolean doesBranchAlreadyExist = gitCommands.doesBranchExistAtRemote(branchName, processContextBuilder);
         if (doesBranchAlreadyExist) {
             log.info("Branch '{}' already exists, skipping the creation", branchName);
             // In case the branch already exists, nothing to do (we're assuming that this means the commit is already in

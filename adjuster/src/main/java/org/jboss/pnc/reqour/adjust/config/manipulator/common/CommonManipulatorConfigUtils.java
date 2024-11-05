@@ -123,7 +123,7 @@ public class CommonManipulatorConfigUtils {
         Matcher brewBuildMatcher = brewBuildPattern.matcher(brewBuildName);
 
         if (!brewBuildMatcher.matches()) {
-            return ExecutionRootOverrides.getEmpty();
+            return ExecutionRootOverrides.noOverrides();
         }
         return new ExecutionRootOverrides(brewBuildMatcher.group("groupId"), brewBuildMatcher.group("artifactId"));
     }

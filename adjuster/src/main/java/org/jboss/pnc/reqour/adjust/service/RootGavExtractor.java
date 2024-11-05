@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.Gav;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
@@ -24,6 +25,9 @@ import java.util.List;
 @ApplicationScoped
 @Slf4j
 public class RootGavExtractor {
+
+    @ConfigProperty(name = "quarkus.profile")
+    String profile;
 
     @Inject
     ProcessExecutor processExecutor;
@@ -45,11 +49,11 @@ public class RootGavExtractor {
 
         int exitCode = 0;
         exitCode += processExecutor
-                .execute(processContextBuilder.command(generateCommand("groupId", groupIdOutput)).build());
+                .execute(processContextBuilder.command(generateHelpEvaluateCommand("groupId", groupIdOutput)).build());
+        exitCode += processExecutor.execute(
+                processContextBuilder.command(generateHelpEvaluateCommand("artifactId", artifactIdOutput)).build());
         exitCode += processExecutor
-                .execute(processContextBuilder.command(generateCommand("artifactId", artifactIdOutput)).build());
-        exitCode += processExecutor
-                .execute(processContextBuilder.command(generateCommand("version", versionOutput)).build());
+                .execute(processContextBuilder.command(generateHelpEvaluateCommand("version", versionOutput)).build());
 
         if (exitCode != 0) {
             throw new RuntimeException(String.format("Unable to extract GAV from directory '%s'", workdir));
@@ -62,7 +66,10 @@ public class RootGavExtractor {
                 .build();
     }
 
-    private List<String> generateCommand(String property, Path outputFile) {
-        return List.of("mvn", "help:evaluate", "-Dexpression=project." + property, "-Doutput=" + outputFile);
+    private List<String> generateHelpEvaluateCommand(String property, Path outputFile) {
+        // In case we are running tests, use maven wrapper (since it's not possible to run mvn from shell during them)
+        String mvnExecutable = ("test".equals(profile)) ? "./mvnw" : "mvn";
+
+        return List.of(mvnExecutable, "help:evaluate", "-Dexpression=project." + property, "-Doutput=" + outputFile);
     }
 }

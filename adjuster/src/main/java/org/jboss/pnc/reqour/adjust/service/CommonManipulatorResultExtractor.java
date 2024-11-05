@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class CommonManipulatorResultExtractor {
 
-    private final static String REMOVED_REPOSITORIES_KEY = "-DrepoRemovalBackup";
+    final static String REMOVED_REPOSITORIES_KEY = "-DrepoRemovalBackup";
 
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -83,8 +83,8 @@ public class CommonManipulatorResultExtractor {
             gavBuilder.groupId(manipulatorResult.getGav().getGroupId());
             gavBuilder.artifactId(manipulatorResult.getGav().getArtifactId());
         } else {
-            log.warn("Overriding groupId as {}", executionRootOverrides.groupId());
-            log.warn("Overriding artifactId as {}", executionRootOverrides.artifactId());
+            log.warn("Overriding groupId as '{}'", executionRootOverrides.groupId());
+            log.warn("Overriding artifactId as '{}'", executionRootOverrides.artifactId());
             gavBuilder.groupId(executionRootOverrides.groupId()).artifactId(executionRootOverrides.artifactId());
         }
 

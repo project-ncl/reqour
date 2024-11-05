@@ -15,7 +15,9 @@ public class CancelEndpointImpl implements CancelEndpoint {
     private final ManagedExecutor managedExecutor;
     private final OpenShiftAdjusterPodController openShiftAdjusterPodController;
 
-    public CancelEndpointImpl(ManagedExecutor managedExecutor, OpenShiftAdjusterPodController openShiftAdjusterPodController) {
+    public CancelEndpointImpl(
+            ManagedExecutor managedExecutor,
+            OpenShiftAdjusterPodController openShiftAdjusterPodController) {
         this.managedExecutor = managedExecutor;
         this.openShiftAdjusterPodController = openShiftAdjusterPodController;
     }
