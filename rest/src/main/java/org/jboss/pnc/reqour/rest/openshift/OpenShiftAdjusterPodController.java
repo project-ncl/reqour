@@ -78,7 +78,6 @@ public class OpenShiftAdjusterPodController {
     }
 
     private String getPodName(String taskId) {
-        StringBuilder adjustedTaskIdSb = new StringBuilder();
         String lowerTaskId = taskId.toLowerCase();
         String adjustedTaskId = lowerTaskId.replaceAll("[^a-z0-9]", "x");
 
@@ -86,7 +85,7 @@ public class OpenShiftAdjusterPodController {
             log.warn("task id '{}' contains invalid characters, converted to '{}'", taskId, adjustedTaskId);
         }
 
-        String podName = String.format("reqour-adjuster-%s", adjustedTaskIdSb);
+        String podName = String.format("reqour-adjuster-%s", adjustedTaskId);
         log.info("For the task ID '{}' using pod name '{}'", taskId, podName);
         return podName;
     }

@@ -8,6 +8,7 @@ reqour:
 reqour-rest:
   app-environment: test
   reqour-secret-key: test-secret
+  indy-url: https://test-indy.example.com
 
 wiremock:
   base-url: http://localhost:${quarkus.wiremock.devservices.port}
