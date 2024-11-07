@@ -7,13 +7,15 @@ package org.jboss.pnc.reqour.adjust.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.api.dto.Gav;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.api.dto.GA;
+import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -26,13 +28,15 @@ import java.util.List;
 @Slf4j
 public class RootGavExtractor {
 
-    @ConfigProperty(name = "quarkus.profile")
-    String profile;
+    @ConfigProperty(name = "reqour-adjuster.maven-executable")
+    String mavenExecutable;
 
     @Inject
     ProcessExecutor processExecutor;
 
-    private final Path resultsDirectory = Path.of("/tmp");
+    private final Path resultsDirectory = IOUtils
+            .createTempDir("gav-extractor-results-", "recording of GAV extractor results");
+
     private final Path groupIdOutput = resultsDirectory.resolve("groupId.txt");
     private final Path artifactIdOutput = resultsDirectory.resolve("artifactId.txt");
     private final Path versionOutput = resultsDirectory.resolve("version.txt");
@@ -42,7 +46,7 @@ public class RootGavExtractor {
      *
      * @param workdir working directory
      */
-    public Gav extractGav(Path workdir) {
+    public GAV extractGav(Path workdir) {
         log.debug("Extracting GAV from POM in directory '{}'", workdir);
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir)
                 .stdoutConsumer(IOUtils::ignoreOutput);
@@ -59,17 +63,23 @@ public class RootGavExtractor {
             throw new RuntimeException(String.format("Unable to extract GAV from directory '%s'", workdir));
         }
 
-        return Gav.builder()
-                .groupId(IOUtils.readFileContent(groupIdOutput))
-                .artifactId(IOUtils.readFileContent(artifactIdOutput))
+        GAV extractedGav = GAV.builder()
+                .ga(
+                        GA.builder()
+                                .groupId(IOUtils.readFileContent(groupIdOutput))
+                                .artifactId(IOUtils.readFileContent(artifactIdOutput))
+                                .build())
                 .version(IOUtils.readFileContent(versionOutput))
                 .build();
+        try {
+            FileUtils.deleteDirectory(resultsDirectory.toFile());
+        } catch (IOException e) {
+            log.warn("Unable to delete directory with results of GAV extractor: '{}'", resultsDirectory);
+        }
+        return extractedGav;
     }
 
     private List<String> generateHelpEvaluateCommand(String property, Path outputFile) {
-        // In case we are running tests, use maven wrapper (since it's not possible to run mvn from shell during them)
-        String mvnExecutable = ("test".equals(profile)) ? "./mvnw" : "mvn";
-
-        return List.of(mvnExecutable, "help:evaluate", "-Dexpression=project." + property, "-Doutput=" + outputFile);
+        return List.of(mavenExecutable, "help:evaluate", "-Dexpression=project." + property, "-Doutput=" + outputFile);
     }
 }

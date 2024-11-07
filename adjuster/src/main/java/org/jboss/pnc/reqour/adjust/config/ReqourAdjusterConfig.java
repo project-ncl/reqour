@@ -13,4 +13,6 @@ import io.smallrye.config.ConfigMapping;
 public interface ReqourAdjusterConfig {
 
     AdjustConfig adjust();
+
+    String mavenExecutable();
 }

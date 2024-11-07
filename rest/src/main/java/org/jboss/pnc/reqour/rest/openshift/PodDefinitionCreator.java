@@ -53,7 +53,6 @@ public class PodDefinitionCreator {
             resourceDefinition = FileUtils
                     .readFileToString(config.podDefinitionFile().toFile(), StandardCharsets.UTF_8);
             String definition = StringSubstitutor.replace(resourceDefinition, properties, "%{", "}");
-            System.out.println("***** definition: " + definition);
             return yamlMapper.readValue(definition, Pod.class);
         } catch (IOException e) {
             throw new RuntimeException(e);

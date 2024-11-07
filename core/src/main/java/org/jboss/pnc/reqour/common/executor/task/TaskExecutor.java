@@ -11,14 +11,13 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
- * This executor is used for starting long-running tasks. It assigns every task to the provided task ID.
+ * Executor used for starting long-running asynchronous tasks (which are, however, written in a synchronous manner).
  */
 public interface TaskExecutor {
 
     /**
      * Execute the task asynchronously.
      *
-     * @param taskID ID of the task
      * @param callbackRequest request identifying where to send the callback
      * @param request input request of the synchronous executor
      * @param syncExecutor executor, which runs the operation synchronously
@@ -28,7 +27,6 @@ public interface TaskExecutor {
      * @param <R> result type
      */
     <T, R> void executeAsync(
-            String taskID,
             Request callbackRequest,
             T request,
             Function<T, R> syncExecutor,

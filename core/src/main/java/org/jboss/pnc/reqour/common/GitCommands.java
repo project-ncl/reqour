@@ -13,12 +13,10 @@ import org.jboss.pnc.reqour.common.utils.GitUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.model.FetchablePRRef;
 import org.jboss.pnc.reqour.model.ProcessContext;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -173,23 +171,19 @@ public class GitCommands {
         return processExecutor.execute(processContextBuilder.command(GitUtils.doesShaExists(ref)).build()) == 0;
     }
 
-    public boolean isReferencePR(String ref) {
-        Pattern githubPRPattern = Pattern.compile("^pull/\\d+");
-        Pattern gitlabPRPattern = Pattern.compile("^merge-requests/\\d+");
+    public static boolean isReferencePR(String ref) {
+        Pattern githubPRPattern = Pattern.compile("^pull/\\d+$");
+        Pattern gitlabPRPattern = Pattern.compile("^merge-requests/\\d+$");
 
         Matcher githubMatcher = githubPRPattern.matcher(ref);
         Matcher gitlabMatcher = gitlabPRPattern.matcher(ref);
 
-        return githubMatcher.hasMatch() || gitlabMatcher.hasMatch();
+        return githubMatcher.matches() || gitlabMatcher.matches();
     }
 
     public void checkoutPR(String ref, ProcessContext.Builder processContextBuilder) {
-        if (!isReferencePR(ref)) {
-            throw new GitException(String.format("Reference '%s' is not a PR reference", ref));
-        }
-        FetchablePRRef fetchablePRRef = modifyRefToBeFetchable(ref);
-        fetchRef(DEFAULT_REMOTE_NAME, fetchablePRRef.refToFetchableBranch(), false, false, processContextBuilder);
-        checkout(fetchablePRRef.branch(), false, processContextBuilder);
+        fetchRef(DEFAULT_REMOTE_NAME, modifyPullRequestRefToBeFetchable(ref), false, false, processContextBuilder);
+        checkout(GitUtils.FETCH_HEAD, false, processContextBuilder);
     }
 
     public boolean doesReferenceExist(String ref, ProcessContext.Builder processContextBuilder) {
@@ -198,14 +192,10 @@ public class GitCommands {
     }
 
     public boolean doesPRExists(String ref, ProcessContext.Builder processContextBuilder) {
-        if (!isReferencePR(ref)) {
-            return false;
-        }
-
         try {
             fetchRef(
                     GitUtils.DEFAULT_REMOTE_NAME,
-                    modifyRefToBeFetchable(ref).refToFetchableBranch(),
+                    modifyPullRequestRefToBeFetchable(ref),
                     false,
                     true,
                     processContextBuilder);
@@ -213,33 +203,6 @@ public class GitCommands {
         } catch (GitException _e) {
             return false;
         }
-    }
-
-    /**
-     * Return a tuple (ref to fetch to branch, branch) for a ref which is a pull request. <br/>
-     * For example, if the ref is: merge-requests/10, then the returned value is:
-     * ('merge-requests/10/head:random_branch_name', 'random_branch_name') <br/>
-     * The string of the first element of the tuple can then be used in 'git fetch' to pull the pull request locally
-     * into branch: random_branch_name. If the ref is not a pull request, {@link FetchablePRRef#getDefault()} is
-     * returned.
-     */
-    private FetchablePRRef modifyRefToBeFetchable(String ref) {
-
-        if (isReferencePR(ref)) {
-            String randomBranchName = getRandomBranchName();
-            return new FetchablePRRef(ref + "/head:" + randomBranchName, randomBranchName);
-        }
-        return FetchablePRRef.getDefault();
-    }
-
-    private static String getRandomBranchName() {
-        StringBuilder sb = new StringBuilder();
-        String alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        Random r = new Random();
-        for (int i = 0; i < 10; i++) {
-            sb.append(r.nextInt(alphabet.length()));
-        }
-        return sb.toString();
     }
 
     public void push(String ref, boolean force, ProcessContext.Builder processContextBuilder) {
@@ -355,6 +318,13 @@ public class GitCommands {
 
     public String writeTree(ProcessContext.Builder processContextBuilder) {
         return getSingleValueResultOfGitCommand(processContextBuilder.command(GitUtils.writeTree()));
+    }
+
+    private static String modifyPullRequestRefToBeFetchable(String ref) {
+        if (!isReferencePR(ref)) {
+            throw new RuntimeException(String.format("Given reference (%s) does not match PR reference format", ref));
+        }
+        return ref + "/head";
     }
 
     private static boolean isGithubRepository(String url) {

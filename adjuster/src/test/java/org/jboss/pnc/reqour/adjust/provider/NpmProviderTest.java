@@ -56,7 +56,7 @@ class NpmProviderTest {
                 null,
                 null);
 
-        List<String> command = provider.preparedCommand;
+        List<String> command = provider.prepareCommand();
 
         assertThat(command).containsSequence(
                 List.of(

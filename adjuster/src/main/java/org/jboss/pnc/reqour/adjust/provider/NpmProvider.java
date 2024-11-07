@@ -6,7 +6,9 @@ package org.jboss.pnc.reqour.adjust.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.api.dto.Gav;
+import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.pnc.api.dto.GA;
+import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
@@ -15,7 +17,6 @@ import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
@@ -71,11 +72,15 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                 .cliJarPath(npmProviderConfig.cliJarPath())
                 .build();
 
-        validateConfigAndPrepareCommand();
+        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+            validateConfig();
+            log.debug("Project manipulator config was successfully initialized and validated: {}", config);
+        } else {
+            log.debug("Project manipulator config was successfully initialized: {}", config);
+        }
     }
 
-    @Override
-    void validateConfig() {
+    private void validateConfig() {
         IOUtils.validateResourceAtPathExists(config.getCliJarPath(), "CLI jar file (specified as '%s') does not exist");
     }
 
@@ -105,8 +110,8 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
             NpmResult manipulatorResult = objectMapper.readValue(config.getResultsFilePath().toFile(), NpmResult.class);
             return VersioningState.builder()
                     .executionRootModified(
-                            Gav.builder()
-                                    .artifactId(manipulatorResult.getName())
+                            GAV.builder()
+                                    .ga(GA.builder().artifactId(manipulatorResult.getName()).build())
                                     .version(manipulatorResult.getVersion())
                                     .build())
                     .build();

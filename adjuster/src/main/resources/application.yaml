@@ -12,3 +12,4 @@ reqour-adjuster:
         temporary-mode: SERVICE_TEMPORARY
         temporary-prefer-persistent-mode: SERVICE_TEMPORARY_PREFER_PERSISTENT
         prefix-of-suffix-version: managedsvc
+  maven-executable: mvn

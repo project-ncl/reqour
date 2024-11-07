@@ -92,15 +92,13 @@ spec:
           command:
             - '/bin/bash'
             - '-c'
-            - 'exit'
-            - '0'
+            - 'true'
       readinessProbe:
         exec:
           command:
             - '/bin/bash'
             - '-c'
-            - 'exit'
-            - '0'
+            - 'true'
       resources:
         limits:
           cpu: 500m

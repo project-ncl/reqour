@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
+import static org.jboss.pnc.reqour.common.utils.GitUtils.FETCH_HEAD;
 
 /**
  * Fetcher of the SCM repository, which takes place before the manipulation phase in order to prepare the environment
@@ -38,6 +39,8 @@ import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
 @ApplicationScoped
 @Slf4j
 public class RepositoryFetcher {
+
+    private static final String ORIGIN_REMOTE = "origin_remote";
 
     @Inject
     ConfigUtils configUtils;
@@ -112,15 +115,14 @@ public class RepositoryFetcher {
         gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
 
         if (gitCommands.doesReferenceExist(adjustRequest.getRef(), processContextBuilder)) {
-            boolean isRefPR = gitCommands.isReferencePR(adjustRequest.getRef());
+            boolean isRefPR = GitCommands.isReferencePR(adjustRequest.getRef());
             if (isRefPR) {
                 gitCommands.checkoutPR(adjustRequest.getRef(), processContextBuilder);
             } else {
                 gitCommands.checkout(adjustRequest.getRef(), true, processContextBuilder);
             }
 
-            String originRemote = "origin_remote";
-            gitCommands.renameRemote(DEFAULT_REMOTE_NAME, originRemote, processContextBuilder);
+            gitCommands.renameRemote(DEFAULT_REMOTE_NAME, ORIGIN_REMOTE, processContextBuilder);
             gitCommands.addRemote(
                     DEFAULT_REMOTE_NAME,
                     adjustRequest.getInternalUrl().getReadwriteUrl(),
@@ -161,14 +163,15 @@ public class RepositoryFetcher {
             }
         }
 
-        gitCommands.fetchTags(DEFAULT_REMOTE_NAME, false, processContextBuilder);
-
         List<String> internalUrls = this.internalUrls.orElse(Collections.emptyList());
         for (var internalUrl : internalUrls) {
             if (adjustRequest.getOriginRepoUrl().contains(internalUrl)) {
-                return true;
+                isRefInternal = true;
+                break;
             }
         }
+
+        gitCommands.fetchTags(DEFAULT_REMOTE_NAME, false, processContextBuilder);
         return isRefInternal;
     }
 
@@ -178,7 +181,7 @@ public class RepositoryFetcher {
         gitCommands.init(false, processContextBuilder);
         gitCommands.addRemote(DEFAULT_REMOTE_NAME, url, processContextBuilder);
         gitCommands.fetchRef(DEFAULT_REMOTE_NAME, ref, true, false, processContextBuilder);
-        gitCommands.checkout("FETCH_HEAD", false, processContextBuilder);
+        gitCommands.checkout(FETCH_HEAD, false, processContextBuilder);
         gitCommands.fetchTags(DEFAULT_REMOTE_NAME, true, processContextBuilder);
     }
 

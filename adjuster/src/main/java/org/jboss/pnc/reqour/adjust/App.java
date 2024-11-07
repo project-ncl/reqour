@@ -6,8 +6,6 @@ package org.jboss.pnc.reqour.adjust;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.picocli.runtime.annotations.TopCommand;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;

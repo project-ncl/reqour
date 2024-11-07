@@ -7,7 +7,8 @@ package org.jboss.pnc.reqour.adjust.service;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
-import org.jboss.pnc.api.dto.Gav;
+import org.jboss.pnc.api.dto.GA;
+import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
@@ -37,7 +38,10 @@ class CommonManipulatorResultExtractorTest {
     void obtainVersioningState_noOverridesProvided_parsesResultWithoutOverrides() {
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootModified(
-                        Gav.builder().groupId("com.example").artifactId("foo").version("1.0.42.rh-7").build())
+                        GAV.builder()
+                                .ga(GA.builder().groupId("com.example").artifactId("foo").build())
+                                .version("1.0.42.rh-7")
+                                .build())
                 .build();
 
         VersioningState actualVersioningState = manipulatorResultExtractor
@@ -50,7 +54,10 @@ class CommonManipulatorResultExtractorTest {
     void obtainVersioningState_overridesProvided_parsesResultAndUsesOverrides() {
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootModified(
-                        Gav.builder().groupId("org.foo.bar").artifactId("baz").version("1.0.42.rh-7").build())
+                        GAV.builder()
+                                .ga(GA.builder().groupId("org.foo.bar").artifactId("baz").build())
+                                .version("1.0.42.rh-7")
+                                .build())
                 .build();
         ExecutionRootOverrides rootOverrides = new ExecutionRootOverrides("org.foo.bar", "baz");
 
