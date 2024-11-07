@@ -26,7 +26,6 @@ import java.util.function.Function;
 public class TaskExecutorImpl implements TaskExecutor {
 
     private final ManagedExecutor executor;
-    private final Map<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
 
     @Inject
     public TaskExecutorImpl(ManagedExecutor executor) {
@@ -35,17 +34,13 @@ public class TaskExecutorImpl implements TaskExecutor {
 
     @Override
     public <T, R> void executeAsync(
-            String taskID,
             Request callbackRequest,
             T request,
             Function<T, R> syncExecutor,
             BiFunction<T, Throwable, R> errorHandler,
             BiConsumer<Request, R> callbackSender) {
-        log.debug("Starting the task with ID={}", taskID);
-        runningTasks.put(
-                taskID,
-                executor.supplyAsync(() -> syncExecutor.apply(request))
-                        .exceptionally(t -> errorHandler.apply(request, t))
-                        .thenAccept(res -> callbackSender.accept(callbackRequest, res)));
+        executor.supplyAsync(() -> syncExecutor.apply(request))
+                .exceptionally(t -> errorHandler.apply(request, t))
+                .thenAccept(res -> callbackSender.accept(callbackRequest, res));
     }
 }

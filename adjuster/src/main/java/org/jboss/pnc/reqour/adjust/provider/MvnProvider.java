@@ -8,14 +8,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.commonjava.maven.ext.common.json.GAV;
 import org.commonjava.maven.ext.common.json.PME;
-import org.jboss.pnc.api.dto.Gav;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
@@ -83,11 +82,15 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        validateConfigAndPrepareCommand();
+        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+            validateConfig();
+            log.debug("PME config was successfully initialized and validated: {}", config);
+        } else {
+            log.debug("PME config was successfully initialized: {}", config);
+        }
     }
 
-    @Override
-    void validateConfig() {
+    private void validateConfig() {
         IOUtils.validateResourceAtPathExists(config.getCliJarPath(), "CLI jar file (specified at '%s') does not exist");
 
         IOUtils.validateResourceAtPathExists(
@@ -163,7 +166,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     private PME getResultWhenPmeIsDisabled() {
         PME manipulatorResult = new PME();
         GAV gav = new GAV();
-        Gav executionRootGav = rootGavExtractor.extractGav(config.getWorkdir());
+        org.jboss.pnc.api.dto.GAV executionRootGav = rootGavExtractor.extractGav(config.getWorkdir());
         gav.setGroupId(executionRootGav.getGroupId());
         gav.setArtifactId(executionRootGav.getArtifactId());
         gav.setVersion(executionRootGav.getVersion());

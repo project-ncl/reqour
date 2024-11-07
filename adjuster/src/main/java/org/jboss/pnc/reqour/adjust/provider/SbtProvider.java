@@ -6,6 +6,7 @@ package org.jboss.pnc.reqour.adjust.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
@@ -60,11 +61,15 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        validateConfigAndPrepareCommand();
+        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+            validateConfig();
+            log.debug("SMEG config was successfully initialized and validated: {}", config);
+        } else {
+            log.debug("SMEG config was successfully initialized: {}", config);
+        }
     }
 
-    @Override
-    void validateConfig() {
+    private void validateConfig() {
         IOUtils.validateResourceAtPathExists(
                 config.getSbtPath(),
                 "Scala build tool (specified at '%s') does not exist");

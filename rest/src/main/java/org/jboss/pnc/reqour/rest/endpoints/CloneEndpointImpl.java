@@ -37,7 +37,6 @@ public class CloneEndpointImpl implements CloneEndpoint {
     @Override
     public void clone(RepositoryCloneRequest cloneRequest) {
         taskExecutor.executeAsync(
-                cloneRequest.getTaskId(),
                 cloneRequest.getCallback(),
                 cloneRequest,
                 service::clone,

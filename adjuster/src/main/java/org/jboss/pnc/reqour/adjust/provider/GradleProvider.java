@@ -6,6 +6,7 @@ package org.jboss.pnc.reqour.adjust.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
@@ -69,11 +70,15 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        validateConfigAndPrepareCommand();
+        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+            validateConfig();
+            log.debug("GME config was successfully initialized and validated: {}", config);
+        } else {
+            log.debug("GME config was successfully initialized: {}", config);
+        }
     }
 
-    @Override
-    void validateConfig() {
+    private void validateConfig() {
         IOUtils.validateResourceAtPathExists(
                 config.getGradleAnalyzerPluginInitFilePath(),
                 "Gradle init file (specified as '%s') does not exist");

@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.common.exceptions.UnsupportedTaskIdFormatException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 
@@ -80,19 +79,11 @@ public class OpenShiftAdjusterPodController {
 
     private String getPodName(String taskId) {
         StringBuilder adjustedTaskIdSb = new StringBuilder();
-        for (int i = 0; i < taskId.length(); i++) {
-            char c = taskId.charAt(i);
-            if ('A' <= c && c <= 'Z') {
-                adjustedTaskIdSb.append(IOUtils.transformUppercaseCharToLowercase(c));
-            } else if ('0' <= c && c <= '9') {
-                adjustedTaskIdSb.append(c);
-            } else {
-                throw new UnsupportedTaskIdFormatException(
-                        String.format(
-                                "Given task ID '%s' contains invalid character '%s'. Supported characters are: [a-zA-Z0-9]",
-                                taskId,
-                                c));
-            }
+        String lowerTaskId = taskId.toLowerCase();
+        String adjustedTaskId = lowerTaskId.replaceAll("[^a-z0-9]", "x");
+
+        if (!adjustedTaskId.equals(lowerTaskId)) {
+            log.warn("task id '{}' contains invalid characters, converted to '{}'", taskId, adjustedTaskId);
         }
 
         String podName = String.format("reqour-adjuster-%s", adjustedTaskIdSb);

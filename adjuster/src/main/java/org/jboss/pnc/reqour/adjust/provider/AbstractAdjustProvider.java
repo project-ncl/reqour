@@ -6,7 +6,6 @@ package org.jboss.pnc.reqour.adjust.provider;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
@@ -27,7 +26,6 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
 
     private final AdjustmentPusher adjustmentPusher;
     protected T config;
-    protected List<String> preparedCommand;
     protected final ObjectMapper objectMapper;
     protected final ProcessExecutor processExecutor;
 
@@ -43,8 +41,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     @Override
     public AdjustmentResult adjust(AdjustRequest adjustRequest) {
         // TODO[NCL-8829]: MDC -- BEGIN ALIGNMENT_ADJUST
-        String manipulatorOutput = callAdjust();
-        log.debug("Manipulator stdout: {}", manipulatorOutput);
+        callAdjust();
         ManipulatorResult manipulatorResult = obtainManipulatorResult();
         log.debug("Parsed adjust response: {}", manipulatorResult);
         AdjustmentPushResult adjustmentPushResult = adjustmentPusher.pushAdjustmentChanges(
@@ -55,19 +52,19 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         // TODO[NCL-8829]: MDC -- END ALIGNMENT_ADJUST
     }
 
-    protected void validateConfigAndPrepareCommand() {
-        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
-            validateConfig();
-        }
-        log.debug("Config was successfully initialized and validated: {}", config);
-
-        preparedCommand = prepareCommand();
+    private void callAdjust() {
+        List<String> preparedCommand = prepareCommand();
         log.debug("Prepared command is: {}", preparedCommand);
+        processExecutor.execute(
+                ProcessContext.defaultBuilderWithWorkdir(config.getWorkdir())
+                        .stdoutConsumer(this::consumeLogLine)
+                        .command(preparedCommand)
+                        .build());
     }
 
-    private String callAdjust() {
-        return processExecutor
-                .stdout(ProcessContext.defaultBuilderWithWorkdir(config.getWorkdir()).command(preparedCommand));
+    private void consumeLogLine(String line) {
+        log.info(line);
+        // TODO[NCL-8813]: Handle logging (sending to bifrost, configuring kafka logging)
     }
 
     private String getTagMessage(String originalReference, BuildType adjustType) {
@@ -76,12 +73,6 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
                 originalReference,
                 adjustType);
     }
-
-    /**
-     * Validate the provided configuration.<br/>
-     * Typically, checks whether the provided paths, e.g. CLI jar path, exist in the running environment.
-     */
-    abstract void validateConfig();
 
     /**
      * Prepare the command which invokes the manipulator with all the necessary options parsed from all the config

@@ -56,7 +56,7 @@ class SbtProviderTest {
                 null,
                 null);
 
-        List<String> command = provider.preparedCommand;
+        List<String> command = provider.prepareCommand();
 
         assertThat(command).containsSequence(List.of(config.adjust().scalaProviderConfig().sbtPath().toString()));
         assertSystemPropertiesContainExactly(

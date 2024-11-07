@@ -49,7 +49,6 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     @Override
     public void createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
         taskExecutor.executeAsync(
-                creationRequest.getTaskId(),
                 creationRequest.getCallback(),
                 creationRequest,
                 service::createInternalSCMRepository,

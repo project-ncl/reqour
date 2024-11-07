@@ -25,7 +25,7 @@ public class IOUtils {
         return createTempDir("adjust-", "adjust");
     }
 
-    private static Path createTempDir(String prefix, String activity) {
+    public static Path createTempDir(String prefix, String activity) {
         try {
             return Files.createTempDirectory(prefix);
         } catch (IOException e) {

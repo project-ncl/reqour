@@ -57,7 +57,7 @@ class GradleProviderTest {
                 null,
                 null);
 
-        List<String> command = provider.preparedCommand;
+        List<String> command = provider.prepareCommand();
 
         assertThat(command).containsSequence(
                 List.of(
@@ -92,7 +92,7 @@ class GradleProviderTest {
                 null,
                 null);
 
-        List<String> command = provider.preparedCommand;
+        List<String> command = provider.prepareCommand();
 
         assertThat(command).containsSequence(
                 List.of(

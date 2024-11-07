@@ -9,11 +9,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.commonjava.maven.ext.common.json.PME;
-import org.jboss.pnc.api.dto.Gav;
+import org.jboss.pnc.api.dto.GA;
+import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -77,19 +77,21 @@ public class CommonManipulatorResultExtractor {
     private VersioningState transformPMEIntoVersioningState(
             PME manipulatorResult,
             ExecutionRootOverrides executionRootOverrides) {
-        Gav.GavBuilder gavBuilder = Gav.builder();
+        GA.GABuilder gaBuilder = GA.builder();
 
         if (executionRootOverrides.hasNoOverrides()) {
-            gavBuilder.groupId(manipulatorResult.getGav().getGroupId());
-            gavBuilder.artifactId(manipulatorResult.getGav().getArtifactId());
+            gaBuilder.groupId(manipulatorResult.getGav().getGroupId())
+                    .artifactId(manipulatorResult.getGav().getArtifactId());
         } else {
             log.warn("Overriding groupId as '{}'", executionRootOverrides.groupId());
             log.warn("Overriding artifactId as '{}'", executionRootOverrides.artifactId());
-            gavBuilder.groupId(executionRootOverrides.groupId()).artifactId(executionRootOverrides.artifactId());
+            gaBuilder.groupId(executionRootOverrides.groupId()).artifactId(executionRootOverrides.artifactId());
         }
 
-        gavBuilder.version(manipulatorResult.getGav().getVersion());
-        return VersioningState.builder().executionRootModified(gavBuilder.build()).build();
+        return VersioningState.builder()
+                .executionRootModified(
+                        GAV.builder().ga(gaBuilder.build()).version(manipulatorResult.getGav().getVersion()).build())
+                .build();
     }
 
     /**

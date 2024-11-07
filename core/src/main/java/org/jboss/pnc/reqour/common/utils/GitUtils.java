@@ -19,6 +19,7 @@ import java.util.List;
 public class GitUtils {
 
     public static final String DEFAULT_REMOTE_NAME = "origin";
+    public static final String FETCH_HEAD = "FETCH_HEAD";
 
     public static List<String> add(String filename) {
         return List.of("git", "add", filename);
