@@ -1,3 +1,4 @@
 reqour-rest:
   app-environment: devel
-  reqour-secret-key: reqour # TODO: devel-secret
+  reqour-secret-key: devel-secret-dummy-key
+  indy-url: https://dev-indy.example.com

@@ -10,6 +10,7 @@ mp:
           - org.jboss.pnc.reqour.rest.endpoints.BaseUrlEndpoint
 
 reqour-rest:
-  pod-definition-file: 'src/main/resources/pod.yaml'
   app-environment: ${APP_ENV}
   reqour-secret-key: ${REQOUR_SECRET_NAME}
+  indy-url: ${INDY_URL}
+  pod-definition-file-path: 'src/main/resources/pod.yaml' # overridden in runtime config

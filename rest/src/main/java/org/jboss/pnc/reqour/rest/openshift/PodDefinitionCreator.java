@@ -43,7 +43,10 @@ public class PodDefinitionCreator {
                     "appEnvironment",
                     config.appEnvironment(),
                     "reqourSecretKey",
-                    config.reqourSecretKey());
+                    config.reqourSecretKey(),
+                    "indyUrl",
+                    config.indyUrl()
+            );
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -51,7 +54,7 @@ public class PodDefinitionCreator {
         final String resourceDefinition;
         try {
             resourceDefinition = FileUtils
-                    .readFileToString(config.podDefinitionFile().toFile(), StandardCharsets.UTF_8);
+                    .readFileToString(config.podDefinitionFilePath().toFile(), StandardCharsets.UTF_8);
             String definition = StringSubstitutor.replace(resourceDefinition, properties, "%{", "}");
             return yamlMapper.readValue(definition, Pod.class);
         } catch (IOException e) {

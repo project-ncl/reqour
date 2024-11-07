@@ -13,11 +13,13 @@ import java.time.Duration;
 @ConfigMapping(prefix = "reqour-rest")
 public interface ReqourRestConfig {
 
-    Path podDefinitionFile();
+    Path podDefinitionFilePath();
 
     String appEnvironment();
 
     String reqourSecretKey();
+
+    String indyUrl();
 
     RetryConfig openshiftRetryConfig();
 
@@ -31,7 +33,7 @@ public interface ReqourRestConfig {
         @WithDefault("-1")
         int maxRetries();
 
-        @WithDefault("PT20m")
+        @WithDefault("PT5m")
         Duration maxDuration();
     }
 }
