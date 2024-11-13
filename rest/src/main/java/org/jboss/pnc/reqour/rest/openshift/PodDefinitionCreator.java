@@ -45,8 +45,7 @@ public class PodDefinitionCreator {
                     "reqourSecretKey",
                     config.reqourSecretKey(),
                     "indyUrl",
-                    config.indyUrl()
-            );
+                    config.indyUrl());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
