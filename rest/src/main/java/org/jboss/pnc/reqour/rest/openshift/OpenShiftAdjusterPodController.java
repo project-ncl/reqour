@@ -7,16 +7,16 @@ package org.jboss.pnc.reqour.rest.openshift;
 import dev.failsafe.Failsafe;
 import dev.failsafe.RetryPolicy;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.StatusDetails;
 import io.fabric8.openshift.client.OpenShiftClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 
-import java.net.http.HttpResponse;
+import java.util.List;
 
 /**
  * Controller of the reqour adjuster pod, which is used to create and destroy these pods at the configured OpenShift
@@ -46,9 +46,11 @@ public class OpenShiftAdjusterPodController {
     public void createAdjusterPod(AdjustRequest adjustRequest) {
         Pod adjusterPod = podDefinitionCreator
                 .getAdjusterPodDefinition(adjustRequest, getPodName(adjustRequest.getTaskId()));
-        Failsafe.with(getOpenShiftRetryPolicy()).with(executor).runAsync(() -> {
+        Failsafe.with(getOpenShiftRetryPolicy()).with(executor).getAsync(() -> {
             log.debug("Creating reqour adjuster pod in the cluster");
-            openShiftClient.resource(adjusterPod).create();
+            Pod pod = openShiftClient.resource(adjusterPod).create();
+            log.debug("Pod '{}' was successfully created", pod.getMetadata().getName());
+            return pod;
         });
     }
 
@@ -56,18 +58,19 @@ public class OpenShiftAdjusterPodController {
         Pod adjusterPod = openShiftClient.pods().withName(getPodName(taskId)).get();
         Failsafe.with(getOpenShiftRetryPolicy()).with(executor).runAsync(() -> {
             log.debug("Removing reqour adjuster pod from the cluster");
-            openShiftClient.resource(adjusterPod).delete();
+            List<StatusDetails> statusDetails = openShiftClient.resource(adjusterPod).delete();
+            log.debug("{}", statusDetails);
         });
     }
 
-    private RetryPolicy<HttpResponse<String>> getOpenShiftRetryPolicy() {
+    private RetryPolicy<Object> getOpenShiftRetryPolicy() {
         ReqourRestConfig.RetryConfig openShiftRetryConfig = config.openshiftRetryConfig();
 
-        return RetryPolicy.<HttpResponse<String>> builder()
+        return RetryPolicy.builder()
                 .withBackoff(openShiftRetryConfig.backoffInitialDelay(), openShiftRetryConfig.backoffMaxDelay())
                 .withMaxRetries(openShiftRetryConfig.maxRetries())
                 .withMaxDuration(openShiftRetryConfig.maxDuration())
-                .onSuccess((e) -> log.debug("Request successfully sent, response: {}", e.getResult().statusCode()))
+                .onSuccess((e) -> log.debug("Request successfully sent"))
                 .onRetry(
                         (e) -> log.debug(
                                 "Retrying (attempt #{}), last exception was: {}",
