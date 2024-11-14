@@ -5,6 +5,8 @@
 package org.jboss.pnc.reqour.rest.endpoints;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.reqour.rest.CancelEndpoint;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterPodController;
@@ -25,5 +27,7 @@ public class CancelEndpointImpl implements CancelEndpoint {
     @Override
     public void cancelTask(String taskId) {
         managedExecutor.runAsync(() -> openShiftAdjusterPodController.destroyAdjusterPod(taskId));
+
+        throw new WebApplicationException(Response.Status.ACCEPTED);
     }
 }

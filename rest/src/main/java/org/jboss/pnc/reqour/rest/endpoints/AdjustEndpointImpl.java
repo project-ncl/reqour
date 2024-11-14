@@ -7,6 +7,8 @@ package org.jboss.pnc.reqour.rest.endpoints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.enums.ResultStatus;
@@ -49,5 +51,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
                                     .build());
                     return null;
                 });
+
+        throw new WebApplicationException(Response.Status.ACCEPTED);
     }
 }
