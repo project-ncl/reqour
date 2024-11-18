@@ -46,7 +46,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         log.debug("Parsed adjust response: {}", manipulatorResult);
         AdjustmentPushResult adjustmentPushResult = adjustmentPusher.pushAdjustmentChanges(
                 config.getWorkdir(),
-                manipulatorResult.getVersioningState().getExecutionRootModified().getVersion(),
+                manipulatorResult.getVersioningState().getExecutionRootVersion(),
                 getTagMessage(adjustRequest.getRef(), adjustRequest.getBuildType()));
         return new AdjustmentResult(manipulatorResult, adjustmentPushResult);
         // TODO[NCL-8829]: MDC -- END ALIGNMENT_ADJUST
