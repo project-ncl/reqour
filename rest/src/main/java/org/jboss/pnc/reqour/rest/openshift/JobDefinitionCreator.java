@@ -8,6 +8,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.io.FileUtils;
@@ -20,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @ApplicationScoped
-public class PodDefinitionCreator {
+public class JobDefinitionCreator {
 
     @Inject
     ObjectMapper objectMapper;
@@ -30,12 +31,12 @@ public class PodDefinitionCreator {
     @Inject
     ReqourRestConfig config;
 
-    public Pod getAdjusterPodDefinition(AdjustRequest adjustRequest, String podName) {
+    public Job getAdjusterJobDefinition(AdjustRequest adjustRequest, String jobName) {
         final Map<String, Object> properties;
         try {
             properties = Map.of(
-                    "podName",
-                    podName,
+                    "jobName",
+                    jobName,
                     "buildType",
                     adjustRequest.getBuildType(),
                     "adjustRequest",
@@ -53,11 +54,11 @@ public class PodDefinitionCreator {
         final String resourceDefinition;
         try {
             resourceDefinition = FileUtils
-                    .readFileToString(config.podDefinitionFilePath().toFile(), StandardCharsets.UTF_8);
+                    .readFileToString(config.jobDefinitionFilePath().toFile(), StandardCharsets.UTF_8);
             String definition = StringSubstitutor.replace(resourceDefinition, properties, "%{", "}");
-            return yamlMapper.readValue(definition, Pod.class);
+            return yamlMapper.readValue(definition, Job.class);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unable to parse Job definition", e);
         }
     }
 }
