@@ -6,8 +6,8 @@ package org.jboss.pnc.reqour.rest.openshift;
 
 import dev.failsafe.Failsafe;
 import dev.failsafe.RetryPolicy;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.StatusDetails;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.openshift.client.OpenShiftClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -19,7 +19,7 @@ import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import java.util.List;
 
 /**
- * Controller of the reqour adjuster pod, which is used to create and destroy these pods at the configured OpenShift
+ * Controller of the reqour adjuster job, which is used to create and destroy these jobs at the configured OpenShift
  * cluster.
  */
 @ApplicationScoped
@@ -29,36 +29,36 @@ public class OpenShiftAdjusterPodController {
     private final ReqourRestConfig config;
     private final ManagedExecutor executor;
     private final OpenShiftClient openShiftClient;
-    private final PodDefinitionCreator podDefinitionCreator;
+    private final JobDefinitionCreator jobDefinitionCreator;
 
     @Inject
     public OpenShiftAdjusterPodController(
             ReqourRestConfig config,
             ManagedExecutor executor,
             OpenShiftClient openShiftClient,
-            PodDefinitionCreator podDefinitionCreator) {
+            JobDefinitionCreator jobDefinitionCreator) {
         this.config = config;
         this.executor = executor;
         this.openShiftClient = openShiftClient;
-        this.podDefinitionCreator = podDefinitionCreator;
+        this.jobDefinitionCreator = jobDefinitionCreator;
     }
 
-    public void createAdjusterPod(AdjustRequest adjustRequest) {
-        Pod adjusterPod = podDefinitionCreator
-                .getAdjusterPodDefinition(adjustRequest, getPodName(adjustRequest.getTaskId()));
+    public void createAdjusterJob(AdjustRequest adjustRequest) {
+        Job adjusterJob = jobDefinitionCreator
+                .getAdjusterJobDefinition(adjustRequest, getJobName(adjustRequest.getTaskId()));
         Failsafe.with(getOpenShiftRetryPolicy()).with(executor).getAsync(() -> {
-            log.debug("Creating reqour adjuster pod in the cluster");
-            Pod pod = openShiftClient.resource(adjusterPod).create();
-            log.debug("Pod '{}' was successfully created", pod.getMetadata().getName());
-            return pod;
+            log.debug("Creating reqour adjuster job in the cluster");
+            Job job = openShiftClient.resource(adjusterJob).create();
+            log.debug("Job '{}' was successfully created", job.getMetadata().getName());
+            return job;
         });
     }
 
-    public void destroyAdjusterPod(String taskId) {
-        Pod adjusterPod = openShiftClient.pods().withName(getPodName(taskId)).get();
+    public void destroyAdjusterJob(String taskId) {
+        Job job = openShiftClient.resources(Job.class).withName(getJobName(taskId)).item();
         Failsafe.with(getOpenShiftRetryPolicy()).with(executor).runAsync(() -> {
-            log.debug("Removing reqour adjuster pod from the cluster");
-            List<StatusDetails> statusDetails = openShiftClient.resource(adjusterPod).delete();
+            log.debug("Removing reqour adjuster job corresponding to task ID '{}' from the cluster", taskId);
+            List<StatusDetails> statusDetails = openShiftClient.resource(job).delete();
             log.debug("{}", statusDetails);
         });
     }
@@ -80,7 +80,7 @@ public class OpenShiftAdjusterPodController {
                 .build();
     }
 
-    private String getPodName(String taskId) {
+    private String getJobName(String taskId) {
         String lowerTaskId = taskId.toLowerCase();
         String adjustedTaskId = lowerTaskId.replaceAll("[^a-z0-9]", "x");
 
@@ -88,8 +88,8 @@ public class OpenShiftAdjusterPodController {
             log.warn("task id '{}' contains invalid characters, converted to '{}'", taskId, adjustedTaskId);
         }
 
-        String podName = String.format("reqour-adjuster-%s", adjustedTaskId);
-        log.info("For the task ID '{}' using pod name '{}'", taskId, podName);
-        return podName;
+        String jobName = String.format("reqour-adjuster-%s", adjustedTaskId);
+        log.info("For the task ID '{}' using job name '{}'", taskId, jobName);
+        return jobName;
     }
 }

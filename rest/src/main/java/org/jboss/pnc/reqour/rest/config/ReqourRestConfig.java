@@ -13,7 +13,7 @@ import java.time.Duration;
 @ConfigMapping(prefix = "reqour-rest")
 public interface ReqourRestConfig {
 
-    Path podDefinitionFilePath();
+    Path jobDefinitionFilePath();
 
     String appEnvironment();
 

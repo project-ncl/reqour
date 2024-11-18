@@ -26,7 +26,7 @@ public class CancelEndpointImpl implements CancelEndpoint {
 
     @Override
     public void cancelTask(String taskId) {
-        managedExecutor.runAsync(() -> openShiftAdjusterPodController.destroyAdjusterPod(taskId));
+        managedExecutor.runAsync(() -> openShiftAdjusterPodController.destroyAdjusterJob(taskId));
 
         throw new WebApplicationException(Response.Status.ACCEPTED);
     }

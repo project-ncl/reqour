@@ -40,7 +40,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
 
     @Override
     public void adjust(AdjustRequest adjustRequest) {
-        managedExecutor.runAsync(() -> openShiftAdjusterPodController.createAdjusterPod(adjustRequest))
+        managedExecutor.runAsync(() -> openShiftAdjusterPodController.createAdjusterJob(adjustRequest))
                 .exceptionally(throwable -> {
                     log.error("Endpoint ended with the exception, sending SYSTEM_ERROR as the callback", throwable);
                     pncHttpClient.sendRequest(
