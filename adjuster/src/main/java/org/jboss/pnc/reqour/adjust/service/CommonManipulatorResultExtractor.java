@@ -9,8 +9,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.commonjava.maven.ext.common.json.PME;
-import org.jboss.pnc.api.dto.GA;
-import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
@@ -77,21 +75,27 @@ public class CommonManipulatorResultExtractor {
     private VersioningState transformPMEIntoVersioningState(
             PME manipulatorResult,
             ExecutionRootOverrides executionRootOverrides) {
-        GA.GABuilder gaBuilder = GA.builder();
+        final String groupId;
+        final String artifactId;
 
         if (executionRootOverrides.hasNoOverrides()) {
-            gaBuilder.groupId(manipulatorResult.getGav().getGroupId())
-                    .artifactId(manipulatorResult.getGav().getArtifactId());
+            groupId = manipulatorResult.getGav().getGroupId();
+            artifactId = manipulatorResult.getGav().getArtifactId();
         } else {
             log.warn("Overriding groupId as '{}'", executionRootOverrides.groupId());
             log.warn("Overriding artifactId as '{}'", executionRootOverrides.artifactId());
-            gaBuilder.groupId(executionRootOverrides.groupId()).artifactId(executionRootOverrides.artifactId());
+            groupId = executionRootOverrides.groupId();
+            artifactId = executionRootOverrides.artifactId();
         }
 
         return VersioningState.builder()
-                .executionRootModified(
-                        GAV.builder().ga(gaBuilder.build()).version(manipulatorResult.getGav().getVersion()).build())
+                .executionRootName(getExecutionRootName(groupId, artifactId))
+                .executionRootVersion(manipulatorResult.getGav().getVersion())
                 .build();
+    }
+
+    private static String getExecutionRootName(String groupId, String artifactId) {
+        return (groupId == null) ? artifactId : groupId + ":" + artifactId;
     }
 
     /**

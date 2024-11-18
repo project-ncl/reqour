@@ -49,14 +49,6 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         super(objectMapper, processExecutor, adjustmentPusher);
 
         NpmProviderConfig npmProviderConfig = adjustConfig.npmProviderConfig();
-        Path resultsFile = workdir.resolve("results");
-        if (Files.notExists(resultsFile)) {
-            try {
-                Files.createFile(resultsFile);
-            } catch (IOException e) {
-                throw new RuntimeException("Unable to create the file for manipulator results", e);
-            }
-        }
 
         config = ProjectManipulatorConfig.builder()
                 .pncDefaultAlignmentParameters(
@@ -68,7 +60,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(npmProviderConfig.alignmentParameters())
                 .workdir(workdir)
-                .resultsFilePath(resultsFile)
+                .resultsFilePath(getResultsFile(workdir))
                 .cliJarPath(npmProviderConfig.cliJarPath())
                 .build();
 
@@ -100,24 +92,28 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
     @Override
     ManipulatorResult obtainManipulatorResult() {
         return ManipulatorResult.builder()
-                .versioningState(obtainVersioningState())
+                .versioningState(obtainVersioningState(config.getResultsFilePath()))
                 .removedRepositories(Collections.emptyList()) // no support of repos removal by project manipulator
                 .build();
     }
 
-    private VersioningState obtainVersioningState() {
+    VersioningState obtainVersioningState(Path resultsFilePath) {
         try {
-            NpmResult manipulatorResult = objectMapper.readValue(config.getResultsFilePath().toFile(), NpmResult.class);
+            NpmResult manipulatorResult = objectMapper.readValue(resultsFilePath.toFile(), NpmResult.class);
             return VersioningState.builder()
-                    .executionRootModified(
-                            GAV.builder()
-                                    .ga(GA.builder().artifactId(manipulatorResult.getName()).build())
-                                    .version(manipulatorResult.getVersion())
-                                    .build())
+                    .executionRootName(adjustNpmName(manipulatorResult.getName()))
+                    .executionRootVersion(manipulatorResult.getVersion())
                     .build();
         } catch (IOException e) {
             throw new RuntimeException("Cannot deserialize the manipulator result", e);
         }
+    }
+
+    private String adjustNpmName(String originalName) {
+        String adjustedName = originalName.replaceAll("@", "");
+        adjustedName = adjustedName.replaceAll("/", "-");
+        adjustedName += "-npm";
+        return adjustedName;
     }
 
     private List<String> getComputedAlignmentParameters() {
@@ -141,5 +137,17 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         }
 
         return alignmentParameters;
+    }
+
+    private static Path getResultsFile(Path workdir) {
+        Path resultsFile = workdir.resolve("results");
+        if (Files.notExists(resultsFile)) {
+            try {
+                Files.createFile(resultsFile);
+            } catch (IOException e) {
+                throw new RuntimeException("Unable to create the file for manipulator results", e);
+            }
+        }
+        return resultsFile;
     }
 }
