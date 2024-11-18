@@ -31,7 +31,7 @@ import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
 @TestHTTPEndpoint(InternalSCMRepositoryCreationEndpoint.class)
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 @ConnectWireMock
-public class InternalSCMRepoCreationIT {
+public class InternalSCMRepoCreationEndpointTest {
 
     private static final String CALLBACK_PATH = "/callback";
     private static final String GITLAB_API_PATH = "/api/v4";
