@@ -37,14 +37,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
 
 @QuarkusTest
 @TestHTTPEndpoint(CloneEndpoint.class)
 @TestProfile(CloningProfile.class)
 @ConnectWireMock
 class CloningEndpointIT {
-
-    private static final String CALLBACK_PATH = "/callback";
 
     WireMock invokerWireMock;
 
