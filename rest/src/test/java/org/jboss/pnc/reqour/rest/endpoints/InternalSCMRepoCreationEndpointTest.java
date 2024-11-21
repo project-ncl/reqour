@@ -26,14 +26,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.jboss.pnc.api.constants.HttpHeaders.ACCEPT_STRING;
 import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
 
 @QuarkusTest
 @TestHTTPEndpoint(InternalSCMRepositoryCreationEndpoint.class)
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 @ConnectWireMock
 public class InternalSCMRepoCreationEndpointTest {
-
-    private static final String CALLBACK_PATH = "/callback";
 
     private static final String GITLAB_API_PATH = "/api/v4";
 

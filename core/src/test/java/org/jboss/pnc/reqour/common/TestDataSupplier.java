@@ -4,7 +4,6 @@
  */
 package org.jboss.pnc.reqour.common;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Namespace;
@@ -22,8 +21,9 @@ import java.util.List;
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromExternalUrl;
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
 
-@ApplicationScoped
 public class TestDataSupplier {
+
+    public static final String CALLBACK_PATH = "/callback";
 
     public static final String TASK_ID = "task-id";
 

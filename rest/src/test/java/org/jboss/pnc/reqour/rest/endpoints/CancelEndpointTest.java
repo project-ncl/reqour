@@ -32,14 +32,14 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+
 @QuarkusTest
 @TestProfile(CancelProfile.class)
 @TestHTTPEndpoint(CancelEndpoint.class)
 @WithOpenShiftTestServer(crud = false)
 @ConnectWireMock
 public class CancelEndpointTest {
-
-    private static final String CALLBACK_PATH = "/callback";
 
     WireMock wireMock;
 

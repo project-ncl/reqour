@@ -26,12 +26,11 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
 
 @QuarkusTest
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 class GitlabRepositoryCreationServiceTest {
-
-    private static final String CALLBACK_PATH = "/callback";
 
     @InjectMock
     GitlabApiService gitlabApiService;
