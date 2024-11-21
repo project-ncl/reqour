@@ -9,7 +9,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.jboss.pnc.api.dto.GA;
 import org.jboss.pnc.api.dto.GAV;
-import org.jboss.pnc.reqour.adjust.profiles.AdjustProfile;
+import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;

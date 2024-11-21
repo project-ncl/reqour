@@ -2,9 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.adjust.profiles;
-
-import org.jboss.pnc.reqour.common.profile.CommonTestProfile;
+package org.jboss.pnc.reqour.common.profile;
 
 import java.util.Set;
 
