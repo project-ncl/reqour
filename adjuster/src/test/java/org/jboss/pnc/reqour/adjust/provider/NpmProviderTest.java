@@ -10,7 +10,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
-import org.jboss.pnc.reqour.adjust.TestUtils;
+import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.profiles.NpmAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -24,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertiesContainExactly;
-import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
+import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 @QuarkusTest
 @TestProfile(NpmAdjustProfile.class)
@@ -35,7 +35,7 @@ class NpmProviderTest {
     ReqourAdjusterConfig config;
 
     @Inject
-    TestUtils testUtils;
+    AdjustTestUtils adjustTestUtils;
 
     @Inject
     ObjectMapper objectMapper;
@@ -58,7 +58,7 @@ class NpmProviderTest {
     void prepareCommand_standardTemporaryBuildWithPersistentPreference_generatedCommandIsCorrect() {
         NpmProvider provider = new NpmProvider(
                 config.adjust(),
-                testUtils.getAdjustRequest(Path.of("npm-request.json")),
+                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 null,
                 null,
@@ -89,7 +89,7 @@ class NpmProviderTest {
     void obtainManipulatorResult_resultWithBasicName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
                 config.adjust(),
-                testUtils.getAdjustRequest(Path.of("npm-request.json")),
+                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 objectMapper,
                 null,
@@ -110,7 +110,7 @@ class NpmProviderTest {
     void obtainManipulatorResult_resultWithComplicatedName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
                 config.adjust(),
-                testUtils.getAdjustRequest(Path.of("npm-request.json")),
+                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 objectMapper,
                 null,

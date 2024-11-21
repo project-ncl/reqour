@@ -19,7 +19,7 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ApplicationScoped
-public class TestUtils {
+public class AdjustTestUtils {
 
     @ConfigProperty(name = "test.location.requests.dir")
     Path requestsLocation;
