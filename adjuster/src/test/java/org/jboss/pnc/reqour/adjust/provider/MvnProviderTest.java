@@ -8,7 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
-import org.jboss.pnc.reqour.adjust.TestUtils;
+import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.profiles.MvnAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertiesContainExactly;
-import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
+import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 @QuarkusTest
 @TestProfile(MvnAdjustProfile.class)
@@ -33,7 +33,7 @@ public class MvnProviderTest {
     ReqourAdjusterConfig config;
 
     @Inject
-    TestUtils testUtils;
+    AdjustTestUtils adjustTestUtils;
 
     static Path workdir;
 
@@ -51,7 +51,7 @@ public class MvnProviderTest {
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.adjust(),
-                testUtils.getAdjustRequest(Path.of("mvn-request.json")),
+                adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json")),
                 workdir,
                 null,
                 null,
@@ -97,7 +97,7 @@ public class MvnProviderTest {
     void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.adjust(),
-                testUtils.getAdjustRequest(Path.of("mvn-request-2.json")),
+                adjustTestUtils.getAdjustRequest(Path.of("mvn-request-2.json")),
                 workdir,
                 null,
                 null,
