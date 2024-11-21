@@ -17,9 +17,9 @@ import jakarta.ws.rs.core.MediaType;
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.utils.UrlEncoder;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
-import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
+import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +34,7 @@ import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
 public class InternalSCMRepoCreationEndpointTest {
 
     private static final String CALLBACK_PATH = "/callback";
+
     private static final String GITLAB_API_PATH = "/api/v4";
 
     @Inject

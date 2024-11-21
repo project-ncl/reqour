@@ -23,17 +23,7 @@
     </properties>
 
     <dependencies>
-        <!-- Inter-module dependencies -->
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-core</artifactId>
-        </dependency>
-
         <!-- Quarkus dependencies -->
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-config-yaml</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
@@ -44,15 +34,19 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-openshift-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-config-yaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-health</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-openapi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-openshift-client</artifactId>
         </dependency>
 
         <!-- Regular dependencies -->
@@ -79,12 +73,6 @@
         </dependency>
 
         <!-- Test dependencies -->
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-core</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
@@ -113,6 +101,23 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-test-openshift-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Inter-module dependencies -->
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-core</artifactId>
         </dependency>
     </dependencies>
 
