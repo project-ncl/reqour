@@ -12,7 +12,7 @@ import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.profiles.NpmAdjustProfile;
+import org.jboss.pnc.reqour.common.profile.NpmAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
