@@ -8,6 +8,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
+import org.jboss.pnc.api.reqour.dto.CancelRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
@@ -88,6 +89,17 @@ public class TestUtils {
             String callbackPath) {
         return InternalSCMCreationRequest.builder()
                 .project(projectPath)
+                .taskId(taskId)
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create(getWiremockBaseUrl() + callbackPath))
+                                .build())
+                .build();
+    }
+
+    public static CancelRequest createCancelRequest(String taskId, String callbackPath) {
+        return CancelRequest.builder()
                 .taskId(taskId)
                 .callback(
                         Request.builder()

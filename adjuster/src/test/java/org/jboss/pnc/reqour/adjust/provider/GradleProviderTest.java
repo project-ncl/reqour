@@ -8,6 +8,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
+import org.jboss.pnc.reqour.adjust.TestUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.profiles.GradleAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -21,8 +22,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.adjust.provider.TestUtils.assertSystemPropertiesContainExactly;
-import static org.jboss.pnc.reqour.adjust.provider.TestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertiesContainExactly;
+import static org.jboss.pnc.reqour.adjust.TestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 @QuarkusTest
 @TestProfile(GradleAdjustProfile.class)

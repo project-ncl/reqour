@@ -18,6 +18,6 @@ public abstract class CommonTestProfile implements QuarkusTestProfile {
     }
 
     protected enum TestTag {
-        ADJUST, CLONING, CONFIG, GRADLE, INTERNAL_SCM_CREATION, MVN, NPM, SBT, TRANSLATION, UTILS, VERSION,
+        ADJUST, CANCEL, CLONING, CONFIG, GRADLE, INTERNAL_SCM_CREATION, MVN, NPM, SBT, TRANSLATION, UTILS, VERSION,
     }
 }

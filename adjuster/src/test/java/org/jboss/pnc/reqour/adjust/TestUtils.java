@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.adjust.provider;
+package org.jboss.pnc.reqour.adjust;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;

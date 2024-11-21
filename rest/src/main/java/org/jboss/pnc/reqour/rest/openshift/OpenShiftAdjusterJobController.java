@@ -13,6 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 
@@ -24,7 +25,7 @@ import java.util.List;
  */
 @ApplicationScoped
 @Slf4j
-public class OpenShiftAdjusterPodController {
+public class OpenShiftAdjusterJobController {
 
     private final ReqourRestConfig config;
     private final ManagedExecutor executor;
@@ -32,7 +33,7 @@ public class OpenShiftAdjusterPodController {
     private final JobDefinitionCreator jobDefinitionCreator;
 
     @Inject
-    public OpenShiftAdjusterPodController(
+    public OpenShiftAdjusterJobController(
             ReqourRestConfig config,
             ManagedExecutor executor,
             OpenShiftClient openShiftClient,
@@ -54,13 +55,21 @@ public class OpenShiftAdjusterPodController {
         });
     }
 
-    public void destroyAdjusterJob(String taskId) {
-        Job job = openShiftClient.resources(Job.class).withName(getJobName(taskId)).item();
+    public ResultStatus destroyAdjusterJob(String taskId) {
+        Job job = openShiftClient.batch().v1().jobs().withName(getJobName(taskId)).get();
+        if (job == null) {
+            log.warn("Job corresponding to task ID '{}' was not found", taskId);
+            return ResultStatus.FAILED;
+        }
+
         Failsafe.with(getOpenShiftRetryPolicy()).with(executor).runAsync(() -> {
             log.debug("Removing reqour adjuster job corresponding to task ID '{}' from the cluster", taskId);
             List<StatusDetails> statusDetails = openShiftClient.resource(job).delete();
-            log.debug("{}", statusDetails);
+            if (statusDetails.size() == 1) {
+                log.debug("Job with name '{}' successfully deleted", statusDetails.getFirst().getName());
+            }
         });
+        return ResultStatus.CANCELLED;
     }
 
     private RetryPolicy<Object> getOpenShiftRetryPolicy() {

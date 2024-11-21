@@ -7,8 +7,6 @@ package org.jboss.pnc.reqour.adjust.service;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
-import org.jboss.pnc.api.dto.GA;
-import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
