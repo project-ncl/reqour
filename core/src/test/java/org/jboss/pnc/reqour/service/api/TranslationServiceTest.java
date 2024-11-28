@@ -10,7 +10,6 @@ import jakarta.inject.Inject;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
-import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.common.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
@@ -27,7 +26,7 @@ class TranslationServiceTest {
 
     @Test
     void externalToInternal_noProtocol_returnsResult() {
-        testInvalidURL(TestDataSupplier.Translation.noProtocol(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.noProtocol());
     }
 
     @Test
@@ -67,34 +66,32 @@ class TranslationServiceTest {
 
     @Test
     void externalToInternal_invalidScpLikeURL_throwsException() {
-        testInvalidURL(
-                TestDataSupplier.Translation.invalidScpLikeWithoutSemicolon(),
-                InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.invalidScpLikeWithoutSemicolon());
     }
 
     @Test
     void externalToInternal_noRepositoryProvided_throwsException() {
-        testInvalidURL(TestDataSupplier.Translation.withoutRepository(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.withoutRepository());
     }
 
     @Test
     void externalToInternal_nonScpLikeWithUser_throwsException() {
-        testInvalidURL(TestDataSupplier.Translation.nonScpLikeWithUser(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.nonScpLikeWithUser());
     }
 
     @Test
     void externalToInternal_unknownSchema_throwsException() {
-        testInvalidURL(TestDataSupplier.Translation.withUnavailableSchema(), InvalidExternalUrlException.class);
+        testInvalidURL(TestDataSupplier.Translation.withUnavailableSchema());
     }
 
     private void testCorrectURL(TranslateResponse expectedResponse) {
-        TranslateResponse response = service
-                .externalToInternal(TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl()));
+        String actualInternalUrl = service.externalToInternal(expectedResponse.getExternalUrl());
 
-        assertThat(response).isEqualTo(expectedResponse);
+        assertThat(actualInternalUrl).isEqualTo(expectedResponse.getInternalUrl());
     }
 
-    private void testInvalidURL(TranslateRequest request, Class<? extends Throwable> expectedException) {
-        assertThatThrownBy(() -> service.externalToInternal(request)).isInstanceOf(expectedException);
+    private void testInvalidURL(TranslateRequest request) {
+        assertThatThrownBy(() -> service.externalToInternal(request.getExternalUrl()))
+                .isInstanceOf(InvalidExternalUrlException.class);
     }
 }

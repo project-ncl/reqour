@@ -38,7 +38,7 @@ class TranslationEndpointTest {
     void externalToInternal_validURL_returnsResponse() {
         TranslateResponse expectedResponse = TestDataSupplier.Translation.httpsWithOrganizationAndGitSuffix();
         TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
-        Mockito.when(service.externalToInternal(ArgumentMatchers.any())).thenReturn(expectedResponse);
+        Mockito.when(service.externalToInternal(ArgumentMatchers.any())).thenReturn(expectedResponse.getInternalUrl());
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)

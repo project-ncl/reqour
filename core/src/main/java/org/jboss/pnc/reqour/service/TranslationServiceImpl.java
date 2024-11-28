@@ -7,8 +7,6 @@ package org.jboss.pnc.reqour.service;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.api.reqour.dto.TranslateRequest;
-import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
@@ -29,10 +27,8 @@ public class TranslationServiceImpl implements TranslationService {
     }
 
     @Override
-    public TranslateResponse externalToInternal(TranslateRequest request) {
-        String externalUrl = request.getExternalUrl();
-
-        GitRepositoryURLValidator.ParsedURL url = GitRepositoryURLValidator.parseURL(request.getExternalUrl());
+    public String externalToInternal(String externalUrl) {
+        GitRepositoryURLValidator.ParsedURL url = GitRepositoryURLValidator.parseURL(externalUrl);
         if (url == null) {
             log.debug("Invalid external URL provided: {}", externalUrl);
             throw new InvalidExternalUrlException("Invalid external URL provided: " + externalUrl);
@@ -45,7 +41,7 @@ public class TranslationServiceImpl implements TranslationService {
                             + configUtils.getAcceptableSchemes());
         }
 
-        log.debug("Provided external URL ({}), was successfully parsed to: {}", request.getExternalUrl(), url);
+        log.info("Provided external URL ({}), was successfully parsed to: {}", externalUrl, url);
 
         String repository = adjustRepository(url.getRepository());
         String gitServer = adjustGitServer(configUtils.getActiveGitBackend().gitUrlInternalTemplate());
@@ -53,10 +49,9 @@ public class TranslationServiceImpl implements TranslationService {
 
         String repositoryName = (organization == null) ? repository : organization + URL_PATH_SEPARATOR + repository;
 
-        return TranslateResponse.builder()
-                .externalUrl(externalUrl)
-                .internalUrl(computeInternalUrlFromRepositoryName(repositoryName, gitServer))
-                .build();
+        String internalUrl = computeInternalUrlFromRepositoryName(repositoryName, gitServer);
+        log.info("For external URL '{}' was computed corresponding internal URL as: '{}'", externalUrl, internalUrl);
+        return internalUrl;
     }
 
     private static String adjustRepository(String repository) {
