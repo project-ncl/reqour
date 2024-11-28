@@ -8,6 +8,7 @@ import io.netty.handler.codec.http.HttpResponseStatus;
 import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
@@ -34,6 +35,7 @@ import java.util.Optional;
  */
 @ApplicationScoped
 @LookupIfProperty(name = "reqour.git.git-backends.active", stringValue = "gitlab")
+@Slf4j
 public class GitlabApiService {
 
     private final GitLabApi delegate;
@@ -90,12 +92,19 @@ public class GitlabApiService {
                 .readwriteUrl(readwriteUrl)
                 .callback(ReqourCallback.builder().status(ResultStatus.SUCCESS).id(taskId).build());
         try {
-            return new GitlabGetOrCreateProjectResult(
+            GitlabGetOrCreateProjectResult foundProject = new GitlabGetOrCreateProjectResult(
                     getProject(projectPath),
                     scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS).build());
+            log.debug("Project '{}' (id={}) already exists", foundProject.project().getName(), foundProject.project().getId());
+            return foundProject;
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
-                return createProject(projectName, parentId, scmCreationResponseBuilder);
+                GitlabGetOrCreateProjectResult createdProject = createProject(
+                        projectName,
+                        parentId,
+                        scmCreationResponseBuilder);
+                log.debug("Project '{}' (id={}) was newly created", createdProject.project().getName(), createdProject.project().getId());
+                return createdProject;
             }
             throw new GitlabApiRuntimeException(e);
         }
@@ -135,11 +144,13 @@ public class GitlabApiService {
 
             boolean tagsAlreadyExist = projectAlreadyExisted && doesTagProtectionAlreadyExist(projectId);
             if (tagsAlreadyExist) {
+                log.debug("Tag protection of project with id={} already exists", projectId);
                 return;
             }
 
             delegate.getTagsApi()
                     .protectTag(projectId, tagProtectionConfig.protectedTagsPattern().get(), AccessLevel.DEVELOPER);
+            log.debug("Tag protection for project with id={} successfully initialized", projectId);
         } catch (GitLabApiException e) {
             throw new GitlabApiRuntimeException(e);
         }
