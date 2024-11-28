@@ -25,6 +25,10 @@ public class TranslationEndpointImpl implements TranslateEndpoint {
 
     @Override
     public TranslateResponse externalToInternal(TranslateRequest externalToInternalRequestDto) {
-        return service.externalToInternal(externalToInternalRequestDto);
+        String externalUrl = externalToInternalRequestDto.getExternalUrl();
+        return TranslateResponse.builder()
+                .externalUrl(externalUrl)
+                .internalUrl(service.externalToInternal(externalUrl))
+                .build();
     }
 }

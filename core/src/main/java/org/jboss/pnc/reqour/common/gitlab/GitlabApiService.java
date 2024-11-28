@@ -95,7 +95,10 @@ public class GitlabApiService {
             GitlabGetOrCreateProjectResult foundProject = new GitlabGetOrCreateProjectResult(
                     getProject(projectPath),
                     scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS).build());
-            log.debug("Project '{}' (id={}) already exists", foundProject.project().getName(), foundProject.project().getId());
+            log.debug(
+                    "Project '{}' (id={}) already exists",
+                    foundProject.project().getName(),
+                    foundProject.project().getId());
             return foundProject;
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
@@ -103,7 +106,10 @@ public class GitlabApiService {
                         projectName,
                         parentId,
                         scmCreationResponseBuilder);
-                log.debug("Project '{}' (id={}) was newly created", createdProject.project().getName(), createdProject.project().getId());
+                log.debug(
+                        "Project '{}' (id={}) was newly created",
+                        createdProject.project().getName(),
+                        createdProject.project().getId());
                 return createdProject;
             }
             throw new GitlabApiRuntimeException(e);
