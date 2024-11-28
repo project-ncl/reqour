@@ -59,12 +59,18 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
             pathToTemplate = creationRequest.getProject();
         }
 
+        log.debug("Project path within the PNC workspace: '{}'", pathWithinWorkspace);
+        String projectReadonlyUrl = completeTemplateWithProjectPath(gitlabConfig.readOnlyTemplate(), pathToTemplate);
+        String projectReadwriteUrl = completeTemplateWithProjectPath(gitlabConfig.readWriteTemplate(), pathToTemplate);
+        log.debug("Readonly URL is: {}", projectReadonlyUrl);
+        log.debug("Readwrite URL is: {}", projectReadwriteUrl);
+
         GitlabGetOrCreateProjectResult fetchedProjectResult = gitlabApiService.getOrCreateProject(
                 project.projectName(),
                 parentId,
                 pathWithinWorkspace,
-                completeTemplateWithProjectPath(gitlabConfig.readOnlyTemplate(), pathToTemplate),
-                completeTemplateWithProjectPath(gitlabConfig.readWriteTemplate(), pathToTemplate),
+                projectReadonlyUrl,
+                projectReadwriteUrl,
                 creationRequest.getTaskId());
 
         gitlabApiService.configureProtectedTags(
