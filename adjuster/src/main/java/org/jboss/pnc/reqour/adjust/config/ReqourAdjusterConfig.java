@@ -5,6 +5,9 @@
 package org.jboss.pnc.reqour.adjust.config;
 
 import io.smallrye.config.ConfigMapping;
+import io.smallrye.config.WithName;
+
+import java.util.Map;
 
 /**
  * Configuration for the whole Reqour adjuster module.
@@ -15,4 +18,7 @@ public interface ReqourAdjusterConfig {
     AdjustConfig adjust();
 
     String mavenExecutable();
+
+    @WithName("mdc")
+    String serializedMDC();
 }

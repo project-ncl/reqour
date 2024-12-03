@@ -9,7 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentResult;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
@@ -40,7 +42,8 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
 
     @Override
     public AdjustmentResult adjust(AdjustRequest adjustRequest) {
-        // TODO[NCL-8829]: MDC -- BEGIN ALIGNMENT_ADJUST
+        ProcessStageUtils.logProcessStageBegin(AdjustProcessStage.ALIGNMENT.name());
+
         callAdjust();
         ManipulatorResult manipulatorResult = obtainManipulatorResult();
         log.debug("Parsed adjust response: {}", manipulatorResult);
@@ -48,8 +51,9 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
                 config.getWorkdir(),
                 manipulatorResult.getVersioningState().getExecutionRootVersion(),
                 getTagMessage(adjustRequest.getRef(), adjustRequest.getBuildType()));
+
+        ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.ALIGNMENT.name());
         return new AdjustmentResult(manipulatorResult, adjustmentPushResult);
-        // TODO[NCL-8829]: MDC -- END ALIGNMENT_ADJUST
     }
 
     private void callAdjust() {

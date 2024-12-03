@@ -11,6 +11,8 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
+import org.jboss.pnc.common.log.ProcessStageUtils;
+import org.jboss.pnc.reqour.adjust.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.common.GitCommands;
@@ -64,10 +66,9 @@ public class RepositoryFetcher {
      * @param workdir directory where to clone
      */
     public CloningResult cloneRepository(AdjustRequest adjustRequest, Path workdir) {
-        // TODO[NCL-8829]: MDC -- BEGIN SCM_CLONE
+        ProcessStageUtils.logProcessStageBegin(AdjustProcessStage.SCM_CLONE.name());
 
         checkTagProtection(adjustRequest);
-
         String gitUsername = configUtils.getActiveGitBackend().username();
 
         final boolean isRefInternal;
@@ -84,12 +85,11 @@ public class RepositoryFetcher {
         gitCommands.configureCommitter(workdir);
         // Get upstream commit before transforming into fat repository (since that potentially creates a new commit)
         String upstreamCommitId = gitCommands.revParse(workdir);
-
         CloningResult cloningResult = new CloningResult(upstreamCommitId, isRefInternal);
         transformGitSubmodulesIntoFatRepository(workdir);
 
+        ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.SCM_CLONE.name());
         return cloningResult;
-        // TODO[NCL-8829]: MDC -- END SCM_CLONE
     }
 
     private void checkTagProtection(AdjustRequest adjustRequest) {

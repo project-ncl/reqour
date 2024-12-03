@@ -7,7 +7,6 @@ package org.jboss.pnc.reqour.rest.openshift;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -15,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,7 +46,9 @@ public class JobDefinitionCreator {
                     "reqourSecretKey",
                     config.reqourSecretKey(),
                     "indyUrl",
-                    config.indyUrl());
+                    config.indyUrl(),
+                    "mdc",
+                    objectMapper.writeValueAsString(MDC.getCopyOfContextMap()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

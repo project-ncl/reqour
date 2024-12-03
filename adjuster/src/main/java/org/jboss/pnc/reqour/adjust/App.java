@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.picocli.runtime.annotations.TopCommand;
 import jakarta.inject.Inject;
@@ -32,6 +34,7 @@ import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.slf4j.MDC;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -83,6 +86,7 @@ public class App implements Runnable {
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {
+            configureMDC();
             CloningResult cloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
             AdjustProvider adjustProvider = pickAdjustProvider();
             AdjustmentResult adjustmentResult = adjustProvider.adjust(adjustRequest);
@@ -159,5 +163,11 @@ public class App implements Runnable {
                     processExecutor,
                     adjustmentPusher);
         };
+    }
+
+    private void configureMDC() throws JsonProcessingException {
+        MDC.clear();
+        MDC.setContextMap(objectMapper.readValue(config.serializedMDC(), new TypeReference<>() {
+        }));
     }
 }

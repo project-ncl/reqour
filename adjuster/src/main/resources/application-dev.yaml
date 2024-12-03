@@ -35,3 +35,4 @@ reqour-adjuster:
       cli-jar-path: '/foo/project-manipulator-cli.jar'
       alignment-parameters:
         - '-Dfoo=bar'
+  mdc: '{}'

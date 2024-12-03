@@ -50,6 +50,7 @@
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-common</artifactId>
             <version>3.0.2-SNAPSHOT</version>
+            <classifier>jakarta</classifier>
             <exclusions>
                 <exclusion>
                     <groupId>org.jboss.pnc</groupId>

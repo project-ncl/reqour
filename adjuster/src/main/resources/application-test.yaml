@@ -39,6 +39,7 @@ reqour-adjuster:
       alignment-parameters:
         - '-Doverride=config'
   maven-executable: './mvnw'
+  mdc: '{}'
 
 test:
   location:
