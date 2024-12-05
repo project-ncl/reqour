@@ -1,3 +1,7 @@
+quarkus:
+  otel:
+    enabled: false
+
 reqour:
   git:
     git-backends:
