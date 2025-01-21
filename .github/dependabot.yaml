@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "maven"
+    directory: "/" # pom.xml present in root
+    schedule:
+      interval: weekly
+      day: friday
+      time: '08:00' # UTC
+    open-pull-requests-limit: 5
