@@ -90,7 +90,7 @@ public class GitUtils {
     }
 
     public static List<String> doesShaExists(String ref) {
-        return List.of("git", "cat-file", "-e", ref);
+        return List.of("git", "cat-file", "-e", ref + "^{commit}");
     }
 
     public static List<String> fetchRef(String remote, String ref, boolean fetchShallowly, boolean dryRun) {
