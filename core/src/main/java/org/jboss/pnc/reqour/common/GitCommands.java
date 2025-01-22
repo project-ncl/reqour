@@ -159,12 +159,18 @@ public class GitCommands {
                 .execute(processContextBuilder.command(GitUtils.doesBranchExistAtRemote(remote, branch)).build()) == 0;
     }
 
-    public boolean isReferenceBranch(String ref, ProcessContext.Builder processContextBuilder) {
-        return processExecutor.execute(processContextBuilder.command(GitUtils.isReferenceBranch(ref)).build()) == 0;
+    public boolean doesBranchExistsLocally(String ref, ProcessContext.Builder processContextBuilder) {
+        return processExecutor
+                .execute(processContextBuilder.command(GitUtils.doesBranchExistLocally(ref)).build()) == 0;
     }
 
-    public boolean isReferenceTag(String ref, ProcessContext.Builder processContextBuilder) {
-        return processExecutor.execute(processContextBuilder.command(GitUtils.isReferenceTag(ref)).build()) == 0;
+    public boolean doesTagExistLocally(String ref, ProcessContext.Builder processContextBuilder) {
+        return processExecutor.execute(processContextBuilder.command(GitUtils.doesTagExistLocally(ref)).build()) == 0;
+    }
+
+    public boolean doesTagExistAtRemote(String remote, String ref, ProcessContext.Builder processContextBuilder) {
+        return processExecutor
+                .execute(processContextBuilder.command(GitUtils.doesTagExistAtRemote(remote, ref)).build()) == 0;
     }
 
     public boolean doesShaExists(String ref, ProcessContext.Builder processContextBuilder) {
@@ -186,19 +192,20 @@ public class GitCommands {
         checkout(GitUtils.FETCH_HEAD, false, processContextBuilder);
     }
 
-    public boolean doesReferenceExist(String ref, ProcessContext.Builder processContextBuilder) {
-        return isReferenceTag(ref, processContextBuilder) || isReferenceBranch(ref, processContextBuilder)
-                || doesShaExists(ref, processContextBuilder) || doesPRExists(ref, processContextBuilder);
+    public boolean doesReferenceExistRemotely(String ref, ProcessContext.Builder processContextBuilder) {
+        return doesReferenceExistAtRemote(DEFAULT_REMOTE_NAME, ref, processContextBuilder);
     }
 
-    public boolean doesPRExists(String ref, ProcessContext.Builder processContextBuilder) {
+    public boolean doesReferenceExistAtRemote(String remote, String ref, ProcessContext.Builder processContextBuilder) {
+        return doesTagExistAtRemote(remote, ref, processContextBuilder)
+                || doesBranchExistAtRemote(remote, ref, processContextBuilder)
+                || doesShaExists(ref, processContextBuilder)
+                || doesPRExistsAtRemote(remote, ref, processContextBuilder);
+    }
+
+    public boolean doesPRExistsAtRemote(String remote, String ref, ProcessContext.Builder processContextBuilder) {
         try {
-            fetchRef(
-                    GitUtils.DEFAULT_REMOTE_NAME,
-                    modifyPullRequestRefToBeFetchable(ref),
-                    false,
-                    true,
-                    processContextBuilder);
+            fetchRef(remote, modifyPullRequestRefToBeFetchable(ref), false, true, processContextBuilder);
             return true;
         } catch (GitException _e) {
             return false;

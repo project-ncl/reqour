@@ -118,9 +118,9 @@ public class GitCloneService implements CloneService {
     }
 
     public void pushClonedChanges(String ref, String remote, ProcessContext.Builder processContextBuilder) {
-        if (gitCommands.isReferenceBranch(ref, processContextBuilder)) {
+        if (gitCommands.doesBranchExistsLocally(ref, processContextBuilder)) {
             gitCommands.push(remote, ref, false, processContextBuilder);
-        } else if (gitCommands.isReferenceTag(ref, processContextBuilder)) {
+        } else if (gitCommands.doesTagExistLocally(ref, processContextBuilder)) {
             gitCommands.pushTags(
                     remote,
                     gitCommands.listTagsReachableFromRef(ref, processContextBuilder),
@@ -134,7 +134,7 @@ public class GitCloneService implements CloneService {
         log.info("adding tag and pushing");
         String newTag = "reqour-sync-" + ref;
 
-        if (gitCommands.isReferenceTag(newTag, processContextBuilder)) {
+        if (gitCommands.doesTagExistLocally(newTag, processContextBuilder)) {
             throw new GitException(
                     String.format(
                             "Cannot create tag '%s' in the remote '%s'. This tag already exists.",

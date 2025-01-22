@@ -114,7 +114,7 @@ public class RepositoryFetcher {
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
         gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
 
-        if (gitCommands.doesReferenceExist(adjustRequest.getRef(), processContextBuilder)) {
+        if (gitCommands.doesReferenceExistRemotely(adjustRequest.getRef(), processContextBuilder)) {
             boolean isRefPR = GitCommands.isReferencePR(adjustRequest.getRef());
             if (isRefPR) {
                 gitCommands.checkoutPR(adjustRequest.getRef(), processContextBuilder);
@@ -151,7 +151,7 @@ public class RepositoryFetcher {
             gitCommands.clone(
                     URLUtils.addUsernameToUrl(adjustRequest.getInternalUrl().getReadwriteUrl(), gitUsername),
                     processContextBuilder);
-            if (gitCommands.doesReferenceExist(adjustRequest.getRef(), processContextBuilder)) {
+            if (gitCommands.doesReferenceExistRemotely(adjustRequest.getRef(), processContextBuilder)) {
                 log.debug("Downstream repository has the ref, but not the upstream one. No syncing required!");
                 gitCommands.checkout(adjustRequest.getRef(), true, processContextBuilder);
                 isRefInternal = true;
