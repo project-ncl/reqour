@@ -109,12 +109,12 @@ public class AdjustmentPusher {
         String commitId = gitCommands.revParse(workdir);
 
         String tagName = (alignmentRootVersion != null) ? alignmentRootVersion : String.format("reqour-%s", commitId);
-        boolean doesTagAlreadyExist = gitCommands.isReferenceTag(tagName, processContextBuilder);
+        boolean doesTagAlreadyExist = gitCommands.doesTagExistLocally(tagName, processContextBuilder);
         if (doesTagAlreadyExist) {
             tagName = String.format("%s-%s", tagName, commitId.substring(0, 8));
         }
 
-        if (gitCommands.isReferenceTag(tagName, processContextBuilder)) {
+        if (gitCommands.doesTagExistLocally(tagName, processContextBuilder)) {
             return tagName;
         }
 
