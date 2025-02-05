@@ -11,6 +11,7 @@ import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jakarta.inject.Inject;
@@ -38,11 +39,13 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestHTTPEndpoint(CloneEndpoint.class)
 @TestProfile(CloningProfile.class)
 @ConnectWireMock
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class CloningEndpointIT {
 
     WireMock invokerWireMock;

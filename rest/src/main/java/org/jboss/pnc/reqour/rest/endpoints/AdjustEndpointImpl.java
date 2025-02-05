@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.rest.endpoints;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -39,6 +40,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     }
 
     @Override
+    @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void adjust(AdjustRequest adjustRequest) {
         managedExecutor.runAsync(() -> openShiftAdjusterJobController.createAdjusterJob(adjustRequest))
                 .exceptionally(throwable -> {

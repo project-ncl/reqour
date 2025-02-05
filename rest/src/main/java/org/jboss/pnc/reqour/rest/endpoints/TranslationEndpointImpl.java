@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ public class TranslationEndpointImpl implements TranslateEndpoint {
     }
 
     @Override
+    @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public TranslateResponse externalToInternal(TranslateRequest externalToInternalRequestDto) {
         String externalUrl = externalToInternalRequestDto.getExternalUrl();
         return TranslateResponse.builder()
