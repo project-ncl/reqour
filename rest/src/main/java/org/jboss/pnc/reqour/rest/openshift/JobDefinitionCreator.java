@@ -12,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringSubstitutor;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.slf4j.MDC;
@@ -31,6 +32,9 @@ public class JobDefinitionCreator {
     @Inject
     ReqourRestConfig config;
 
+    @ConfigProperty(name = "quarkus.oidc-client.credentials.secret")
+    String saSecret;
+
     public Job getAdjusterJobDefinition(AdjustRequest adjustRequest, String jobName) {
         final Map<String, Object> properties;
         try {
@@ -48,13 +52,9 @@ public class JobDefinitionCreator {
                     "indyUrl",
                     config.indyUrl(),
                     "mdc",
-<<<<<<< Updated upstream
-                    objectMapper.writeValueAsString(MDC.getCopyOfContextMap()));
-=======
                     objectMapper.writeValueAsString(MDC.getCopyOfContextMap()),
                     "saSecret",
                     saSecret);
->>>>>>> Stashed changes
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
