@@ -52,6 +52,7 @@
             <version>1.9.0</version>
         </dependency>
         <dependency>
+            <!-- This dependency is used because adjuster has to know PME's internal representation in order to parse the result. -->
             <groupId>org.commonjava.maven.ext</groupId>
             <artifactId>pom-manipulation-common</artifactId>
             <version>4.19</version>
@@ -59,6 +60,10 @@
                 <exclusion>
                     <groupId>com.sun</groupId>
                     <artifactId>tools</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.commonjava.maven.galley</groupId>
+                    <artifactId>galley-maven</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
