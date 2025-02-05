@@ -1,3 +1,10 @@
+quarkus:
+  oidc-client:
+    auth-server-url: https://keycloak-host/auth/realms/realm # overridden in runtime config
+    client-id: sa # overridden in runtime config
+    credentials:
+      secret: secret-of-sa # overridden in runtime config
+
 reqour-adjuster:
   adjust:
     validate: true
