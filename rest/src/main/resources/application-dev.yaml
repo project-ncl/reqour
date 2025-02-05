@@ -1,4 +1,6 @@
 quarkus:
+  oidc:
+    enabled: false
   otel:
     enabled: false
 

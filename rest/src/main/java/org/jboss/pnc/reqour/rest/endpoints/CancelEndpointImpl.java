@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.rest.endpoints;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -38,6 +39,7 @@ public class CancelEndpointImpl implements CancelEndpoint {
     }
 
     @Override
+    @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void cancelTask(CancelRequest cancelRequest) {
         managedExecutor.supplyAsync(() -> openShiftAdjusterJobController.destroyAdjusterJob(cancelRequest.getTaskId()))
                 .exceptionally(t -> {

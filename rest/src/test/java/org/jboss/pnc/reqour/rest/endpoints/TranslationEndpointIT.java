@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.rest.endpoints;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jakarta.ws.rs.core.MediaType;
@@ -21,10 +22,12 @@ import org.jboss.pnc.reqour.common.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestHTTPEndpoint(TranslateEndpoint.class)
 @TestProfile(TranslationProfile.class)
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 public class TranslationEndpointIT {
 
     @Test
@@ -59,5 +62,38 @@ public class TranslationEndpointIT {
 
         assertThat(response.statusCode()).isEqualTo(Status.BAD_REQUEST.getStatusCode());
         assertThat(response.getBody().as(ErrorResponse.class)).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    @TestSecurity(roles = {})
+    void externalToInternal_whenUnauthorized_returnsUnauthorized() {
+        TranslateResponse expectedResponse = TestDataSupplier.Translation.httpsWithOrganizationAndGitSuffix();
+        TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
+
+        Response response = RestAssured.given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request)
+                .when()
+                .post();
+
+        assertThat(response.statusCode()).isEqualTo(Status.UNAUTHORIZED.getStatusCode());
+    }
+
+    @Test
+    @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_USERS_ADMIN })
+    void externalToInternal_whenPncAdmin_returnsResponse() {
+        TranslateResponse expectedResponse = TestDataSupplier.Translation.httpsWithOrganizationAndGitSuffix();
+        TranslateRequest request = TestUtils.createTranslateRequestFromExternalUrl(expectedResponse.getExternalUrl());
+
+        Response response = RestAssured.given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(request)
+                .when()
+                .post();
+
+        assertThat(response.statusCode()).isEqualTo(Status.OK.getStatusCode());
+        assertThat(response.getBody().as(TranslateResponse.class)).isEqualTo(expectedResponse);
     }
 }

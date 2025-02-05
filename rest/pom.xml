@@ -5,8 +5,7 @@
     SPDX-License-Identifier: Apache-2.0
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>reqour-rest</artifactId>
 
@@ -51,6 +50,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-opentelemetry</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc</artifactId>
         </dependency>
 
         <!-- Regular dependencies -->
@@ -108,7 +111,15 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-test-security</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Inter-module dependencies -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-test-openshift-client</artifactId>
+            
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -117,8 +128,6 @@
             <type>test-jar</type>
             <scope>test</scope>
         </dependency>
-
-        <!-- Inter-module dependencies -->
         <dependency>
             <groupId>org.jboss.pnc.reqour</groupId>
             <artifactId>reqour-core</artifactId>

@@ -16,6 +16,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.OpenShiftTestServer;
 import io.quarkus.test.kubernetes.client.WithOpenShiftTestServer;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
@@ -33,12 +34,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestProfile(CancelProfile.class)
 @TestHTTPEndpoint(CancelEndpoint.class)
 @WithOpenShiftTestServer(crud = false)
 @ConnectWireMock
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 public class CancelEndpointTest {
 
     WireMock wireMock;
