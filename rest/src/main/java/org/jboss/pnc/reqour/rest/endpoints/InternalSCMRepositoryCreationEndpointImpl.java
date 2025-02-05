@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
@@ -47,6 +48,7 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     }
 
     @Override
+    @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
         taskExecutor.executeAsync(
                 creationRequest.getCallback(),

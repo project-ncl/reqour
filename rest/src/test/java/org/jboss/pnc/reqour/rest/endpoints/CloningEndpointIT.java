@@ -11,6 +11,7 @@ import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jakarta.inject.Inject;
@@ -38,11 +39,13 @@ import java.nio.file.Files;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestHTTPEndpoint(CloneEndpoint.class)
 @TestProfile(CloningProfile.class)
 @ConnectWireMock
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class CloningEndpointIT {
 
     WireMock invokerWireMock;
@@ -129,6 +132,52 @@ class CloningEndpointIT {
                 .body(
                         TestUtils.createRepositoryCloneRequest(
                                 nonExistentRepoUrl,
+                                CloneTestUtils.EMPTY_DEST_REPO_URL,
+                                getCallbackUrl(),
+                                TestDataSupplier.TASK_ID))
+                .when()
+                .post()
+                .then()
+                .statusCode(202);
+
+        Thread.sleep(2_000);
+        WireMockUtils.verifyThatCallbackWasSent(invokerWireMock, CALLBACK_PATH, expectedBody);
+    }
+
+    @Test
+    @TestSecurity(user = TEST_USER, roles = {})
+    void clone_whenUnauthorized_returnsUnauthorized() {
+        RestAssured.given()
+                .when()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(
+                        TestUtils.createRepositoryCloneRequest(
+                                CloneTestUtils.SOURCE_REPO_URL,
+                                CloneTestUtils.EMPTY_DEST_REPO_URL,
+                                getCallbackUrl(),
+                                TestDataSupplier.TASK_ID))
+                .when()
+                .post()
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_USERS_ADMIN })
+    void clone_whenAdmin_returnsResponse() throws JsonProcessingException, InterruptedException {
+        String expectedBody = objectMapper.writeValueAsString(
+                TestUtils.createRepositoryCloneResponse(
+                        CloneTestUtils.SOURCE_REPO_URL,
+                        CloneTestUtils.EMPTY_DEST_REPO_URL,
+                        ResultStatus.SUCCESS,
+                        TestDataSupplier.TASK_ID));
+
+        RestAssured.given()
+                .when()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(
+                        TestUtils.createRepositoryCloneRequest(
+                                CloneTestUtils.SOURCE_REPO_URL,
                                 CloneTestUtils.EMPTY_DEST_REPO_URL,
                                 getCallbackUrl(),
                                 TestDataSupplier.TASK_ID))
