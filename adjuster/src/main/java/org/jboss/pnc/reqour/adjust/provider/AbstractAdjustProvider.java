@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */

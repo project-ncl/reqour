@@ -170,30 +170,34 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>2.2</version>
+                    <version>4.6</version>
                     <configuration>
-                        <header>${rootPath}/.license-header.txt</header>
-                        <excludes>
-                            <exclude>.license-header.txt</exclude>
-                            <exclude>**/README.md</exclude>
-                            <exclude>LICENSE.txt</exclude>
-                            <exclude>eclipse-codeStyle.xml</exclude>
-                            <exclude>**/Dockerfile</exclude>
-                            <exclude>**/scripts/**</exclude>
-                            <exclude>**/images/**</exclude>
-                            <exclude>**/.dockerignore</exclude>
-                            <exclude>**/.mvn/**</exclude>
-                            <exclude>**/mvnw*</exclude>
-                            <exclude>**/**.properties</exclude>
-                            <exclude>**/application*.yaml</exclude>
-                            <exclude>src/test/resources/clone-test/source-repo/*.txt</exclude>
-                            <exclude>src/test/resources/**/*</exclude>
+                        <licenseSets>
+                            <licenseSet>
+                                <header>${rootPath}/.license-header.txt</header>
+                                <excludes>
+                                    <exclude>.license-header.txt</exclude>
+                                    <exclude>**/README.md</exclude>
+                                    <exclude>LICENSE.txt</exclude>
+                                    <exclude>eclipse-codeStyle.xml</exclude>
+                                    <exclude>**/Dockerfile</exclude>
+                                    <exclude>**/scripts/**</exclude>
+                                    <exclude>**/images/**</exclude>
+                                    <exclude>**/.dockerignore</exclude>
+                                    <exclude>**/.mvn/**</exclude>
+                                    <exclude>**/mvnw*</exclude>
+                                    <exclude>**/**.properties</exclude>
+                                    <exclude>**/application*.yaml</exclude>
+                                    <exclude>src/test/resources/clone-test/source-repo/*.txt</exclude>
+                                    <exclude>src/test/resources/**/*</exclude>
 
-                            <!-- Exclude downloaded/generated -->
-                            <exclude>**/.cache/**</exclude>
-                            <exclude>**/rest-config.json</exclude>
-                            <exclude>**/Test*.html</exclude>
-                        </excludes>
+                                    <!-- Exclude downloaded/generated -->
+                                    <exclude>**/.cache/**</exclude>
+                                    <exclude>**/rest-config.json</exclude>
+                                    <exclude>**/Test*.html</exclude>
+                                </excludes>
+                            </licenseSet>
+                        </licenseSets>
                     </configuration>
                 </plugin>
             </plugins>
