@@ -1,6 +1,9 @@
 quarkus:
   swagger-ui:
     always-include: true
+  oidc:
+    auth-server-url: https://keycloak-host/auth/realms/realm # overridden in runtime config
+    client-id: client # overridden in runtime config
 
 mp:
   openapi:

@@ -48,7 +48,13 @@ public class JobDefinitionCreator {
                     "indyUrl",
                     config.indyUrl(),
                     "mdc",
+<<<<<<< Updated upstream
                     objectMapper.writeValueAsString(MDC.getCopyOfContextMap()));
+=======
+                    objectMapper.writeValueAsString(MDC.getCopyOfContextMap()),
+                    "saSecret",
+                    saSecret);
+>>>>>>> Stashed changes
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

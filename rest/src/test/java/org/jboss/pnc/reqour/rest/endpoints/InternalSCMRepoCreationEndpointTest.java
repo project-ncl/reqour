@@ -11,6 +11,7 @@ import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
@@ -27,11 +28,13 @@ import org.junit.jupiter.api.Test;
 import static org.jboss.pnc.api.constants.HttpHeaders.ACCEPT_STRING;
 import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestHTTPEndpoint(InternalSCMRepositoryCreationEndpoint.class)
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 @ConnectWireMock
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 public class InternalSCMRepoCreationEndpointTest {
 
     private static final String GITLAB_API_PATH = "/api/v4";
