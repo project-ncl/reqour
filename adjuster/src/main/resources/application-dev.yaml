@@ -1,3 +1,7 @@
+quarkus:
+  oidc-client:
+    enabled: false
+
 reqour-adjuster:
   adjust:
     validate: false
