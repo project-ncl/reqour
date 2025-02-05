@@ -1,6 +1,8 @@
 quarkus:
   oidc:
     enabled: false
+  oidc-client:
+    enabled: false
   otel:
     enabled: false
 
