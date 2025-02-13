@@ -16,6 +16,8 @@ import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
 
 import java.util.List;
 
@@ -31,27 +33,28 @@ public class OpenShiftAdjusterJobController {
     private final ManagedExecutor executor;
     private final OpenShiftClient openShiftClient;
     private final JobDefinitionCreator jobDefinitionCreator;
+    private final Logger userLogger;
 
     @Inject
     public OpenShiftAdjusterJobController(
             ReqourRestConfig config,
             ManagedExecutor executor,
             OpenShiftClient openShiftClient,
-            JobDefinitionCreator jobDefinitionCreator) {
+            JobDefinitionCreator jobDefinitionCreator,
+            @UserLogger Logger userLogger) {
         this.config = config;
         this.executor = executor;
         this.openShiftClient = openShiftClient;
         this.jobDefinitionCreator = jobDefinitionCreator;
+        this.userLogger = userLogger;
     }
 
     public void createAdjusterJob(AdjustRequest adjustRequest) {
-        Job adjusterJob = jobDefinitionCreator
-                .getAdjusterJobDefinition(adjustRequest, getJobName(adjustRequest.getTaskId()));
+        String jobName = getJobName(adjustRequest.getTaskId());
+        Job adjusterJob = jobDefinitionCreator.getAdjusterJobDefinition(adjustRequest, jobName);
         Failsafe.with(getOpenShiftRetryPolicy()).with(executor).getAsync(() -> {
-            log.debug("Creating reqour adjuster job in the cluster");
-            Job job = openShiftClient.resource(adjusterJob).create();
-            log.debug("Job '{}' was successfully created", job.getMetadata().getName());
-            return job;
+            userLogger.info("Creating reqour adjuster job '{}' in the cluster", jobName);
+            return openShiftClient.resource(adjusterJob).create();
         });
     }
 
@@ -79,7 +82,7 @@ public class OpenShiftAdjusterJobController {
                 .withBackoff(openShiftRetryConfig.backoffInitialDelay(), openShiftRetryConfig.backoffMaxDelay())
                 .withMaxRetries(openShiftRetryConfig.maxRetries())
                 .withMaxDuration(openShiftRetryConfig.maxDuration())
-                .onSuccess((e) -> log.debug("Request successfully sent"))
+                .onSuccess((e) -> userLogger.info("Request successfully sent"))
                 .onRetry(
                         (e) -> log.debug(
                                 "Retrying (attempt #{}), last exception was: {}",

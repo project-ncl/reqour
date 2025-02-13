@@ -6,8 +6,7 @@ package org.jboss.pnc.reqour.adjust.exception;
 
 /**
  * Application exception wrapping expected errors.<br/>
- * In case this exception is thrown, we are returning {@code FAILED} status into BPM.<br/>
- * Otherwise, we return {@code SYSTEM_ERROR} (since unexpected error happened).
+ * In case this exception is thrown, we are returning {@code FAILED} status.
  */
 public class AdjusterException extends RuntimeException {
 

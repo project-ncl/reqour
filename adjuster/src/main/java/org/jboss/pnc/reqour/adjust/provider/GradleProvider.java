@@ -14,11 +14,11 @@ import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
-import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.slf4j.Logger;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,8 +45,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
-            AdjustmentPusher adjustmentPusher) {
-        super(objectMapper, processExecutor, adjustmentPusher);
+            Logger userLogger) {
+        super(objectMapper, processExecutor, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
 
         GradleProviderConfig gradleProviderConfig = adjustConfig.gradleProviderConfig();

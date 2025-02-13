@@ -15,6 +15,8 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -48,6 +50,10 @@ public class CommonManipulatorResultExtractor {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    @UserLogger
+    Logger userLogger;
+
     /**
      * Obtain {@link ManipulatorResult#getVersioningState()}. In case execution root overrides are specified, use them
      * for overrides.
@@ -66,6 +72,9 @@ public class CommonManipulatorResultExtractor {
                             "File which should contain alignment result ('%s') does not exist",
                             alignmentResultFilePath));
             PME manipulatorResult = objectMapper.readValue(alignmentResultFilePath.toFile(), PME.class);
+            userLogger.info(
+                    "Got PME result data: {}",
+                    org.jboss.pnc.reqour.adjust.utils.IOUtils.prettyPrint(manipulatorResult));
             return transformPMEIntoVersioningState(manipulatorResult, executionRootOverrides);
         } catch (IOException e) {
             throw new RuntimeException("Could not deserialize the result of manipulator", e);

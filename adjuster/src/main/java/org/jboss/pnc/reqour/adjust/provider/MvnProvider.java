@@ -16,12 +16,12 @@ import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
-import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,8 +51,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
-            AdjustmentPusher adjustmentPusher) {
-        super(objectMapper, processExecutor, adjustmentPusher);
+            Logger userLogger) {
+        super(objectMapper, processExecutor, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
@@ -84,9 +84,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
         if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
             validateConfig();
-            log.debug("PME config was successfully initialized and validated: {}", config);
+            userLogger.info("PME config was successfully initialized and validated: {}", config);
         } else {
-            log.debug("PME config was successfully initialized: {}", config);
+            userLogger.info("PME config was successfully initialized: {}", config);
         }
     }
 

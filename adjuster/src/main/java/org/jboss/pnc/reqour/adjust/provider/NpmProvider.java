@@ -7,8 +7,6 @@ package org.jboss.pnc.reqour.adjust.provider;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.ConfigProvider;
-import org.jboss.pnc.api.dto.GA;
-import org.jboss.pnc.api.dto.GAV;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
@@ -17,10 +15,10 @@ import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
-import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -45,8 +43,8 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
-            AdjustmentPusher adjustmentPusher) {
-        super(objectMapper, processExecutor, adjustmentPusher);
+            Logger userLogger) {
+        super(objectMapper, processExecutor, userLogger);
 
         NpmProviderConfig npmProviderConfig = adjustConfig.npmProviderConfig();
 
@@ -66,9 +64,9 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
         if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
             validateConfig();
-            log.debug("Project manipulator config was successfully initialized and validated: {}", config);
+            userLogger.info("Project manipulator config was successfully initialized and validated: {}", config);
         } else {
-            log.debug("Project manipulator config was successfully initialized: {}", config);
+            userLogger.info("Project manipulator config was successfully initialized: {}", config);
         }
     }
 
@@ -100,6 +98,9 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
     VersioningState obtainVersioningState(Path resultsFilePath) {
         try {
             NpmResult manipulatorResult = objectMapper.readValue(resultsFilePath.toFile(), NpmResult.class);
+            userLogger.info(
+                    "Got Project Manipulator result data: {}",
+                    org.jboss.pnc.reqour.adjust.utils.IOUtils.prettyPrint(manipulatorResult));
             return VersioningState.builder()
                     .executionRootName(adjustNpmName(manipulatorResult.getName()))
                     .executionRootVersion(manipulatorResult.getVersion())

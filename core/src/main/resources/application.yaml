@@ -23,3 +23,10 @@ reqour:
           token: ${GITLAB_TOKEN}
     internal-urls: []  # overridden in runtime config
     private-github-user: ${PRIVATE_GITHUB_USER}
+  log:
+    final-log:
+      bifrost-uploader:
+        base-url: ${BIFROST_URL}
+      uploader-base-name: 'org.jboss.pnc._userlog_.alignment-log'
+    user-log:
+      user-logger-name: 'org.jboss.pnc._userlog_.alignment-log.reqour'

@@ -19,4 +19,6 @@ public interface ReqourAdjusterConfig {
 
     @WithName("mdc")
     String serializedMDC();
+
+    LogConfig log();
 }

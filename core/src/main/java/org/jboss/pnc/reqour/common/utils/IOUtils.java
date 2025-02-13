@@ -21,7 +21,7 @@ public class IOUtils {
         return createTempDir("clone-", "cloning");
     }
 
-    public static Path createTempDirForAdjust() {
+    public static Path createTempRandomDirForAdjust() {
         return createTempDir("adjust-", "adjust");
     }
 

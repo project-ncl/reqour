@@ -9,12 +9,13 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.reqour.model.ProcessContext;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -25,10 +26,12 @@ import java.util.function.Consumer;
 public class ProcessExecutorImpl implements ProcessExecutor {
 
     private final ManagedExecutor executor;
+    private final Logger userLogger;
 
     @Inject
-    public ProcessExecutorImpl(ManagedExecutor executor) {
+    public ProcessExecutorImpl(ManagedExecutor executor, @UserLogger Logger userLogger) {
         this.executor = executor;
+        this.userLogger = userLogger;
     }
 
     @Override
@@ -50,7 +53,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
                     processContext.getCommand(),
                     processContext.getWorkingDirectory(),
                     processContext.getExtraEnvVariables());
-            log.info("Executing the command with the process context: {}", loggedProcessContext);
+            userLogger.info("Executing the command with the process context: {}", loggedProcessContext);
             Process processStart = processBuilder.start();
             CompletableFuture<Void> stdoutConsumerProcess = createOutputConsumerProcess(
                     processStart.inputReader(),
@@ -62,7 +65,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
             int exitCode = processStart.waitFor();
             stdoutConsumerProcess.join();
             stderrConsumerProcess.join();
-            log.info(
+            log.debug(
                     "Command with process context {} terminated with the exit code: {}",
                     loggedProcessContext,
                     exitCode);
