@@ -6,9 +6,12 @@ package org.jboss.pnc.reqour.common;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
+import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.CancelRequest;
+import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
@@ -95,6 +98,24 @@ public class TestUtils {
                                 .method(Request.Method.POST)
                                 .uri(URI.create(getWiremockBaseUrl() + callbackPath))
                                 .build())
+                .build();
+    }
+
+    public static AdjustRequest createAdjustRequest() {
+        return AdjustRequest.builder()
+                .taskId(TestDataSupplier.TASK_ID)
+                .buildType(BuildType.MVN)
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create(TestUtils.getWiremockBaseUrl() + TestDataSupplier.CALLBACK_PATH))
+                                .build())
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readonlyUrl("https://github.com/project/repo")
+                                .readwriteUrl("git@github.com:project/repo")
+                                .build())
+                .originRepoUrl("https://github.com/project/repo")
                 .build();
     }
 

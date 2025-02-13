@@ -2,6 +2,8 @@ quarkus:
   log:
     console:
       json: false
+  oidc-client:
+    enabled: false
 
 reqour:
   git:
@@ -31,3 +33,7 @@ reqour:
     user:
       email: dev-user@example.com
       name: ReqourDev
+  log:
+    final-log:
+      bifrost-uploader:
+        base-url: http://bifrost.com

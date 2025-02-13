@@ -50,12 +50,16 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-logging-json</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-oidc-client</artifactId>
+        </dependency>
 
         <!-- Regular dependencies -->
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-api</artifactId>
-            <version>3.0.5-SNAPSHOT</version>
+            <version>3.0.6</version>
             <classifier>jakarta</classifier>
         </dependency>
         <dependency>
@@ -69,6 +73,11 @@
                     <artifactId>pnc-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc</groupId>
+            <artifactId>bifrost-upload-client</artifactId>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -112,6 +121,12 @@
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkiverse.wiremock</groupId>
+            <artifactId>quarkus-wiremock-test</artifactId>
+            <version>${wiremock.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

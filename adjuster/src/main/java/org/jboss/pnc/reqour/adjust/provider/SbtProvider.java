@@ -14,10 +14,10 @@ import org.jboss.pnc.reqour.adjust.config.SbtProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.SmegConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
-import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -40,8 +40,8 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
-            AdjustmentPusher adjustmentPusher) {
-        super(objectMapper, processExecutor, adjustmentPusher);
+            Logger userLogger) {
+        super(objectMapper, processExecutor, userLogger);
 
         SbtProviderConfig sbtProviderConfig = adjustConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils

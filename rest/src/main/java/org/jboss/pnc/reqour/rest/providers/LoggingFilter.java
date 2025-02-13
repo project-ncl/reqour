@@ -5,6 +5,8 @@
 package org.jboss.pnc.reqour.rest.providers;
 
 import io.opentelemetry.api.trace.Span;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerRequestFilter;
 import jakarta.ws.rs.container.ContainerResponseContext;
@@ -14,19 +16,20 @@ import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
 import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.log.MDCUtils;
+import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 import java.io.IOException;
 
-/**
- * @author <a href="mailto:matejonnet@gmail.com">Matej Lazar</a>
- */
+@ApplicationScoped
 @Provider
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(LoggingFilter.class);
+    @Inject
+    @UserLogger
+    Logger userLogger;
+
     private static final String REQUEST_EXECUTION_START = "request-execution-start";
 
     @Override
@@ -38,7 +41,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
 
         UriInfo uriInfo = requestContext.getUriInfo();
         Request request = requestContext.getRequest();
-        logger.info("Requested {} {}.", request.getMethod(), uriInfo.getRequestUri());
+        userLogger.info("Requested {} {}.", request.getMethod(), uriInfo.getRequestUri());
     }
 
     @Override
@@ -56,7 +59,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         try (MDC.MDCCloseable mdcTook = MDC.putCloseable(MDCKeys.REQUEST_TOOK, took);
                 MDC.MDCCloseable mdcStatus = MDC
                         .putCloseable(MDCKeys.RESPONSE_STATUS, Integer.toString(responseContext.getStatus()));) {
-            logger.debug("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
+            userLogger.info("Completed {}, took: {}ms.", requestContext.getUriInfo().getPath(), took);
         }
     }
 }

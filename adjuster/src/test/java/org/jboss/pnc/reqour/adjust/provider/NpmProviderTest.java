@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
+import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.common.profile.NpmAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -46,7 +47,7 @@ class NpmProviderTest {
 
     @BeforeAll
     static void beforeAll() {
-        workdir = IOUtils.createTempDirForAdjust();
+        workdir = IOUtils.createTempRandomDirForAdjust();
     }
 
     @AfterAll
@@ -62,7 +63,7 @@ class NpmProviderTest {
                 workdir,
                 null,
                 null,
-                null);
+                TestDataFactory.userLogger);
 
         List<String> command = provider.prepareCommand();
 
@@ -93,7 +94,7 @@ class NpmProviderTest {
                 workdir,
                 objectMapper,
                 null,
-                null);
+                TestDataFactory.userLogger);
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("artifactId-npm")
@@ -114,7 +115,7 @@ class NpmProviderTest {
                 workdir,
                 objectMapper,
                 null,
-                null);
+                TestDataFactory.userLogger);
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("redhat-artifactId-npm")

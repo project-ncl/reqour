@@ -17,7 +17,6 @@
 
     <properties>
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
-        <wiremock.version>1.4.1</wiremock.version>
         <rootPath>..</rootPath>
     </properties>
 
@@ -55,27 +54,17 @@
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-oidc</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-oidc-client</artifactId>
-        </dependency>
 
         <!-- Regular dependencies -->
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-api</artifactId>
-            <version>3.0.5-SNAPSHOT</version>
+            <version>3.0.6</version>
             <classifier>jakarta</classifier>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkiverse.wiremock</groupId>
-            <artifactId>quarkus-wiremock</artifactId>
-            <version>${wiremock.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

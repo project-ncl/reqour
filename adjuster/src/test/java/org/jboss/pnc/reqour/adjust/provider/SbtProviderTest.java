@@ -9,6 +9,7 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
+import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.common.profile.SbtAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -39,7 +40,7 @@ class SbtProviderTest {
 
     @BeforeAll
     static void beforeAll() {
-        workdir = IOUtils.createTempDirForAdjust();
+        workdir = IOUtils.createTempRandomDirForAdjust();
     }
 
     @AfterAll
@@ -55,7 +56,7 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                null);
+                TestDataFactory.userLogger);
 
         List<String> command = provider.prepareCommand();
 

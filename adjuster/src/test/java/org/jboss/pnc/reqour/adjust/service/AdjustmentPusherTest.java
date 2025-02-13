@@ -9,14 +9,15 @@ import io.quarkus.test.junit.TestProfile;
 import jakarta.inject.Inject;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.jboss.pnc.reqour.common.CloneTestUtils;
+import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
@@ -26,16 +27,20 @@ import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
 class AdjustmentPusherTest {
 
     @Inject
-    AdjustmentPusher adjustmentPusher;
+    AdjustmentPusherImpl adjustmentPusher;
+
+    private static final Path ADJUST_DIR = Path.of("/tmp/adjust"); // adjustment pusher impl makes sure it exists
 
     @BeforeAll
     static void beforeAll() throws IOException, GitAPIException {
+        Files.createDirectory(ADJUST_DIR);
         Files.createDirectory(SOURCE_REPO_PATH);
         CloneTestUtils.cloneSourceRepoFromGithub();
     }
 
     @AfterAll
     static void removeCloneRepo() throws IOException {
+        FileUtils.deleteDirectory(ADJUST_DIR.toFile());
         FileUtils.deleteDirectory(SOURCE_REPO_PATH.toFile());
     }
 

@@ -15,4 +15,6 @@ public interface ReqourConfig {
     GitConfig gitConfigs();
 
     PNCHttpClientConfig pncHttpClientConfig();
+
+    LogConfig log();
 }

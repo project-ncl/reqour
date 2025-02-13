@@ -1,10 +1,3 @@
-quarkus:
-  oidc-client:
-    auth-server-url: https://keycloak-host/auth/realms/realm # overridden in runtime config
-    client-id: sa # overridden in runtime config
-    credentials:
-      secret: secret-of-sa # overridden in runtime config
-
 reqour-adjuster:
   adjust:
     validate: true
@@ -21,3 +14,26 @@ reqour-adjuster:
         prefix-of-suffix-version: managedsvc
   maven-executable: mvn
   mdc: ${MDC}
+  log:
+    final-log-file-path: &final-log-file
+      /tmp/file-log.txt
+
+quarkus:
+  oidc-client:
+    auth-server-url: https://keycloak-host/auth/realms/realm # overridden in runtime config
+    client-id: sa # overridden in runtime config
+    credentials:
+      secret: secret-of-sa # overridden in runtime config
+  log:
+    handler:
+      file:
+        final-log-file-handler:
+          enable: true
+          path: *final-log-file
+          rotation:
+            max-file-size: 10G
+    category:
+      "org.jboss.pnc._userlog_.alignment-log":
+        level: INFO
+        handlers:
+          - final-log-file-handler

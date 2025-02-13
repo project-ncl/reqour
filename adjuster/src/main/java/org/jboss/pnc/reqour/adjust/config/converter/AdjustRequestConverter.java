@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.spi.Converter;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 
 import java.io.IOException;
 
@@ -26,9 +25,7 @@ public class AdjustRequestConverter implements Converter<AdjustRequest> {
     @Override
     public AdjustRequest convert(String value) throws IllegalArgumentException, NullPointerException {
         try {
-            AdjustRequest request = objectMapper.readValue(value, AdjustRequest.class);
-            log.debug("Parsed adjust request: {}", request);
-            return request;
+            return objectMapper.readValue(value, AdjustRequest.class);
         } catch (IOException e) {
             throw new RuntimeException("Error occurred when reading the request from ADJUST_REQUEST env variable", e);
         }

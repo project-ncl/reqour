@@ -7,13 +7,20 @@ reqour-adjuster:
     validate: true
     request: >
       {
+        "ref": "main",
         "callback": {
           "method": "POST",
-          "uri": "https://example.com/callback"
+          "uri": "http://localhost:${quarkus.wiremock.devservices.port}/callback"
         },
+        "sync": true,
         "originRepoUrl": "git@gitlab.com:repo/project.git",
+        "buildConfigParameters": {
+        },
+        "tempBuild": false,
         "taskId": "task123",
         "buildType": "MVN",
+        "pncDefaultAlignmentParameters": "-DdependencySource=REST -DrepoRemovalBackup=repositories-backup.xml -DversionSuffixStrip= -DreportNonAligned=true",
+        "brewPullActive": false,
         "internalUrl": {
           "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
           "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"

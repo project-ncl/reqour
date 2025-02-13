@@ -24,7 +24,7 @@ import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromE
 public class TestDataSupplier {
 
     public static final String CALLBACK_PATH = "/callback";
-
+    public static final String BIFROST_FINAL_LOG_UPLOAD_PATH = "/final-log/upload";
     public static final String TASK_ID = "task-id";
 
     public static class Translation {

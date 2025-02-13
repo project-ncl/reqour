@@ -5,7 +5,7 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.adjust.model.AdjustmentResult;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 
 /**
  * Interface for providing alignment for any {@link org.jboss.pnc.api.enums.BuildType}.
@@ -17,5 +17,5 @@ public interface AdjustProvider {
      *
      * @return result of alignment operation
      */
-    AdjustmentResult adjust(AdjustRequest adjustRequest);
+    ManipulatorResult adjust(AdjustRequest adjustRequest);
 }

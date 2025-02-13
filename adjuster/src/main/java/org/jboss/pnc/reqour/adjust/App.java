@@ -11,29 +11,30 @@ import io.quarkus.picocli.runtime.annotations.TopCommand;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
+import org.jboss.pnc.bifrost.upload.BifrostUploadException;
 import org.jboss.pnc.common.http.PNCHttpClient;
+import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
-import org.jboss.pnc.reqour.adjust.model.AdjustmentResult;
+import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.adjust.provider.AdjustProvider;
-import org.jboss.pnc.reqour.adjust.provider.GradleProvider;
-import org.jboss.pnc.reqour.adjust.provider.MvnProvider;
-import org.jboss.pnc.reqour.adjust.provider.NpmProvider;
-import org.jboss.pnc.reqour.adjust.provider.SbtProvider;
+import org.jboss.pnc.reqour.adjust.provider.AdjustProviderPicker;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
-import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
-import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
-import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
-import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.adjust.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.enums.FinalLogUploader;
+import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
 import org.slf4j.MDC;
 import picocli.CommandLine;
 
@@ -58,57 +59,60 @@ public class App implements Runnable {
     @Inject
     ConfigUtils configUtils;
 
-    @ConfigProperty(name = "reqour-adjuster.adjust.request")
-    AdjustRequest adjustRequest;
-
     @Inject
     ObjectMapper objectMapper;
-
-    @Inject
-    ProcessExecutor processExecutor;
 
     @Inject
     RepositoryFetcher repositoryFetcher;
 
     @Inject
-    CommonManipulatorResultExtractor adjustResultExtractor;
-
-    @Inject
-    RootGavExtractor rootGavExtractor;
+    AdjustProviderPicker adjustProviderPicker;
 
     @Inject
     AdjustmentPusher adjustmentPusher;
 
-    private final Path workdir = IOUtils.createTempDirForAdjust();
+    @Inject
+    BifrostLogUploaderWrapper bifrostLogUploader;
+
+    @Inject
+    @UserLogger
+    Logger userLogger;
+
+    private final Path workdir = IOUtils.createAdjustDirectory();
 
     @Override
     public void run() {
+        AdjustRequest adjustRequest = config.adjust().request();
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {
             configureMDC();
-            CloningResult cloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
-            AdjustProvider adjustProvider = pickAdjustProvider();
-            AdjustmentResult adjustmentResult = adjustProvider.adjust(adjustRequest);
-            adjustResponseBuilder.tag(adjustmentResult.adjustmentPushResult().tag())
-                    .downstreamCommit(adjustmentResult.adjustmentPushResult().commit())
-                    .internalUrl(adjustRequest.getInternalUrl())
-                    .upstreamCommit(cloningResult.upstreamCommit())
-                    .isRefRevisionInternal(cloningResult.isRefRevisionInternal())
-                    .manipulatorResult(adjustmentResult.manipulatorResult())
-                    .callback(
-                            ReqourCallback.builder()
-                                    .id(adjustRequest.getTaskId())
-                                    .status(ResultStatus.SUCCESS)
-                                    .build());
+
+            final CloningResult cloningResult;
+            try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.SCM_CLONE.name())) {
+                cloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
+            }
+
+            try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.ALIGNMENT.name())) {
+                AdjustProvider adjustProvider = adjustProviderPicker.pickAdjustProvider(adjustRequest);
+                ManipulatorResult manipulatorResult = adjustProvider.adjust(adjustRequest);
+                AdjustmentPushResult adjustmentPushResult = adjustmentPusher
+                        .pushAlignedChanges(adjustRequest, manipulatorResult);
+                combineResultsOfStages(
+                        adjustRequest,
+                        cloningResult,
+                        adjustmentPushResult,
+                        adjustResponseBuilder,
+                        manipulatorResult);
+            }
         } catch (AdjusterException e) {
             log.warn("Alignment exception occurred, setting the status to FAILED");
-            log.warn("Exception was: " + e);
+            userLogger.warn("Exception was: " + e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());
-        } catch (Throwable e) {
+        } catch (Exception e) {
             log.warn("Unexpected exception occurred, setting the status to SYSTEM_ERROR");
-            log.warn("Exception was: " + e);
+            userLogger.warn("Exception was: " + e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.SYSTEM_ERROR).build());
         } finally {
@@ -117,10 +121,36 @@ public class App implements Runnable {
             } catch (IOException e) {
                 log.error(String.format("Unable to delete directory '%s' after adjustments", workdir));
             }
-        }
 
-        AdjustResponse adjustResponse = adjustResponseBuilder.build();
-        sendCallback(adjustRequest.getCallback(), adjustResponse);
+            try {
+                bifrostLogUploader.uploadFileFinalLog(config.log().finalLogFilePath(), FinalLogUploader.ADJUSTER);
+            } catch (BifrostUploadException e) {
+                userLogger.error("Could not send final log to Bifrost, exiting with system error.", e);
+                adjustResponseBuilder.callback(
+                        ReqourCallback.builder()
+                                .id(adjustRequest.getTaskId())
+                                .status(ResultStatus.SYSTEM_ERROR)
+                                .build());
+            }
+
+            AdjustResponse adjustResponse = adjustResponseBuilder.build();
+            sendCallback(adjustRequest.getCallback(), adjustResponse);
+        }
+    }
+
+    private void combineResultsOfStages(
+            AdjustRequest adjustRequest,
+            CloningResult cloningResult,
+            AdjustmentPushResult adjustmentPushResult,
+            AdjustResponse.AdjustResponseBuilder adjustResponseBuilder,
+            ManipulatorResult manipulatorResult) {
+        adjustResponseBuilder.tag(adjustmentPushResult.tag())
+                .downstreamCommit(adjustmentPushResult.commit())
+                .internalUrl(adjustRequest.getInternalUrl())
+                .upstreamCommit(cloningResult.upstreamCommit())
+                .isRefRevisionInternal(cloningResult.isRefRevisionInternal())
+                .manipulatorResult(manipulatorResult)
+                .callback(ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.SUCCESS).build());
     }
 
     private void sendCallback(Request callback, AdjustResponse adjustResponse) {
@@ -129,45 +159,10 @@ public class App implements Runnable {
         pncHttpClient.sendRequest(callback, adjustResponse);
     }
 
-    AdjustProvider pickAdjustProvider() {
-        return switch (adjustRequest.getBuildType()) {
-            case MVN -> new MvnProvider(
-                    config.adjust(),
-                    adjustRequest,
-                    workdir,
-                    objectMapper,
-                    processExecutor,
-                    adjustResultExtractor,
-                    rootGavExtractor,
-                    adjustmentPusher);
-            case GRADLE -> new GradleProvider(
-                    config.adjust(),
-                    adjustRequest,
-                    workdir,
-                    objectMapper,
-                    processExecutor,
-                    adjustResultExtractor,
-                    adjustmentPusher);
-            case NPM -> new NpmProvider(
-                    config.adjust(),
-                    adjustRequest,
-                    workdir,
-                    objectMapper,
-                    processExecutor,
-                    adjustmentPusher);
-            case SBT -> new SbtProvider(
-                    config.adjust(),
-                    adjustRequest,
-                    workdir,
-                    objectMapper,
-                    processExecutor,
-                    adjustmentPusher);
-        };
-    }
-
     private void configureMDC() throws JsonProcessingException {
         MDC.clear();
         MDC.setContextMap(objectMapper.readValue(config.serializedMDC(), new TypeReference<>() {
         }));
+        log.debug("Parsed MDC: {}", MDC.getCopyOfContextMap());
     }
 }
