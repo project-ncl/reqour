@@ -14,6 +14,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.slf4j.MDC;
 
@@ -28,6 +29,9 @@ public class JobDefinitionCreator {
     ObjectMapper objectMapper;
 
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+
+    @Inject
+    ReqourConfig reqourCoreConfig;
 
     @Inject
     ReqourRestConfig config;
@@ -51,6 +55,8 @@ public class JobDefinitionCreator {
                     config.reqourSecretKey(),
                     "indyUrl",
                     config.indyUrl(),
+                    "bifrostUrl",
+                    reqourCoreConfig.log().finalLog().bifrostUploader().baseUrl(),
                     "mdc",
                     objectMapper.writeValueAsString(MDC.getCopyOfContextMap()),
                     "saSecret",
