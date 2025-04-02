@@ -54,7 +54,9 @@ public class JobDefinitionCreator {
                     "mdc",
                     objectMapper.writeValueAsString(MDC.getCopyOfContextMap()),
                     "saSecret",
-                    saSecret);
+                    saSecret,
+                    "saslJaasConf",
+                    config.saslJaasConf());
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

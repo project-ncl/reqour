@@ -17,6 +17,7 @@ reqour-rest:
   app-environment: test
   reqour-secret-key: test-secret
   indy-url: https://test-indy.example.com
+  sasl-jaas-conf: config
 
 wiremock:
   base-url: http://localhost:${quarkus.wiremock.devservices.port}

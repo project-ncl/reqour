@@ -21,6 +21,8 @@ public interface ReqourRestConfig {
 
     String indyUrl();
 
+    String saslJaasConf();
+
     RetryConfig openshiftRetryConfig();
 
     interface RetryConfig {
