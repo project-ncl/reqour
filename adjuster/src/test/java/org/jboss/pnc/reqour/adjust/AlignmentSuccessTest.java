@@ -59,10 +59,10 @@ class AlignmentSuccessTest {
                 WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH))
                         .withRequestBody(
                                 WireMock.and(
-                                        WireMock.containing("Cloning a repository"),
+                                        WireMock.containing("[INFO] Cloning a repository"),
                                         WireMock.containing(
-                                                "Starting an alignment process using the corresponding manipulator"),
-                                        WireMock.containing("Pushing aligned changes"))));
+                                                "[INFO] Starting an alignment process using the corresponding manipulator"),
+                                        WireMock.containing("[INFO] Pushing aligned changes"))));
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))

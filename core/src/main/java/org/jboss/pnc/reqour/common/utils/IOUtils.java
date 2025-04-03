@@ -67,4 +67,11 @@ public class IOUtils {
         int diff = c - 'A';
         return (char) ('a' + diff);
     }
+
+    /**
+     * Creates an {@link AutoCloseable} which automatically closes the file at the end of its lifecycle.
+     */
+    public static AutoCloseable createFileAutoCloseable(Path file) {
+        return () -> Files.deleteIfExists(file);
+    }
 }

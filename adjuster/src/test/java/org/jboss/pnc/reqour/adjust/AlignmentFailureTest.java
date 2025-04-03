@@ -52,7 +52,13 @@ public class AlignmentFailureTest {
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH))
-                        .withRequestBody(WireMock.containing("Oops, alignment exception")));
+                        .withRequestBody(
+                                WireMock.and(
+                                        WireMock.containing("[INFO] Cloning a repository"),
+                                        WireMock.containing("[WARN] Exception was: org.jboss.pnc.reqour.adjust.exception.AdjusterException: Oops, alignment exception")
+                                )
+                        ));
+
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))
