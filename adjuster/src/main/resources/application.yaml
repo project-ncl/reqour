@@ -32,6 +32,7 @@ quarkus:
           path: *final-log-file
           rotation:
             max-file-size: 10G
+          format: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%p] %s%e%n'
     category:
       "org.jboss.pnc._userlog_.alignment-log":
         level: INFO
