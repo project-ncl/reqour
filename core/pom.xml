@@ -47,8 +47,9 @@
             <artifactId>quarkus-logging-kafka-deployment</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.quarkus</groupId>
+            <groupId>io.quarkiverse.loggingjson</groupId>
             <artifactId>quarkus-logging-json</artifactId>
+            <version>3.1.0</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
