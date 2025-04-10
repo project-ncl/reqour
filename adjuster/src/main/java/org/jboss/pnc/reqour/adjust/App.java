@@ -18,6 +18,7 @@ import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.bifrost.upload.BifrostUploadException;
+import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
@@ -78,6 +79,9 @@ public class App implements Runnable {
     @UserLogger
     Logger userLogger;
 
+    @Inject
+    HeartbeatScheduler heartbeatScheduler;
+
     private final Path workdir = IOUtils.createAdjustDirectory();
 
     @Override
@@ -87,6 +91,7 @@ public class App implements Runnable {
 
         try {
             configureMDC();
+            heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
 
             final CloningResult cloningResult;
             try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.SCM_CLONE.name())) {
