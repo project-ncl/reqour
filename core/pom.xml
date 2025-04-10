@@ -65,6 +65,10 @@
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-common</artifactId>
+            <!--
+                Using snapshot version because of PNCHttpClient
+                TODO: Change to 3.0.2 once available
+            -->
             <version>3.0.2-SNAPSHOT</version>
             <classifier>jakarta</classifier>
             <exclusions>
