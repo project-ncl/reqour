@@ -24,6 +24,14 @@ reqour-adjuster:
         "internalUrl": {
           "readwriteUrl": "git@gitlab.com:test-workspace/repo/project.git",
           "readonlyUrl": "https://gitlab.com/test-workspace/repo/project.git"
+        },
+        "heartbeatConfig": {
+          "request": {
+            "method": "POST",
+            "uri": "http://localhost:${quarkus.wiremock.devservices.port}${test.heartbeat.path}"
+          },
+          "delay": 1,
+          "delayTimeUnit": "SECONDS"
         }
       }
     mvn:
@@ -63,3 +71,5 @@ test:
       gradle: '${test.location.providers.dir}/gradle'
       sbt: '${test.location.providers.dir}/sbt'
       npm: '${test.location.providers.dir}/npm'
+  heartbeat:
+    path: /heartbeat
