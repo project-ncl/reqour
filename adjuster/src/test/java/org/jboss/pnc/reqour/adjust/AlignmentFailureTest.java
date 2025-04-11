@@ -38,10 +38,14 @@ public class AlignmentFailureTest {
     @Inject
     ObjectMapper objectMapper;
 
+    @Inject
+    AdjustTestUtils adjustTestUtils;
+
     @BeforeEach
     void setUp() {
         wireMock.register(WireMock.post(BIFROST_FINAL_LOG_UPLOAD_PATH).willReturn(WireMock.ok()));
         wireMock.register(WireMock.post(CALLBACK_PATH).willReturn(WireMock.ok()));
+        wireMock.register(WireMock.post(adjustTestUtils.getHeartbeatPath()).willReturn(WireMock.ok()));
     }
 
     @Test
