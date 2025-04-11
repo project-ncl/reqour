@@ -4,7 +4,6 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,7 +17,6 @@ import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.AdjustEndpoint;
 import org.jboss.pnc.common.http.PNCHttpClient;
-import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
@@ -39,13 +37,12 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     public AdjustEndpointImpl(
             OpenShiftAdjusterJobController openShiftAdjusterJobController,
             ManagedExecutor managedExecutor,
-            ObjectMapper objectMapper,
-            ConfigUtils configUtils,
+            PNCHttpClient pncHttpClient,
             @UserLogger Logger userLogger,
             BifrostLogUploaderWrapper bifrostLogUploader) {
         this.managedExecutor = managedExecutor;
+        this.pncHttpClient = pncHttpClient;
         this.openShiftAdjusterJobController = openShiftAdjusterJobController;
-        pncHttpClient = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
         this.userLogger = userLogger;
         this.bifrostLogUploader = bifrostLogUploader;
     }
