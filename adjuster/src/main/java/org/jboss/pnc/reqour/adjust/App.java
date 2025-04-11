@@ -18,6 +18,7 @@ import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.bifrost.upload.BifrostUploadException;
+import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
@@ -30,7 +31,6 @@ import org.jboss.pnc.reqour.adjust.provider.AdjustProviderPicker;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
 import org.jboss.pnc.reqour.adjust.utils.IOUtils;
-import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -57,10 +57,10 @@ public class App implements Runnable {
     ReqourAdjusterConfig config;
 
     @Inject
-    ConfigUtils configUtils;
+    ObjectMapper objectMapper;
 
     @Inject
-    ObjectMapper objectMapper;
+    PNCHttpClient pncHttpClient;
 
     @Inject
     RepositoryFetcher repositoryFetcher;
@@ -78,6 +78,9 @@ public class App implements Runnable {
     @UserLogger
     Logger userLogger;
 
+    @Inject
+    HeartbeatScheduler heartbeatScheduler;
+
     private final Path workdir = IOUtils.createAdjustDirectory();
 
     @Override
@@ -87,6 +90,7 @@ public class App implements Runnable {
 
         try {
             configureMDC();
+            heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
 
             final CloningResult cloningResult;
             try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.SCM_CLONE.name())) {
@@ -155,7 +159,6 @@ public class App implements Runnable {
 
     private void sendCallback(Request callback, AdjustResponse adjustResponse) {
         log.debug("Gonna send the callback. Payload is: {}", adjustResponse);
-        PNCHttpClient pncHttpClient = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
         pncHttpClient.sendRequest(callback, adjustResponse);
     }
 

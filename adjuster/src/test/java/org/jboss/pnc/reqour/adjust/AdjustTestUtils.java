@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.Getter;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 
@@ -23,6 +24,10 @@ public class AdjustTestUtils {
 
     @ConfigProperty(name = "test.location.requests.dir")
     Path requestsLocation;
+
+    @ConfigProperty(name = "test.heartbeat.path")
+    @Getter
+    String heartbeatPath;
 
     @Inject
     ObjectMapper objectMapper;
