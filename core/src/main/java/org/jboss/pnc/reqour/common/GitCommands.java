@@ -14,7 +14,10 @@ import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Function;
@@ -31,8 +34,15 @@ import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
 @Slf4j
 public class GitCommands {
 
+    public static final String GIT_ATTRIBUTES = ".gitattributes";
+    private static final String LFS_PATTERN = "lfs";
+
     @Inject
     ConfigUtils configUtils;
+
+    @Inject
+    @UserLogger
+    Logger userLogger;
 
     private final ProcessExecutor processExecutor;
 
@@ -162,6 +172,19 @@ public class GitCommands {
     public boolean doesBranchExistsLocally(String ref, ProcessContext.Builder processContextBuilder) {
         return processExecutor
                 .execute(processContextBuilder.command(GitUtils.doesBranchExistLocally(ref)).build()) == 0;
+    }
+
+    public void setupGitLfsIfPresent(ProcessContext.Builder processContextBuilder) {
+        if (isLfsPresent(processContextBuilder)) {
+            userLogger.info("LFS detected in the repository");
+            processExecutor.execute(processContextBuilder.command(GitUtils.lfsInstall()).build());
+            processExecutor.execute(processContextBuilder.command(GitUtils.lfsFetchAll()).build());
+        }
+    }
+
+    boolean isLfsPresent(ProcessContext.Builder processContextBuilder) {
+        Path gitattributesFilePath = processContextBuilder.build().getWorkingDirectory().resolve(GIT_ATTRIBUTES);
+        return Files.exists(gitattributesFilePath) && IOUtils.fileContainsString(gitattributesFilePath, LFS_PATTERN);
     }
 
     public boolean doesTagExistLocally(String ref, ProcessContext.Builder processContextBuilder) {

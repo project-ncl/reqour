@@ -76,6 +76,7 @@ public class GitCloneService implements CloneService {
         // From: https://stackoverflow.com/a/7216269/2907906
         gitCommands.cloneMirror(request.getOriginRepoUrl(), processContextBuilder);
         gitCommands.disableBareRepository(processContextBuilder);
+        gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);
         gitCommands.pushAll(targetRemote, processContextBuilder);
         gitCommands.pushAllTags(targetRemote, processContextBuilder);
@@ -89,6 +90,7 @@ public class GitCloneService implements CloneService {
         String targetRemote = "target";
 
         gitCommands.clone(request.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.checkout(request.getRef(), true, processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);
         pushClonedChanges(request.getRef(), targetRemote, processContextBuilder);

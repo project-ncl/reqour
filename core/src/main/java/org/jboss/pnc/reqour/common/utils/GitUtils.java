@@ -97,6 +97,14 @@ public class GitUtils {
         return List.of("git", "cat-file", "-e", ref + "^{commit}");
     }
 
+    public static List<String> lfsInstall() {
+        return List.of("git", "lfs", "install");
+    }
+
+    public static List<String> lfsFetchAll() {
+        return List.of("git", "lfs", "fetch", "--all");
+    }
+
     public static List<String> fetchRef(String remote, String ref, boolean fetchShallowly, boolean dryRun) {
         List<String> command = new ArrayList<>(List.of("git", "fetch", remote, ref));
         if (fetchShallowly) {
