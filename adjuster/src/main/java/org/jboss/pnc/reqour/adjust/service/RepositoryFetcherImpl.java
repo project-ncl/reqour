@@ -72,6 +72,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
                     URLUtils.addUsernameToUrl(adjustRequest.getInternalUrl().getReadwriteUrl(), gitUsername),
                     adjustRequest.getRef(),
                     workdir);
+            gitCommands.setupGitLfsIfPresent(ProcessContext.defaultBuilderWithWorkdir(workdir));
             isRefInternal = true;
         }
 
@@ -106,6 +107,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
         gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.setupGitLfsIfPresent(processContextBuilder);
 
         if (gitCommands.doesReferenceExistRemotely(adjustRequest.getRef(), processContextBuilder)) {
             boolean isRefPR = GitCommands.isReferencePR(adjustRequest.getRef());

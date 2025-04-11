@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class IOUtils {
 
@@ -56,6 +58,16 @@ public class IOUtils {
             return Files.readString(file);
         } catch (IOException e) {
             throw new RuntimeException(String.format("Unable to read content of file '%s'", file), e);
+        }
+    }
+
+    public static boolean fileContainsString(Path file, String patternAsString) {
+        try {
+            Pattern pattern = Pattern.compile(patternAsString);
+            Matcher matcher = pattern.matcher(Files.readString(file));
+            return matcher.find();
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read content of the file " + file);
         }
     }
 
