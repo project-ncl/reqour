@@ -4,7 +4,6 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.WebApplicationException;
@@ -17,7 +16,6 @@ import org.jboss.pnc.api.reqour.dto.CancelResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.CancelEndpoint;
 import org.jboss.pnc.common.http.PNCHttpClient;
-import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 
 @ApplicationScoped
@@ -31,11 +29,10 @@ public class CancelEndpointImpl implements CancelEndpoint {
     public CancelEndpointImpl(
             ManagedExecutor managedExecutor,
             OpenShiftAdjusterJobController openShiftAdjusterJobController,
-            ObjectMapper objectMapper,
-            ConfigUtils configUtils) {
+            PNCHttpClient pncHttpClient) {
         this.managedExecutor = managedExecutor;
         this.openShiftAdjusterJobController = openShiftAdjusterJobController;
-        pncHttpClient = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
+        this.pncHttpClient = pncHttpClient;
     }
 
     @Override
