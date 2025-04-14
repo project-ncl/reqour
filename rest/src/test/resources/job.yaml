@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: %{jobName}
+spec:
+  backoffLimit: 1               # After a (potential) failure, do not try any retries
+  ttlSecondsAfterFinished: 900  # After 15 minutes, delete the job (hence its adjuster pod)
+  activeDeadlineSeconds: 10800  # Allow the job (hence its adjuster pod) to run for 3 hours max
+  template:
+    metadata:
+      name: %{jobName}  # Note: pods of the job will have name: %{jobName}-<randomSuffix>, these random suffixes cannot be removed, see: https://stackoverflow.com/a/62833249
+      # annotations:
+        # values from Job's metadata.annotations are not deserialized (used within _getAdjusterJobDefinition_ test) properly
+        # hence, injecting it directly into env through value
+        # environment: %{appEnvironment}
+        # kafka-client-secret: kafka-client-secret
+        # reqour-secret: %{reqourSecretKey}
+    spec:
+      containers:
+        - image: "quay.io/rh-newcastle-devel/reqour-adjuster-main:latest"
+          name: reqour-adjuster
+          env:
+            - name: KAFKA_CLIENT_SECRET_NAME
+              value: kafka-client-secret
+            - name: REQOUR_SECRET_NAME
+              value: '%{reqourSecretKey}'
+            - name: APP_ENV
+              value: '%{appEnvironment}'
+            - name: INDY_URL
+              value: '%{indyUrl}'
+            - name: BIFROST_URL
+              value: '%{bifrostUrl}'
+            - name: BUILD_TYPE
+              value: '%{buildType}'
+            - name: ADJUST_REQUEST
+              value: >
+                %{adjustRequest}
+            - name: MDC
+              value: '%{mdc}'
+            - name: OIDC_CLIENT_CREDENTIALS_SECRET
+              value: '%{saSecret}'
+            - name: SASL_JAAS_CONF
+              value: '%{saslJaasConf}'
+          livenessProbe:
+            exec:
+              command:
+                - '/bin/bash'
+                - '-c'
+                - 'true'
+          readinessProbe:
+            exec:
+              command:
+                - '/bin/bash'
+                - '-c'
+                - 'true'
+          resources:
+            limits:
+              cpu: 500m
+              memory: '%{resourcesMemory}'
+            requests:
+              cpu: 500m
+              memory: '%{resourcesMemory}'
+      restartPolicy: Never
