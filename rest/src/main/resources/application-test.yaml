@@ -3,6 +3,8 @@ quarkus:
     enabled: false
   oidc-client:
     enabled: false
+    credentials:
+      secret: oidc-client-secret
   otel:
     enabled: false
 
@@ -16,8 +18,9 @@ reqour:
 reqour-rest:
   app-environment: test
   reqour-secret-key: test-secret
-  indy-url: https://test-indy.example.com
-  sasl-jaas-conf: config
+  indy-url: https://test.indy.com
+  sasl-jaas-conf: sasl-jaas-config
+  job-definition-file-path: 'src/test/resources/job.yaml'
 
 wiremock:
   base-url: http://localhost:${quarkus.wiremock.devservices.port}
