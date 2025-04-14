@@ -90,7 +90,9 @@ public class App implements Runnable {
 
         try {
             configureMDC();
-            heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
+            if (adjustRequest.getHeartbeatConfig() != null) {
+                heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
+            }
 
             final CloningResult cloningResult;
             try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.SCM_CLONE.name())) {
