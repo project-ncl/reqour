@@ -4,9 +4,21 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
+import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
+import static org.jboss.pnc.reqour.common.utils.GitUtils.FETCH_HEAD;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -22,17 +34,7 @@ import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
 import org.slf4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
-import static org.jboss.pnc.reqour.common.utils.GitUtils.FETCH_HEAD;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

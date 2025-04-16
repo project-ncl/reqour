@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.alternatives;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;

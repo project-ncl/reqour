@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
@@ -25,6 +25,8 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.service.GitlabRepositoryCreationService;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

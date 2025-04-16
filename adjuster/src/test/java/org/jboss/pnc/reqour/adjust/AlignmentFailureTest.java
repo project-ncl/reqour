@@ -4,15 +4,13 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import io.quarkiverse.wiremock.devservice.ConnectWireMock;
-import io.quarkus.picocli.runtime.annotations.TopCommand;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
+
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
@@ -20,9 +18,14 @@ import org.jboss.pnc.reqour.adjust.profile.WithFailingAdjustProviderAlternative;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+
+import io.quarkiverse.wiremock.devservice.ConnectWireMock;
+import io.quarkus.picocli.runtime.annotations.TopCommand;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(WithFailingAdjustProviderAlternative.class)

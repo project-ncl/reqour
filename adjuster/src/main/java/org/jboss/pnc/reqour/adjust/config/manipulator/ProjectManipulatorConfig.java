@@ -4,13 +4,14 @@
  */
 package org.jboss.pnc.reqour.adjust.config.manipulator;
 
+import java.nio.file.Path;
+
+import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.SuperBuilder;
-import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
-
-import java.nio.file.Path;
 
 /**
  * Configuration of the project manipulator.

@@ -4,11 +4,11 @@
  */
 package org.jboss.pnc.reqour.common.executor.task;
 
-import org.jboss.pnc.api.dto.Request;
-
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import org.jboss.pnc.api.dto.Request;
 
 /**
  * Executor used for starting long-running asynchronous tasks (which are, however, written in a synchronous manner).

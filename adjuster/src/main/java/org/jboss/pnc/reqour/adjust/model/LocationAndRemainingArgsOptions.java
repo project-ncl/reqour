@@ -4,11 +4,11 @@
  */
 package org.jboss.pnc.reqour.adjust.model;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.util.List;
 import java.util.Optional;
+
+import lombok.Builder;
+import lombok.Value;
 
 /**
  * Location option together with all remaining arguments.<br/>

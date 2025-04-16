@@ -4,13 +4,14 @@
  */
 package org.jboss.pnc.reqour.adjust.profile;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
+import java.util.Set;
+
 import org.jboss.pnc.reqour.adjust.alternatives.AdjustProviderPickerMock;
 import org.jboss.pnc.reqour.adjust.alternatives.AdjustmentPusherMock;
 import org.jboss.pnc.reqour.adjust.alternatives.FailingAdjustProviderMock;
 import org.jboss.pnc.reqour.adjust.alternatives.RepositoryFetcherMock;
 
-import java.util.Set;
+import io.quarkus.test.junit.QuarkusTestProfile;
 
 public class WithFailingAdjustProviderAlternative implements QuarkusTestProfile {
 

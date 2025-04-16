@@ -4,13 +4,13 @@
  */
 package org.jboss.pnc.reqour.adjust.model;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import lombok.Builder;
+import lombok.Value;
 
 /**
  * User specified alignment parameters, i.e., parameters provided in

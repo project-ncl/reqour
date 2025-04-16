@@ -4,10 +4,9 @@
  */
 package org.jboss.pnc.reqour.service;
 
-import io.quarkus.arc.lookup.LookupIfProperty;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.gitlab4j.api.models.Group;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
@@ -18,6 +17,9 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
+
+import io.quarkus.arc.lookup.LookupIfProperty;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of {@link InternalSCMRepositoryCreationService} using internal GitLab.

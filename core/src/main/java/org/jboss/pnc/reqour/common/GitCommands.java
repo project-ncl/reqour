@@ -4,9 +4,18 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
@@ -17,14 +26,7 @@ import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Handles the composing of git commands (by delegating it into {@link GitUtils}) and then executing it as a shell

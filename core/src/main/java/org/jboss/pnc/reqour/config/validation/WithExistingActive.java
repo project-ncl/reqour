@@ -4,14 +4,14 @@
  */
 package org.jboss.pnc.reqour.config.validation;
 
-import jakarta.validation.Constraint;
-import jakarta.validation.Payload;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import jakarta.validation.Constraint;
+import jakarta.validation.Payload;
 
 /**
  * Annotation used for validating whether the active git backend (key 'reqour.git.git-backends.active') is being present

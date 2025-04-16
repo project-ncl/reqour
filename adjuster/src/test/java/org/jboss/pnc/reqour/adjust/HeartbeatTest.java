@@ -4,19 +4,22 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
-import com.github.tomakehurst.wiremock.client.CountMatchingStrategy;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import io.quarkiverse.wiremock.devservice.ConnectWireMock;
-import io.quarkus.picocli.runtime.annotations.TopCommand;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.reqour.adjust.profile.WithSuccessfulAlternatives;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import com.github.tomakehurst.wiremock.client.CountMatchingStrategy;
+import com.github.tomakehurst.wiremock.client.WireMock;
+
+import io.quarkiverse.wiremock.devservice.ConnectWireMock;
+import io.quarkus.picocli.runtime.annotations.TopCommand;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(WithSuccessfulAlternatives.class)

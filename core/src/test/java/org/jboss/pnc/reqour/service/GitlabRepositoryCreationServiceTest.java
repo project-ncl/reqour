@@ -4,10 +4,14 @@
  */
 package org.jboss.pnc.reqour.service;
 
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+
+import java.net.URI;
+
 import jakarta.inject.Inject;
+
 import org.gitlab4j.api.GitLabApiException;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
@@ -17,16 +21,14 @@ import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
-import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
+import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.net.URI;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(InternalSCMRepositoryCreationProfile.class)

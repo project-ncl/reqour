@@ -4,20 +4,22 @@
  */
 package org.jboss.pnc.reqour.config.validation;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Map;
+
 import jakarta.validation.ConstraintValidatorContext;
+
 import org.jboss.pnc.reqour.common.TestDataSupplier;
-import org.jboss.pnc.reqour.config.GitConfig;
 import org.jboss.pnc.reqour.common.profile.ConfigProfile;
+import org.jboss.pnc.reqour.config.GitConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(ConfigProfile.class)

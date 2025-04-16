@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import java.net.URI;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -11,10 +13,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.RedirectionException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.dto.ComponentVersion;
 
-import java.net.URI;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Endpoint which redirects GET requests from base URL to '/version'.

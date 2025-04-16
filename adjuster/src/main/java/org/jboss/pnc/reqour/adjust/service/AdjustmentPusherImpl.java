@@ -4,9 +4,16 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
@@ -19,12 +26,7 @@ import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Service for pushing alignment changes once the manipulation took place.

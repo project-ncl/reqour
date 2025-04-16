@@ -6,6 +6,7 @@ package org.jboss.pnc.reqour.config.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
+
 import org.jboss.pnc.reqour.config.GitConfig;
 
 public class ActiveGitBackendExistsValidator

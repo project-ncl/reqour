@@ -4,15 +4,15 @@
  */
 package org.jboss.pnc.reqour.common.utils;
 
-import org.apache.commons.io.FileUtils;
-import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.io.FileUtils;
+import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 
 public class IOUtils {
 

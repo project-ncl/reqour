@@ -4,15 +4,17 @@
  */
 package org.jboss.pnc.reqour.common.executor.task;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.jboss.pnc.api.dto.Request;
-
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.api.dto.Request;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Implementation of {@link TaskExecutor} using container's {@link ManagedExecutor}, which acts as a delegate, where the

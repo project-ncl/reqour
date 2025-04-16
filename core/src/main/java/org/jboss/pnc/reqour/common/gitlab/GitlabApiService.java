@@ -4,11 +4,13 @@
  */
 package org.jboss.pnc.reqour.common.gitlab;
 
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.quarkus.arc.lookup.LookupIfProperty;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.gitlab4j.api.Constants;
 import org.gitlab4j.api.GitLabApi;
 import org.gitlab4j.api.GitLabApiException;
@@ -26,9 +28,9 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.quarkus.arc.lookup.LookupIfProperty;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Thin wrapper around {@link GitLabApi} for performing GitLab API calls.

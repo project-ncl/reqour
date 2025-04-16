@@ -4,7 +4,8 @@
  */
 package org.jboss.pnc.reqour.rest.providers;
 
-import io.opentelemetry.api.trace.Span;
+import java.io.IOException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.container.ContainerRequestContext;
@@ -14,13 +15,14 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.UriInfo;
 import jakarta.ws.rs.ext.Provider;
+
 import org.jboss.pnc.api.constants.MDCKeys;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-import java.io.IOException;
+import io.opentelemetry.api.trace.Span;
 
 @ApplicationScoped
 @Provider

@@ -6,11 +6,13 @@ package org.jboss.pnc.reqour.rest.endpoints;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.service.api.TranslationService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

@@ -4,19 +4,21 @@
  */
 package org.jboss.pnc.reqour.common;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import jakarta.inject.Inject;
-import org.jboss.pnc.reqour.common.profile.UtilsProfile;
-import org.jboss.pnc.reqour.model.ProcessContext;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import jakarta.inject.Inject;
+
+import org.jboss.pnc.reqour.common.profile.UtilsProfile;
+import org.jboss.pnc.reqour.model.ProcessContext;
+import org.junit.jupiter.api.Test;
+
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(UtilsProfile.class)

@@ -4,9 +4,9 @@
  */
 package org.jboss.pnc.reqour.common.profile;
 
-import io.quarkus.test.junit.QuarkusTestProfile;
-
 import java.util.Map;
+
+import io.quarkus.test.junit.QuarkusTestProfile;
 
 public class WithStaticBifrostUrl implements QuarkusTestProfile {
 

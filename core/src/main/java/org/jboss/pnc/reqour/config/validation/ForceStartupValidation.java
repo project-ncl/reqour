@@ -4,10 +4,12 @@
  */
 package org.jboss.pnc.reqour.config.validation;
 
-import io.quarkus.runtime.Startup;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+
 import org.jboss.pnc.reqour.config.ReqourConfig;
+
+import io.quarkus.runtime.Startup;
 
 /**
  * In order to fail due to invalid config during startup, we force the validation using this bean.

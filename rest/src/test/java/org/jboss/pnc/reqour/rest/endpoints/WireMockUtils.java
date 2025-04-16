@@ -4,10 +4,11 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
+import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
+
 import jakarta.ws.rs.core.MediaType;
 
-import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
+import com.github.tomakehurst.wiremock.client.WireMock;
 
 public class WireMockUtils {
 
