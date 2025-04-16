@@ -13,7 +13,6 @@ import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.junit.jupiter.api.Test;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
@@ -109,14 +108,14 @@ class CommonManipulatorResultExtractorTest {
                         .snapshots(true)
                         .id("MavenRepo-0")
                         .name("MavenRepo-0")
-                        .url(URI.create("https://repo.maven.apache.org/maven2/"))
+                        .url("https://repo.maven.apache.org/maven2/")
                         .build(),
                 RemovedRepository.builder()
                         .releases(false)
                         .snapshots(true)
                         .id("MavenRepo-1")
                         .name("MavenRepo-1")
-                        .url(URI.create("https://repo.maven.apache.org/maven2/"))
+                        .url("file:///${project.basedir}/src/test/mavenRepo1")
                         .build());
 
         List<RemovedRepository> actualRemovedRepositories = manipulatorResultExtractor
