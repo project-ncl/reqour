@@ -6,11 +6,13 @@ package org.jboss.pnc.reqour.common.callbacksender;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.common.http.PNCHttpClient;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Sender which uses {@link PNCHttpClient} to send callbacks.

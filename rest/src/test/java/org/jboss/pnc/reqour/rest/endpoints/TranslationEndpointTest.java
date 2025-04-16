@@ -4,14 +4,11 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
+
 import org.jboss.pnc.api.dto.ErrorResponse;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
@@ -24,7 +21,12 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 
 @QuarkusTest
 @TestHTTPEndpoint(TranslateEndpoint.class)

@@ -4,15 +4,15 @@
  */
 package org.jboss.pnc.reqour.model;
 
-import lombok.Builder;
-import lombok.Value;
-
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+
+import lombok.Builder;
+import lombok.Value;
 
 @Value
 @Builder(builderClassName = "Builder", toBuilder = true)

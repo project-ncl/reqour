@@ -4,12 +4,11 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.quarkus.picocli.runtime.annotations.TopCommand;
+import java.io.IOException;
+import java.nio.file.Path;
+
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.ResultStatus;
@@ -36,10 +35,14 @@ import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
-import picocli.CommandLine;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.quarkus.picocli.runtime.annotations.TopCommand;
+import lombok.extern.slf4j.Slf4j;
+import picocli.CommandLine;
 
 /**
  * The entrypoint of the reqour adjuster.

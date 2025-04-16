@@ -4,17 +4,14 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import io.quarkiverse.wiremock.devservice.ConnectWireMock;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.quarkus.test.security.TestSecurity;
-import io.restassured.RestAssured;
+import static org.jboss.pnc.api.constants.HttpHeaders.ACCEPT_STRING;
+import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
+
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.utils.UrlEncoder;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
@@ -25,10 +22,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.jboss.pnc.api.constants.HttpHeaders.ACCEPT_STRING;
-import static org.jboss.pnc.api.constants.HttpHeaders.CONTENT_TYPE_STRING;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
-import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+
+import io.quarkiverse.wiremock.devservice.ConnectWireMock;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
+import io.restassured.RestAssured;
 
 @QuarkusTest
 @TestHTTPEndpoint(InternalSCMRepositoryCreationEndpoint.class)

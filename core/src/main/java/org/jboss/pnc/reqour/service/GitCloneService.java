@@ -4,9 +4,12 @@
  */
 package org.jboss.pnc.reqour.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
@@ -19,8 +22,7 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.service.api.CloneService;
 
-import java.io.IOException;
-import java.nio.file.Path;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Clone service using git.

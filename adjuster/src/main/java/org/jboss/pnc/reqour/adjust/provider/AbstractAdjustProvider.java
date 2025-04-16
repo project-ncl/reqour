@@ -4,8 +4,8 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
@@ -13,7 +13,9 @@ import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.slf4j.Logger;
 
-import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Common parent for all the concrete implementations of {@link AdjustProvider}.

@@ -4,11 +4,13 @@
  */
 package org.jboss.pnc.reqour.runtime;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationScoped
 public class BeanFactory {

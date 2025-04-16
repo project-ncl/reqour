@@ -4,13 +4,15 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.jboss.pnc.common.http.PNCHttpClientConfig;
-
 import java.util.Optional;
 import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import org.jboss.pnc.common.http.PNCHttpClientConfig;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

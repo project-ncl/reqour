@@ -4,9 +4,15 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import jakarta.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jboss.pnc.reqour.common.CloneTestUtils;
@@ -15,12 +21,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(AdjustProfile.class)

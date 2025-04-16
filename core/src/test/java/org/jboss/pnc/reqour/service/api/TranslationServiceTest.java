@@ -4,9 +4,11 @@
  */
 package org.jboss.pnc.reqour.service.api;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
@@ -14,8 +16,8 @@ import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.common.profile.TranslationProfile;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(TranslationProfile.class)

@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
+
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -22,6 +22,8 @@ import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

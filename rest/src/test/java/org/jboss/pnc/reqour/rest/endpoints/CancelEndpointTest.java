@@ -4,9 +4,29 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.inject.Inject;
+import jakarta.ws.rs.core.MediaType;
+
+import org.jboss.pnc.api.enums.ResultStatus;
+import org.jboss.pnc.api.reqour.dto.CancelResponse;
+import org.jboss.pnc.api.reqour.dto.ReqourCallback;
+import org.jboss.pnc.api.reqour.rest.CancelEndpoint;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
+import org.jboss.pnc.reqour.common.TestUtils;
+import org.jboss.pnc.reqour.common.profile.CancelProfile;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+
 import io.fabric8.kubernetes.api.model.StatusDetailsBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.fabric8.openshift.client.server.mock.OpenShiftServer;
@@ -18,23 +38,6 @@ import io.quarkus.test.kubernetes.client.OpenShiftTestServer;
 import io.quarkus.test.kubernetes.client.WithOpenShiftTestServer;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.core.MediaType;
-import org.jboss.pnc.api.enums.ResultStatus;
-import org.jboss.pnc.api.reqour.dto.CancelResponse;
-import org.jboss.pnc.api.reqour.dto.ReqourCallback;
-import org.jboss.pnc.api.reqour.rest.CancelEndpoint;
-import org.jboss.pnc.reqour.common.TestDataSupplier;
-import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.CancelProfile;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
-import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 @QuarkusTest
 @TestProfile(CancelProfile.class)

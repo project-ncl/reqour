@@ -4,13 +4,14 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import io.smallrye.config.WithName;
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import org.jboss.pnc.reqour.config.validation.WithExistingActive;
+
+import io.smallrye.config.WithName;
 
 /**
  * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.

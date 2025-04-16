@@ -9,7 +9,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
@@ -19,6 +19,8 @@ import org.jboss.pnc.reqour.common.callbacksender.CallbackSender;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.service.api.CloneService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

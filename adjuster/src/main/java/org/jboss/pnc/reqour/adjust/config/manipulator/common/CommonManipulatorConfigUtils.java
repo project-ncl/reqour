@@ -4,7 +4,22 @@
  */
 package org.jboss.pnc.reqour.adjust.config.manipulator.common;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS;
+import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.BREW_BUILD_NAME;
+
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -21,20 +36,7 @@ import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingArgsOptions;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 
-import javax.validation.constraints.NotNull;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS;
-import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.BREW_BUILD_NAME;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for common operations with configurations, e.g. extracting values from {@link AdjustRequest} into a

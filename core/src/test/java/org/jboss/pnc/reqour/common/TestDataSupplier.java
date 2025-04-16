@@ -4,6 +4,12 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromExternalUrl;
+import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
+
+import java.net.URI;
+import java.util.List;
+
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.gitlab4j.api.models.Group;
 import org.gitlab4j.api.models.Namespace;
@@ -14,12 +20,6 @@ import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
-
-import java.net.URI;
-import java.util.List;
-
-import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromExternalUrl;
-import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
 
 public class TestDataSupplier {
 

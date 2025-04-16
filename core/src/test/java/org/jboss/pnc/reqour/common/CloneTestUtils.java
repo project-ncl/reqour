@@ -4,18 +4,19 @@
  */
 package org.jboss.pnc.reqour.common;
 
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.ListBranchCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.TagOpt;
 
-import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
 @Slf4j

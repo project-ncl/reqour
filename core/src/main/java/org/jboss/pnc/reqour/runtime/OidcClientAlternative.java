@@ -4,17 +4,18 @@
  */
 package org.jboss.pnc.reqour.runtime;
 
+import java.time.Duration;
+import java.util.Map;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.quarkus.oidc.client.OidcClient;
 import io.quarkus.oidc.client.Tokens;
 import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Produces;
-
-import java.time.Duration;
-import java.util.Map;
 
 @ApplicationScoped
 @LookupIfProperty(name = "quarkus.oidc-client.enabled", stringValue = "false")

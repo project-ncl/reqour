@@ -4,10 +4,22 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.commonjava.maven.ext.common.json.PME;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
@@ -22,17 +34,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Common extractor used from several {@link org.jboss.pnc.reqour.adjust.provider.AdjustProvider}s, typically when

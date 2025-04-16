@@ -4,9 +4,14 @@
  */
 package org.jboss.pnc.reqour.runtime;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.OffsetDateTime;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.bifrost.upload.BifrostUploadException;
 import org.jboss.pnc.bifrost.upload.LogMetadata;
@@ -16,10 +21,7 @@ import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.OffsetDateTime;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

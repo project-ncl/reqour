@@ -4,11 +4,11 @@
  */
 package org.jboss.pnc.reqour.common.utils;
 
-import org.jboss.pnc.reqour.common.exceptions.GitException;
-import org.jboss.pnc.reqour.model.ProcessContext;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.jboss.pnc.reqour.common.exceptions.GitException;
+import org.jboss.pnc.reqour.model.ProcessContext;
 
 /**
  * Utility class, which composes the full git commands. <br/>

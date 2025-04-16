@@ -4,19 +4,15 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import io.quarkiverse.wiremock.devservice.ConnectWireMock;
-import io.quarkus.test.InjectMock;
-import io.quarkus.test.common.http.TestHTTPEndpoint;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
-import io.quarkus.test.security.TestSecurity;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
+
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
@@ -29,11 +25,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
-import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
-import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+
+import io.quarkiverse.wiremock.devservice.ConnectWireMock;
+import io.quarkus.test.InjectMock;
+import io.quarkus.test.common.http.TestHTTPEndpoint;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.security.TestSecurity;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
 
 @QuarkusTest
 @TestProfile(AdjustProfile.class)

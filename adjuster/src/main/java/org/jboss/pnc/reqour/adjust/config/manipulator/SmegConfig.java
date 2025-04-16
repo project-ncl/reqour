@@ -4,14 +4,15 @@
  */
 package org.jboss.pnc.reqour.adjust.config.manipulator;
 
+import java.nio.file.Path;
+
+import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.Value;
 import lombok.experimental.SuperBuilder;
-import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
-import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
-
-import java.nio.file.Path;
 
 /**
  * Configuration of the Sbt Manipulator Extension pluGin (SMEG).

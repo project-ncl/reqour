@@ -4,9 +4,13 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.GA;
@@ -15,9 +19,7 @@ import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Extractor of the {@code groupId}, {@code artifactId}, and {@code version} from the (effective) pom. <br/>

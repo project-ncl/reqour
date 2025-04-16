@@ -4,12 +4,14 @@
  */
 package org.jboss.pnc.reqour.rest.openshift;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -21,10 +23,11 @@ import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
 
 @ApplicationScoped
 public class JobDefinitionCreator {

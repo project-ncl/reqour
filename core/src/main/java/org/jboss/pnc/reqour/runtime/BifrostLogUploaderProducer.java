@@ -4,13 +4,15 @@
  */
 package org.jboss.pnc.reqour.runtime;
 
-import io.quarkus.oidc.client.OidcClient;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ReqourConfig;
+
+import io.quarkus.oidc.client.OidcClient;
 
 @ApplicationScoped
 public class BifrostLogUploaderProducer {

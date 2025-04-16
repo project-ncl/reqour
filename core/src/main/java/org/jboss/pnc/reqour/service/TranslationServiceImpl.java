@@ -6,11 +6,13 @@ package org.jboss.pnc.reqour.service;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.service.api.TranslationService;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

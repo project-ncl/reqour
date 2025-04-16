@@ -4,16 +4,17 @@
  */
 package org.jboss.pnc.reqour.adjust.alternatives;
 
+import java.nio.file.Path;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
-
-import java.nio.file.Path;
 
 @Alternative
 @ApplicationScoped

@@ -4,10 +4,11 @@
  */
 package org.jboss.pnc.reqour.adjust.config;
 
-import io.smallrye.config.WithName;
+import java.util.Map;
+
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 
-import java.util.Map;
+import io.smallrye.config.WithName;
 
 /**
  * Alignment configuration.

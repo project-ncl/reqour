@@ -4,9 +4,28 @@
  */
 package org.jboss.pnc.reqour.service.clone;
 
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_URL;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_URL;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
+import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_URL;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import jakarta.inject.Inject;
+
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -26,25 +45,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_PATH;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.DEST_REPO_WITH_MAIN_BRANCH_URL;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_PATH;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.EMPTY_DEST_REPO_URL;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_PATH;
-import static org.jboss.pnc.reqour.common.CloneTestUtils.SOURCE_REPO_URL;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(CloningProfile.class)

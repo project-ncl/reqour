@@ -4,12 +4,14 @@
  */
 package org.jboss.pnc.reqour.adjust.config.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+
 import org.eclipse.microprofile.config.spi.Converter;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 
-import java.io.IOException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Custom converter of the {@link AdjustRequest} config property.<br>

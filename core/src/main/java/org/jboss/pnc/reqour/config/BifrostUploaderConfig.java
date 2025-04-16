@@ -4,9 +4,9 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import io.smallrye.config.WithDefault;
-
 import java.net.URI;
+
+import io.smallrye.config.WithDefault;
 
 public interface BifrostUploaderConfig {
 

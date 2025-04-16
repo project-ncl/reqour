@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.common;
 
+import java.net.URI;
+
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.BuildType;
@@ -19,8 +21,6 @@ import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-
-import java.net.URI;
 
 public class TestUtils {
 

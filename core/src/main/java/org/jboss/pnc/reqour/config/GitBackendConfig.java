@@ -4,11 +4,11 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import io.smallrye.config.WithName;
-import io.smallrye.config.WithParentName;
-
 import java.util.List;
 import java.util.Optional;
+
+import io.smallrye.config.WithName;
+import io.smallrye.config.WithParentName;
 
 public interface GitBackendConfig {
 

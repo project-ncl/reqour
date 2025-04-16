@@ -4,14 +4,11 @@
  */
 package org.jboss.pnc.reqour.rest.openshift;
 
-import dev.failsafe.Failsafe;
-import dev.failsafe.RetryPolicy;
-import io.fabric8.kubernetes.api.model.StatusDetails;
-import io.fabric8.kubernetes.api.model.batch.v1.Job;
-import io.fabric8.openshift.client.OpenShiftClient;
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
+
 import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -19,7 +16,12 @@ import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
-import java.util.List;
+import dev.failsafe.Failsafe;
+import dev.failsafe.RetryPolicy;
+import io.fabric8.kubernetes.api.model.StatusDetails;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import io.fabric8.openshift.client.OpenShiftClient;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Controller of the reqour adjuster job, which is used to create and destroy these jobs at the configured OpenShift

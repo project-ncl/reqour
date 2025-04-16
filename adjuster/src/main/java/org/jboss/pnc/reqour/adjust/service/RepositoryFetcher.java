@@ -4,10 +4,10 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
+import java.nio.file.Path;
+
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
-
-import java.nio.file.Path;
 
 /**
  * Fetcher of the SCM repository, which takes place before the manipulation phase in order to prepare the environment

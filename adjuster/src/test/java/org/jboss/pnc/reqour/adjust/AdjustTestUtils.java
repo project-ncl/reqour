@@ -4,12 +4,7 @@
  */
 package org.jboss.pnc.reqour.adjust;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.Getter;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -17,7 +12,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import lombok.Getter;
 
 @ApplicationScoped
 public class AdjustTestUtils {

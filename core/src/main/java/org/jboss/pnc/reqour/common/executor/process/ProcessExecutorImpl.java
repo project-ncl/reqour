@@ -4,14 +4,6 @@
  */
 package org.jboss.pnc.reqour.common.executor.process;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
-import org.eclipse.microprofile.context.ManagedExecutor;
-import org.jboss.pnc.reqour.model.ProcessContext;
-import org.jboss.pnc.reqour.runtime.UserLogger;
-import org.slf4j.Logger;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,6 +12,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
+import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.reqour.model.ProcessContext;
+import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.slf4j.Logger;
+
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j

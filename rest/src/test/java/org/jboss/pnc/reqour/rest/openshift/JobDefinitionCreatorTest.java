@@ -4,14 +4,14 @@
  */
 package org.jboss.pnc.reqour.rest.openshift;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.fabric8.kubernetes.api.model.EnvVar;
-import io.fabric8.kubernetes.api.model.Quantity;
-import io.fabric8.kubernetes.api.model.batch.v1.Job;
-import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.net.URI;
+import java.util.List;
+import java.util.Map;
+
 import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.enums.AlignmentPreference;
@@ -24,11 +24,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
-import java.net.URI;
-import java.util.List;
-import java.util.Map;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import io.fabric8.kubernetes.api.model.EnvVar;
+import io.fabric8.kubernetes.api.model.Quantity;
+import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(WithStaticBifrostUrl.class) // override bifrost URL just for this test
