@@ -26,7 +26,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -141,7 +140,7 @@ public class CommonManipulatorResultExtractor {
                 RemovedRepository.RemovedRepositoryBuilder builder = RemovedRepository.builder();
                 builder.id(getRepositoryField(repository, "id"));
                 builder.name(getRepositoryField(repository, "name"));
-                builder.url(URI.create(getRepositoryField(repository, "url")));
+                builder.url(getRepositoryField(repository, "url"));
                 builder.releases(true);
                 builder.snapshots(true);
 

@@ -17,7 +17,7 @@
                     <snapshots />
                     <id>MavenRepo-1</id>
                     <name>MavenRepo-1</name>
-                    <url>https://repo.maven.apache.org/maven2/</url>
+                    <url>file:///${project.basedir}/src/test/mavenRepo1</url>
                 </repository>
             </repositories>
             <id>generated-by-gme</id>
