@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.jboss.pnc.reqour</groupId>
         <artifactId>reqour-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
     <properties>
@@ -65,11 +65,7 @@
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-common</artifactId>
-            <!--
-                Using snapshot version because of PNCHttpClient
-                TODO: Change to 3.0.2 once available
-            -->
-            <version>3.0.2-SNAPSHOT</version>
+            <version>3.0.2</version>
             <classifier>jakarta</classifier>
             <exclusions>
                 <exclusion>
