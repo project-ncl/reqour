@@ -34,7 +34,7 @@ quarkus:
             max-file-size: 10G
           format: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%p] %s%e%n'
     category:
-      "org.jboss.pnc._userlog_.alignment-log":
+      "org.jboss.pnc._userlog_":
         level: INFO
         handlers:
           - final-log-file-handler

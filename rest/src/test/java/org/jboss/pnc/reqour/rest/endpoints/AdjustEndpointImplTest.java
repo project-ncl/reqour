@@ -13,10 +13,12 @@ import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 
+import org.jboss.pnc.api.constants.MDCHeaderKeys;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.AdjustEndpoint;
+import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
@@ -36,6 +38,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
+import io.restassured.http.Header;
 import io.restassured.response.Response;
 
 @QuarkusTest
@@ -65,6 +68,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), "foo"))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
@@ -75,8 +79,13 @@ class AdjustEndpointImplTest {
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH))
                         .withRequestBody(
-                                WireMock.containing(
-                                        "Adjuster Job for taskID='" + TASK_ID + "' was successfully created")));
+                                WireMock.and(
+                                        WireMock.containing(
+                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                        ProcessStageUtils.Step.BEGIN)),
+                                        WireMock.containing(
+                                                "Adjuster Job for taskID='" + TASK_ID
+                                                        + "' was successfully requested to be created"))));
     }
 
     @Test
@@ -89,6 +98,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), "foo"))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
@@ -102,7 +112,15 @@ class AdjustEndpointImplTest {
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH))
-                        .withRequestBody(WireMock.containing(exceptionMessage)));
+                        .withRequestBody(
+                                WireMock.and(
+                                        WireMock.containing(
+                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                        ProcessStageUtils.Step.BEGIN)),
+                                        WireMock.containing(exceptionMessage),
+                                        WireMock.containing(
+                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                        ProcessStageUtils.Step.END)))));
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
