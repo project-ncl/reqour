@@ -19,7 +19,9 @@ import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.profile.WithSuccessfulAlternatives;
+import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -66,10 +68,25 @@ class AlignmentSuccessTest {
                 WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH))
                         .withRequestBody(
                                 WireMock.and(
+                                        AdjustTestUtils.getWireMockContainingPredicate(
+                                                ProcessStageUtils.Step.END,
+                                                AdjustProcessStage.STARTING_ALIGNMENT_POD),
+                                        AdjustTestUtils.getWireMockContainingPredicate(
+                                                ProcessStageUtils.Step.BEGIN,
+                                                AdjustProcessStage.SCM_CLONE),
                                         WireMock.containing("[INFO] Cloning a repository"),
+                                        AdjustTestUtils.getWireMockContainingPredicate(
+                                                ProcessStageUtils.Step.END,
+                                                AdjustProcessStage.SCM_CLONE),
+                                        AdjustTestUtils.getWireMockContainingPredicate(
+                                                ProcessStageUtils.Step.BEGIN,
+                                                AdjustProcessStage.ALIGNMENT),
                                         WireMock.containing(
                                                 "[INFO] Starting an alignment process using the corresponding manipulator"),
-                                        WireMock.containing("[INFO] Pushing aligned changes"))));
+                                        WireMock.containing("[INFO] Pushing aligned changes"),
+                                        AdjustTestUtils.getWireMockContainingPredicate(
+                                                ProcessStageUtils.Step.END,
+                                                AdjustProcessStage.ALIGNMENT))));
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))

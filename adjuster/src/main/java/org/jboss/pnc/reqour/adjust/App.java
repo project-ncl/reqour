@@ -21,7 +21,6 @@ import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
@@ -30,6 +29,7 @@ import org.jboss.pnc.reqour.adjust.provider.AdjustProviderPicker;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
 import org.jboss.pnc.reqour.adjust.utils.IOUtils;
+import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -88,6 +88,7 @@ public class App implements Runnable {
 
     @Override
     public void run() {
+        ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
         AdjustRequest adjustRequest = config.adjust().request();
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 

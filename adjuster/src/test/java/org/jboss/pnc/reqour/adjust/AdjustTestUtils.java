@@ -17,8 +17,12 @@ import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.common.log.ProcessStageUtils;
+import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 
 import lombok.Getter;
 
@@ -87,5 +91,11 @@ public class AdjustTestUtils {
         });
 
         assertThat(actualSystemPropertiesCount).isEqualTo(expectedSystemPropertiesCounts);
+    }
+
+    public static StringValuePattern getWireMockContainingPredicate(
+            ProcessStageUtils.Step processStageStep,
+            AdjustProcessStage adjustProcessStage) {
+        return WireMock.containing(String.format("%s: %s", processStageStep, adjustProcessStage));
     }
 }
