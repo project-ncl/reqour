@@ -23,9 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.MDC;
 
 import io.opentelemetry.api.trace.Span;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Provider
+@Slf4j
 public class LoggingFilter implements ContainerRequestFilter, ContainerResponseFilter {
 
     @Inject
@@ -40,6 +42,7 @@ public class LoggingFilter implements ContainerRequestFilter, ContainerResponseF
         requestContext.setProperty(REQUEST_EXECUTION_START, System.currentTimeMillis());
         MDCUtils.setMDCFromRequestContext(requestContext);
         MDCUtils.addMDCFromOtelHeadersWithFallback(requestContext, Span.current().getSpanContext(), false);
+        log.debug("MDC: {}", MDC.getCopyOfContextMap());
 
         UriInfo uriInfo = requestContext.getUriInfo();
         Request request = requestContext.getRequest();
