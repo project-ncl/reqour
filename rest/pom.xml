@@ -105,8 +105,7 @@
         <!-- Inter-module dependencies -->
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-test-openshift-client</artifactId>
-            
+            <artifactId>quarkus-test-kubernetes-client</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
