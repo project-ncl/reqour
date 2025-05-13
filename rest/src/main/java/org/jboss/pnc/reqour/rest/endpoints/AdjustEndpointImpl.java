@@ -54,12 +54,13 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void adjust(AdjustRequest adjustRequest) {
         managedExecutor.runAsync(() -> {
+            userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.BEGIN));
             finalLogManager.addMessage(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.BEGIN));
             openShiftAdjusterJobController.createAdjusterJob(adjustRequest);
         })
                 .thenRun(() -> onSuccess(adjustRequest))
                 .exceptionally(throwable -> onException(throwable, adjustRequest))
-                .handle(this::handleFinally);
+                .handle((_val, throwable) -> uploadFinalLog(throwable, adjustRequest));
 
         throw new WebApplicationException(Response.Status.ACCEPTED);
     }
@@ -74,10 +75,43 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     }
 
     private Void onException(Throwable throwable, AdjustRequest adjustRequest) {
-        userLogger.error("Adjuster Job for taskId={} cannot be created", adjustRequest.getTaskId());
-        log.error("Endpoint ended with the exception, sending SYSTEM_ERROR as the callback", throwable);
+        userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
         finalLogManager.addMessage(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
-        finalLogManager.addMessage("Alignment pod creation ended with the exception: " + throwable.getMessage());
+
+        String errorMessage = String.format(
+                "Adjuster Job for taskId=%s cannot be created, sending SYSTEM_ERROR as the callback",
+                adjustRequest.getTaskId());
+        userLogger.error(errorMessage);
+        finalLogManager.addMessage(errorMessage);
+
+        userLogger.error("Alignment pod creation ended with the exception: {}", throwable.getMessage(), throwable);
+
+        sendSystemErrorCallback(adjustRequest);
+        return null;
+    }
+
+    private Void uploadFinalLog(Throwable throwable, AdjustRequest adjustRequest) {
+        try {
+            if (throwable != null) {
+                userLogger.error("Unexpected error", throwable);
+                finalLogManager.addMessage("Unexpected error: " + throwable.getMessage());
+            }
+
+            finalLogManager.sendMessage();
+        } catch (RuntimeException ex) {
+            userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
+            userLogger.error("Could not send final log to Bifrost", ex);
+            sendSystemErrorCallback(adjustRequest);
+            openShiftAdjusterJobController.destroyAdjusterJob(adjustRequest.getTaskId());
+        }
+        return null;
+    }
+
+    static String getMessageStepStartingAlignmentPod(ProcessStageUtils.Step step) {
+        return String.format("%s: %s", step, AdjustProcessStage.STARTING_ALIGNMENT_POD);
+    }
+
+    private void sendSystemErrorCallback(AdjustRequest adjustRequest) {
         pncHttpClient.sendRequest(
                 adjustRequest.getCallback(),
                 AdjustResponse.builder()
@@ -87,15 +121,5 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
                                         .status(ResultStatus.SYSTEM_ERROR)
                                         .build())
                         .build());
-        return null;
-    }
-
-    private Void handleFinally(Void _val, Throwable _t) {
-        finalLogManager.sendMessage();
-        return null;
-    }
-
-    static String getMessageStepStartingAlignmentPod(ProcessStageUtils.Step step) {
-        return String.format("%s: %s", step, AdjustProcessStage.STARTING_ALIGNMENT_POD);
     }
 }

@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.BIFROST_FINAL_LOG_UPLOAD_PATH;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
+import static org.jboss.pnc.reqour.rest.endpoints.AdjustEndpointImpl.getMessageStepStartingAlignmentPod;
 import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 import jakarta.inject.Inject;
@@ -22,10 +23,13 @@ import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
+import org.jboss.pnc.reqour.rest.service.FinalLogManager;
+import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +40,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
@@ -48,10 +53,23 @@ import io.restassured.response.Response;
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class AdjustEndpointImplTest {
 
+    private static final String PROCESS_CONTEXT = "my-process-context";
+    private static final String EXCEPTION_MESSAGE = "Ooops, something went terribly wrongie";
+
     WireMock wireMock;
 
     @InjectMock
     OpenShiftAdjusterJobController adjusterJobController;
+
+    @InjectSpy
+    FinalLogManager finalLogManager;
+
+    @InjectMock
+    OpenShiftAdjusterJobController openShiftAdjusterJobController;
+
+    @UserLogger
+    @InjectSpy
+    Logger userLogger;
 
     @Inject
     ObjectMapper objectMapper;
@@ -68,7 +86,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), "foo"))
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
@@ -81,7 +99,7 @@ class AdjustEndpointImplTest {
                         .withRequestBody(
                                 WireMock.and(
                                         WireMock.containing(
-                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                getMessageStepStartingAlignmentPod(
                                                         ProcessStageUtils.Step.BEGIN)),
                                         WireMock.containing(
                                                 "Adjuster Job for taskID='" + TASK_ID
@@ -91,23 +109,20 @@ class AdjustEndpointImplTest {
     @Test
     void adjust_adjusterJobCreationFailed_sendsFinalLogToBifrost()
             throws InterruptedException, JsonProcessingException {
-        String exceptionMessage = "Ooops, something went terribly wrongie";
-        Mockito.doThrow(new RuntimeException(exceptionMessage))
+        RuntimeException ex = new RuntimeException(EXCEPTION_MESSAGE);
+        Mockito.doThrow(ex)
                 .when(adjusterJobController)
                 .createAdjusterJob(ArgumentMatchers.any());
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), "foo"))
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
 
-        assertThat(response.statusCode()).isEqualTo(jakarta.ws.rs.core.Response.Status.ACCEPTED.getStatusCode()); // exception
-                                                                                                                  // thrown
-                                                                                                                  // from
-                                                                                                                  // another
-                                                                                                                  // thread
+        // exception thrown from another thread, so 202 Accepted status code is expected
+        assertThat(response.statusCode()).isEqualTo(jakarta.ws.rs.core.Response.Status.ACCEPTED.getStatusCode());
         Thread.sleep(2_000);
         wireMock.verifyThat(
                 1,
@@ -115,11 +130,10 @@ class AdjustEndpointImplTest {
                         .withRequestBody(
                                 WireMock.and(
                                         WireMock.containing(
-                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                getMessageStepStartingAlignmentPod(
                                                         ProcessStageUtils.Step.BEGIN)),
-                                        WireMock.containing(exceptionMessage),
                                         WireMock.containing(
-                                                AdjustEndpointImpl.getMessageStepStartingAlignmentPod(
+                                                getMessageStepStartingAlignmentPod(
                                                         ProcessStageUtils.Step.END)))));
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
@@ -129,5 +143,43 @@ class AdjustEndpointImplTest {
                                 .callback(
                                         ReqourCallback.builder().id(TASK_ID).status(ResultStatus.SYSTEM_ERROR).build())
                                 .build()));
+        userLogger.error("Alignment pod creation ended with the exception: {}", EXCEPTION_MESSAGE, ex);
+    }
+
+    @Test
+    void adjust_finalLogSendingFails_podIsDestroyedAndErrorLog()
+            throws InterruptedException, JsonProcessingException {
+        wireMock.resetRequests();
+        Mockito.doNothing().when(adjusterJobController).createAdjusterJob(ArgumentMatchers.any());
+        NullPointerException ex = new NullPointerException(EXCEPTION_MESSAGE);
+        Mockito.doThrow(ex)
+                .when(finalLogManager)
+                .sendMessage();
+        Mockito.when(openShiftAdjusterJobController.destroyAdjusterJob(TASK_ID)).thenReturn(ResultStatus.SUCCESS);
+
+        Response response = RestAssured.given()
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
+                .body(TestUtils.createAdjustRequest())
+                .when()
+                .post();
+
+        // exception thrown from another thread, so 202 Accepted status code is expected
+        assertThat(response.statusCode()).isEqualTo(jakarta.ws.rs.core.Response.Status.ACCEPTED.getStatusCode());
+        Thread.sleep(2_000);
+        wireMock.verifyThat(
+                0,
+                WireMock.postRequestedFor(WireMock.urlEqualTo(BIFROST_FINAL_LOG_UPLOAD_PATH)));
+        Mockito.verify(openShiftAdjusterJobController).destroyAdjusterJob(TASK_ID);
+        WireMockUtils.verifyThatCallbackWasSent(
+                wireMock,
+                CALLBACK_PATH,
+                objectMapper.writeValueAsString(
+                        AdjustResponse.builder()
+                                .callback(
+                                        ReqourCallback.builder().id(TASK_ID).status(ResultStatus.SYSTEM_ERROR).build())
+                                .build()));
+        Mockito.verify(userLogger).info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
+        Mockito.verify(userLogger).error("Could not send final log to Bifrost", ex);
     }
 }

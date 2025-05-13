@@ -29,20 +29,20 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 
 import io.fabric8.kubernetes.api.model.StatusDetailsBuilder;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
-import io.fabric8.openshift.client.server.mock.OpenShiftServer;
+import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
-import io.quarkus.test.kubernetes.client.OpenShiftTestServer;
-import io.quarkus.test.kubernetes.client.WithOpenShiftTestServer;
+import io.quarkus.test.kubernetes.client.KubernetesTestServer;
+import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 
 @QuarkusTest
 @TestProfile(CancelProfile.class)
 @TestHTTPEndpoint(CancelEndpoint.class)
-@WithOpenShiftTestServer(crud = false)
+@WithKubernetesTestServer(crud = false)
 @ConnectWireMock
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 public class CancelEndpointTest {
@@ -52,14 +52,14 @@ public class CancelEndpointTest {
     @Inject
     ObjectMapper objectMapper;
 
-    @OpenShiftTestServer
-    OpenShiftServer mockedOpenShiftServer;
+    @KubernetesTestServer
+    KubernetesServer mockedKubernetesServer;
 
     @BeforeEach
     void setUp() {
         String adjusterJobName = "reqour-adjuster-taskxid";
         String path = "/apis/batch/v1/namespaces/test/jobs/" + adjusterJobName;
-        mockedOpenShiftServer.expect()
+        mockedKubernetesServer.expect()
                 .get()
                 .withPath(path)
                 .andReturn(
@@ -70,7 +70,7 @@ public class CancelEndpointTest {
                                 .endMetadata()
                                 .build())
                 .always();
-        mockedOpenShiftServer.expect()
+        mockedKubernetesServer.expect()
                 .delete()
                 .withPath(path)
                 .andReturn(204, new ArrayList<>(List.of(new StatusDetailsBuilder().withName(adjusterJobName).build())))
