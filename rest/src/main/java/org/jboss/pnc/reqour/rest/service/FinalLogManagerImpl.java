@@ -27,7 +27,10 @@ public class FinalLogManagerImpl implements FinalLogManager {
 
     @Override
     public void addMessage(String message) {
-        messages.computeIfAbsent(getProcessContextValue(), StringBuffer::new)
+        final String processContext = getProcessContextValue();
+        log.debug("Adding message for process context {}", processContext);
+
+        messages.computeIfAbsent(processContext, StringBuffer::new)
                 .append(message)
                 .append(System.lineSeparator());
     }
@@ -35,13 +38,13 @@ public class FinalLogManagerImpl implements FinalLogManager {
     @Override
     public void sendMessage() {
         String processContext = getProcessContextValue();
+        log.debug("Gonna send message for process context {}", processContext);
+
         StringBuffer sb = messages.remove(processContext);
         if (sb == null) {
             throw new IllegalArgumentException(
                     "Final log message for process context '" + processContext + "' not found.");
         }
-
-        log.debug("Sending final log assigned to process context '{}' to Bifrost", processContext);
         bifrostUploader.uploadStringFinalLog(sb.toString(), FinalLogUploader.REST);
     }
 
