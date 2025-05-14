@@ -88,12 +88,12 @@ public class App implements Runnable {
 
     @Override
     public void run() {
-        ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
         AdjustRequest adjustRequest = config.adjust().request();
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {
             configureMDC();
+            ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
             if (adjustRequest.getHeartbeatConfig() != null) {
                 heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
             }
