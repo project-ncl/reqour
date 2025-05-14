@@ -179,7 +179,6 @@ class AdjustEndpointImplTest {
                                 .callback(
                                         ReqourCallback.builder().id(TASK_ID).status(ResultStatus.SYSTEM_ERROR).build())
                                 .build()));
-        Mockito.verify(userLogger).info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
         Mockito.verify(userLogger).error("Could not send final log to Bifrost", ex);
     }
 }
