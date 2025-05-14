@@ -54,7 +54,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void adjust(AdjustRequest adjustRequest) {
         managedExecutor.runAsync(() -> {
-            userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.BEGIN));
+            ProcessStageUtils.logProcessStageBegin(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
             finalLogManager.addMessage(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.BEGIN));
             openShiftAdjusterJobController.createAdjusterJob(adjustRequest);
         })
@@ -75,7 +75,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     }
 
     private Void onException(Throwable throwable, AdjustRequest adjustRequest) {
-        userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
+        ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
         finalLogManager.addMessage(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
 
         String errorMessage = String.format(
@@ -99,7 +99,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
 
             finalLogManager.sendMessage();
         } catch (RuntimeException ex) {
-            userLogger.info(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.END));
+            ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
             userLogger.error("Could not send final log to Bifrost", ex);
             sendSystemErrorCallback(adjustRequest);
             openShiftAdjusterJobController.destroyAdjusterJob(adjustRequest.getTaskId());
