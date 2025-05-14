@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.rest.openshift;
 
 import java.util.List;
+import java.util.Random;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -36,6 +37,7 @@ public class OpenShiftAdjusterJobController {
     private final OpenShiftClient openShiftClient;
     private final JobDefinitionCreator jobDefinitionCreator;
     private final Logger userLogger;
+    private final static Random RANDOM = new Random();
 
     @Inject
     public OpenShiftAdjusterJobController(
@@ -102,7 +104,9 @@ public class OpenShiftAdjusterJobController {
             log.warn("task id '{}' contains invalid characters, converted to '{}'", taskId, adjustedTaskId);
         }
 
-        String jobName = String.format("reqour-adjuster-%s", adjustedTaskId);
+        // The random component is so that a retry of the same task id doesn't cause a failure for the job creation
+        // because of a name clash
+        String jobName = String.format("reqour-adjuster-%s-%s", adjustedTaskId, RANDOM.nextInt(1000));
         log.info("For the task ID '{}' using job name '{}'", taskId, jobName);
         return jobName;
     }
