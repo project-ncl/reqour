@@ -22,6 +22,7 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.adjust.profile.WithSuccessfulAlternatives;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -53,6 +54,11 @@ class AlignmentSuccessTest {
         wireMock.register(WireMock.post(BIFROST_FINAL_LOG_UPLOAD_PATH).willReturn(WireMock.ok()));
         wireMock.register(WireMock.post(CALLBACK_PATH).willReturn(WireMock.ok()));
         wireMock.register(WireMock.post(adjustTestUtils.getHeartbeatPath()).willReturn(WireMock.ok()));
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMock.resetRequests();
     }
 
     @Inject
