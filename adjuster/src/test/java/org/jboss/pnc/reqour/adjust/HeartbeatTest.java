@@ -10,6 +10,7 @@ import static org.jboss.pnc.reqour.common.TestDataSupplier.CALLBACK_PATH;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.reqour.adjust.profile.WithSuccessfulAlternatives;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -40,6 +41,11 @@ public class HeartbeatTest {
         wireMock.register(WireMock.post(adjustTestUtils.getHeartbeatPath()).willReturn(WireMock.ok()));
         wireMock.register(WireMock.post(CALLBACK_PATH).willReturn(WireMock.ok()));
         wireMock.register(WireMock.post(BIFROST_FINAL_LOG_UPLOAD_PATH).willReturn(WireMock.ok()));
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMock.resetRequests();
     }
 
     @Test
