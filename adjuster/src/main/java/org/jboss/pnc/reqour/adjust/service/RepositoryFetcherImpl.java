@@ -101,7 +101,8 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     }
 
     private boolean syncEnabled(AdjustRequest adjustRequest) {
-        return adjustRequest.isSync() && !adjustRequest.getOriginRepoUrl().isBlank();
+        return adjustRequest.isSync() && adjustRequest.getOriginRepoUrl() != null
+                && !adjustRequest.getOriginRepoUrl().isBlank();
     }
 
     private boolean syncExternalRepo(AdjustRequest adjustRequest, Path workdir, String gitUsername) {
@@ -162,7 +163,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
         List<String> internalUrls = this.internalUrls.orElse(Collections.emptyList());
         for (var internalUrl : internalUrls) {
-            if (adjustRequest.getOriginRepoUrl().contains(internalUrl)) {
+            if (adjustRequest.getOriginRepoUrl() != null && adjustRequest.getOriginRepoUrl().contains(internalUrl)) {
                 isRefInternal = true;
                 break;
             }
