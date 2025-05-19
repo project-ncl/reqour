@@ -39,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig> implements AdjustProvider {
 
+    private static final String RESULTS_FILENAME = "results";
+
     public NpmProvider(
             AdjustConfig adjustConfig,
             AdjustRequest adjustRequest,
@@ -91,13 +93,17 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
+        VersioningState versioningState = obtainVersioningState(config.getResultsFilePath());
+        log.debug("Parsed versioning state is: {}", versioningState);
+
         return ManipulatorResult.builder()
-                .versioningState(obtainVersioningState(config.getResultsFilePath()))
+                .versioningState(versioningState)
                 .removedRepositories(Collections.emptyList()) // no support of repos removal by project manipulator
                 .build();
     }
 
     VersioningState obtainVersioningState(Path resultsFilePath) {
+        log.debug("Parsing versioning state from the file: '{}'", resultsFilePath);
         try {
             NpmResult manipulatorResult = objectMapper.readValue(resultsFilePath.toFile(), NpmResult.class);
             userLogger.info(
@@ -108,7 +114,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                     .executionRootVersion(manipulatorResult.getVersion())
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException("Cannot deserialize the manipulator result", e);
+            throw new RuntimeException("Cannot deserialize the manipulator result from Project Manipulator", e);
         }
     }
 
@@ -143,7 +149,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
     }
 
     private static Path getResultsFile(Path workdir) {
-        Path resultsFile = workdir.resolve("results");
+        Path resultsFile = workdir.resolve(RESULTS_FILENAME);
         if (Files.notExists(resultsFile)) {
             try {
                 Files.createFile(resultsFile);

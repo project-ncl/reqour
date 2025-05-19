@@ -9,6 +9,7 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.jboss.pnc.reqour.adjust.config.SbtProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.SmegConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
+import org.jboss.pnc.reqour.adjust.model.smeg.SmegResult;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -35,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
+
+    private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
             AdjustConfig adjustConfig,
@@ -91,9 +95,17 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
+        Path alignmentResultsFile = getPathToAlignmentResultsFile();
         try {
-            ManipulatorResult manipulatorResult = objectMapper
-                    .readValue(config.getWorkdir().resolve("manipulations.json").toFile(), ManipulatorResult.class);
+            log.debug(
+                    "Gonna parse manipulator result from the file: '{}': {}",
+                    alignmentResultsFile,
+                    Files.readString(alignmentResultsFile));
+            SmegResult smegResult = objectMapper
+                    .readValue(alignmentResultsFile.toFile(), SmegResult.class);
+            log.debug("Parsed SMEg result: {}", smegResult);
+            ManipulatorResult manipulatorResult = smegResult.toManipulatorResult();
+            log.debug("Unified manipulator result: {}", manipulatorResult);
             return manipulatorResult;
         } catch (IOException e) {
             throw new RuntimeException("Unable to deserialize SMEG result", e);
@@ -116,5 +128,9 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
         }
 
         return alignmentParameters;
+    }
+
+    private Path getPathToAlignmentResultsFile() {
+        return config.getWorkdir().resolve(ALIGNMENT_RESULTS_FILENAME);
     }
 }

@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -64,16 +63,14 @@ public class CommonManipulatorResultExtractor {
     public VersioningState obtainVersioningState(
             Path alignmentResultFilePath,
             ExecutionRootOverrides executionRootOverrides) {
-        if (alignmentResultFilePath == null) {
-            throw new RuntimeException("No file with alignment results provided");
-        }
+        log.debug("Parsing versioning state from the file: '{}'", alignmentResultFilePath);
+        IOUtils.validateResourceAtPathExists(
+                alignmentResultFilePath,
+                String.format(
+                        "File which should contain alignment result ('%s') does not exist",
+                        alignmentResultFilePath));
 
         try {
-            IOUtils.validateResourceAtPathExists(
-                    alignmentResultFilePath,
-                    String.format(
-                            "File which should contain alignment result ('%s') does not exist",
-                            alignmentResultFilePath));
             PME manipulatorResult = objectMapper.readValue(alignmentResultFilePath.toFile(), PME.class);
             userLogger.info(
                     "Got PME result data: {}",
@@ -87,6 +84,9 @@ public class CommonManipulatorResultExtractor {
     private VersioningState transformPMEIntoVersioningState(
             PME manipulatorResult,
             ExecutionRootOverrides executionRootOverrides) {
+        log.debug(
+                "Transforming PME result into versioning state, version root overrides are: {}",
+                executionRootOverrides);
         final String groupId;
         final String artifactId;
 
@@ -94,8 +94,8 @@ public class CommonManipulatorResultExtractor {
             groupId = manipulatorResult.getGav().getGroupId();
             artifactId = manipulatorResult.getGav().getArtifactId();
         } else {
-            log.warn("Overriding groupId as '{}'", executionRootOverrides.groupId());
-            log.warn("Overriding artifactId as '{}'", executionRootOverrides.artifactId());
+            userLogger.warn("Overriding groupId as '{}'", executionRootOverrides.groupId());
+            userLogger.warn("Overriding artifactId as '{}'", executionRootOverrides.artifactId());
             groupId = executionRootOverrides.groupId();
             artifactId = executionRootOverrides.artifactId();
         }
@@ -106,16 +106,14 @@ public class CommonManipulatorResultExtractor {
                 .build();
     }
 
-    private static String getExecutionRootName(String groupId, String artifactId) {
-        return (groupId == null) ? artifactId : groupId + ":" + artifactId;
-    }
-
     /**
      * Obtain {@link ManipulatorResult#getRemovedRepositories()}.
      */
-    public List<RemovedRepository> obtainRemovedRepositories(Path workdir, Stream<String> manipulatorParameters) {
+    public List<RemovedRepository> obtainRemovedRepositories(Path workdir, List<String> manipulatorParameters) {
+        log.debug("Obtaining removed repositories, manipulator parameters: {}", manipulatorParameters);
+
         Optional<String> repositoriesBackupFilename = AdjustmentSystemPropertiesUtils
-                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters);
+                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters.stream());
 
         if (repositoriesBackupFilename.isEmpty()) {
             log.warn(
@@ -132,6 +130,11 @@ public class CommonManipulatorResultExtractor {
             return Collections.emptyList();
         }
 
+        try {
+            log.debug("File with removed repositories: {}", Files.readString(repositoriesBackupFile));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         List<RemovedRepository> removedRepositories = new ArrayList<>();
         try {
             DocumentBuilder db = dbf.newDocumentBuilder();
@@ -169,6 +172,10 @@ public class CommonManipulatorResultExtractor {
         }
 
         return removedRepositories;
+    }
+
+    private static String getExecutionRootName(String groupId, String artifactId) {
+        return (groupId == null) ? artifactId : groupId + ":" + artifactId;
     }
 
     private static String getRepositoryField(Element repository, String field) {

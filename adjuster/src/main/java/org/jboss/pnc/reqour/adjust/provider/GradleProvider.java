@@ -17,6 +17,8 @@ import java.util.List;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.api.reqour.dto.RemovedRepository;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
@@ -109,15 +111,20 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
+        VersioningState versioningState = adjustResultExtractor.obtainVersioningState(
+                getPathToAlignmentResultFile(),
+                config.getExecutionRootOverrides());
+        log.debug("Parsed versioning state is: {}", versioningState);
+
+        List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
+                config.getWorkdir(),
+                config.getPncDefaultAlignmentParameters());
+        log.debug("Parsed removed repositories are: {}", removedRepositories);
+
         return ManipulatorResult.builder()
-                .versioningState(
-                        adjustResultExtractor.obtainVersioningState(
-                                getPathToAlignmentResultFile(),
-                                config.getExecutionRootOverrides()))
+                .versioningState(versioningState)
                 .removedRepositories(
-                        adjustResultExtractor.obtainRemovedRepositories(
-                                config.getWorkdir(),
-                                config.getPncDefaultAlignmentParameters().stream()))
+                        removedRepositories)
                 .build();
     }
 
