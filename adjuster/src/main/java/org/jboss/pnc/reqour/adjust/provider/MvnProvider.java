@@ -20,6 +20,8 @@ import org.commonjava.maven.ext.common.json.PME;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.api.reqour.dto.RemovedRepository;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
@@ -124,19 +126,24 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             createAdjustResultsFile();
         }
 
+        VersioningState versioningState = adjustResultExtractor.obtainVersioningState(
+                getPathToAlignmentResultFile(),
+                config.getExecutionRootOverrides());
+        log.debug("Parsed versioning state is: {}", versioningState);
+
+        List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
+                config.getSubFolderWithAlignmentResultFile(),
+                AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoStream(
+                        List.of(
+                                config.getPncDefaultAlignmentParameters(),
+                                config.getUserSpecifiedAlignmentParameters(),
+                                config.getAlignmentConfigParameters()))
+                        .toList());
+        log.debug("Parsed removed repositories are: {}", removedRepositories);
+
         return ManipulatorResult.builder()
-                .versioningState(
-                        adjustResultExtractor.obtainVersioningState(
-                                getPathToAlignmentResultFile(),
-                                config.getExecutionRootOverrides()))
-                .removedRepositories(
-                        adjustResultExtractor.obtainRemovedRepositories(
-                                config.getSubFolderWithAlignmentResultFile(),
-                                AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoStream(
-                                        List.of(
-                                                config.getPncDefaultAlignmentParameters(),
-                                                config.getUserSpecifiedAlignmentParameters(),
-                                                config.getAlignmentConfigParameters()))))
+                .versioningState(versioningState)
+                .removedRepositories(removedRepositories)
                 .build();
     }
 

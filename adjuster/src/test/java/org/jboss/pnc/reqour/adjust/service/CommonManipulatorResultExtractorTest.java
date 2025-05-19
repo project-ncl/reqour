@@ -9,7 +9,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
@@ -76,7 +75,7 @@ class CommonManipulatorResultExtractorTest {
 
     @Test
     void obtainRemovedRepositories_repoRemovalBackupFileNotSpecified_returnsEmptyArray() {
-        Stream<String> manipulatorParameters = Stream.empty();
+        List<String> manipulatorParameters = Collections.emptyList();
         List<RemovedRepository> expectedRemovedRepositories = Collections.emptyList();
 
         List<RemovedRepository> actualRemovedRepositories = manipulatorResultExtractor
@@ -87,7 +86,7 @@ class CommonManipulatorResultExtractorTest {
 
     @Test
     void obtainRemovedRepositories_repoRemovalBackupFileNotExists_returnsEmptyArray() {
-        Stream<String> manipulatorParameters = Stream.of(
+        List<String> manipulatorParameters = List.of(
                 String.format(
                         "%s=%s",
                         CommonManipulatorResultExtractor.REMOVED_REPOSITORIES_KEY,
@@ -102,7 +101,7 @@ class CommonManipulatorResultExtractorTest {
 
     @Test
     void obtainRemovedRepositories_repoRemovalBackupPresent_parsesTheFileAndReturnsResult() {
-        Stream<String> manipulatorParameters = Stream.of(
+        List<String> manipulatorParameters = List.of(
                 String.format("%s=%s", CommonManipulatorResultExtractor.REMOVED_REPOSITORIES_KEY, "repos-backup.xml"));
         List<RemovedRepository> expectedRemovedRepositories = List.of(
                 RemovedRepository.builder()
