@@ -167,6 +167,7 @@ public class GitCommands {
     }
 
     public boolean doesBranchExistAtRemote(String remote, String branch, ProcessContext.Builder processContextBuilder) {
+        log.debug("Checking whether branch '{}' exists at remote '{}'", branch, remote);
         return processExecutor
                 .execute(processContextBuilder.command(GitUtils.doesBranchExistAtRemote(remote, branch)).build()) == 0;
     }
@@ -194,11 +195,13 @@ public class GitCommands {
     }
 
     public boolean doesTagExistAtRemote(String remote, String ref, ProcessContext.Builder processContextBuilder) {
+        log.debug("Checking whether tag '{}' exists at remote '{}'", ref, remote);
         return processExecutor
                 .execute(processContextBuilder.command(GitUtils.doesTagExistAtRemote(remote, ref)).build()) == 0;
     }
 
     public boolean doesShaExists(String ref, ProcessContext.Builder processContextBuilder) {
+        log.debug("Checking whether sha '{}' exists in the current tree", ref);
         return processExecutor.execute(processContextBuilder.command(GitUtils.doesShaExists(ref)).build()) == 0;
     }
 
@@ -229,10 +232,11 @@ public class GitCommands {
     }
 
     public boolean doesPRExistsAtRemote(String remote, String ref, ProcessContext.Builder processContextBuilder) {
+        log.debug("Checking whether PR '{}' exists at remote '{}'", ref, remote);
         try {
             fetchRef(remote, modifyPullRequestRefToBeFetchable(ref), false, true, processContextBuilder);
             return true;
-        } catch (GitException _e) {
+        } catch (GitException ex) {
             return false;
         }
     }
@@ -354,7 +358,7 @@ public class GitCommands {
 
     private static String modifyPullRequestRefToBeFetchable(String ref) {
         if (!isReferencePR(ref)) {
-            throw new RuntimeException(String.format("Given reference (%s) does not match PR reference format", ref));
+            throw new GitException(String.format("Given reference (%s) does not match PR reference format", ref));
         }
         return ref + "/head";
     }
