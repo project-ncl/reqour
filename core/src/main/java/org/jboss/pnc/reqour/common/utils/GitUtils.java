@@ -90,7 +90,7 @@ public class GitUtils {
     }
 
     public static List<String> doesTagExistAtRemote(String remote, String tag) {
-        return List.of("git", "ls-remote", remote, String.format("refs/tags/%s", tag));
+        return List.of("git", "ls-remote", "--exit-code", remote, String.format("refs/tags/%s", tag));
     }
 
     public static List<String> doesShaExists(String ref) {
