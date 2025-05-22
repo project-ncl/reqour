@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import lombok.Builder;
 import lombok.Value;
 
@@ -18,6 +21,7 @@ import lombok.Value;
 @Builder(builderClassName = "Builder", toBuilder = true)
 public class ProcessContext {
 
+    static Logger userLogger = LoggerFactory.getLogger("org.jboss.pnc._userlog_");
     List<String> command;
     Path workingDirectory;
     Map<String, String> extraEnvVariables;
@@ -33,7 +37,7 @@ public class ProcessContext {
         return ProcessContext.builder()
                 .workingDirectory(workdir)
                 .extraEnvVariables(Collections.emptyMap())
-                .stdoutConsumer(System.out::println)
-                .stderrConsumer(System.out::println);
+                .stdoutConsumer(userLogger::debug)
+                .stderrConsumer(userLogger::warn);
     }
 }

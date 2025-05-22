@@ -48,8 +48,8 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         userLogger.info("Prepared command to be executed is: {}", preparedCommand);
         int manipulatorExitCode = processExecutor.execute(
                 ProcessContext.defaultBuilderWithWorkdir(config.getWorkdir())
-                        .stdoutConsumer(userLogger::info)
                         .command(preparedCommand)
+                        .stdoutConsumer(userLogger::info)
                         .build());
         if (manipulatorExitCode == 0) {
             userLogger.info("Manipulator subprocess ended successfully!");
