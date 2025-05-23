@@ -29,6 +29,7 @@ import org.jboss.pnc.reqour.adjust.provider.AdjustProviderPicker;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
 import org.jboss.pnc.reqour.adjust.utils.IOUtils;
+import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
@@ -117,6 +118,11 @@ public class App implements Runnable {
             }
         } catch (AdjusterException e) {
             log.warn("Alignment exception occurred, setting the status to FAILED");
+            userLogger.warn("Exception was: " + e);
+            adjustResponseBuilder.callback(
+                    ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());
+        } catch (GitException e) {
+            log.warn("Git exception occurred, setting the status to FAILED");
             userLogger.warn("Exception was: " + e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());

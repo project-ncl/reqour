@@ -15,7 +15,7 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.common.log.ProcessStageUtils;
-import org.jboss.pnc.reqour.adjust.profile.WithFailingAdjustProviderAlternative;
+import org.jboss.pnc.reqour.adjust.profile.WithFailingRepositoryFetcherAlternative;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +31,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(WithFailingAdjustProviderAlternative.class)
+@TestProfile(WithFailingRepositoryFetcherAlternative.class)
 @ConnectWireMock
-public class AlignmentFailureTest {
+public class GitExceptionTest {
 
     @Inject
     @TopCommand
@@ -60,7 +60,7 @@ public class AlignmentFailureTest {
     }
 
     @Test
-    void run_alignmentFailure_finalLogAndCallbackSent() throws InterruptedException, JsonProcessingException {
+    void run_gitException_finalLogAndCallbackSent() throws InterruptedException, JsonProcessingException {
         app.run();
 
         Thread.sleep(2_000);
@@ -79,16 +79,10 @@ public class AlignmentFailureTest {
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.END,
                                                 AdjustProcessStage.SCM_CLONE),
-                                        AdjustTestUtils.getWireMockContainingPredicate(
-                                                ProcessStageUtils.Step.BEGIN,
-                                                AdjustProcessStage.ALIGNMENT),
                                         WireMock.containing(
+                                                "[WARN] Exception was: org.jboss.pnc.reqour.common.exceptions.GitException: Oops, git exception"),
+                                        WireMock.notContaining(
                                                 "[INFO] Starting an alignment process using the corresponding manipulator"),
-                                        AdjustTestUtils.getWireMockContainingPredicate(
-                                                ProcessStageUtils.Step.END,
-                                                AdjustProcessStage.ALIGNMENT),
-                                        WireMock.containing(
-                                                "[WARN] Exception was: org.jboss.pnc.reqour.adjust.exception.AdjusterException: Oops, alignment exception"),
                                         WireMock.notContaining("[INFO] Pushing aligned changes"))));
 
         wireMock.verifyThat(
