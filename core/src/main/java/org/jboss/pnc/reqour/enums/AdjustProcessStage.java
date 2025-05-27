@@ -6,5 +6,5 @@ package org.jboss.pnc.reqour.enums;
 
 public enum AdjustProcessStage {
 
-    STARTING_ALIGNMENT_POD, SCM_CLONE, ALIGNMENT,
+    STARTING_ALIGNMENT_POD, SCM_CLONE, ALIGNMENT_ADJUST,
 }
