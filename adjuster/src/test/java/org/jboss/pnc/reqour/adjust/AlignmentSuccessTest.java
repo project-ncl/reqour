@@ -86,13 +86,13 @@ class AlignmentSuccessTest {
                                                 AdjustProcessStage.SCM_CLONE),
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.BEGIN,
-                                                AdjustProcessStage.ALIGNMENT),
+                                                AdjustProcessStage.ALIGNMENT_ADJUST),
                                         WireMock.containing(
                                                 "[INFO] Starting an alignment process using the corresponding manipulator"),
                                         WireMock.containing("[INFO] Pushing aligned changes"),
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.END,
-                                                AdjustProcessStage.ALIGNMENT))));
+                                                AdjustProcessStage.ALIGNMENT_ADJUST))));
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))

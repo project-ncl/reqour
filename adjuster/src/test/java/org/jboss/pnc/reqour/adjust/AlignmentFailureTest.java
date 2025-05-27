@@ -81,12 +81,12 @@ public class AlignmentFailureTest {
                                                 AdjustProcessStage.SCM_CLONE),
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.BEGIN,
-                                                AdjustProcessStage.ALIGNMENT),
+                                                AdjustProcessStage.ALIGNMENT_ADJUST),
                                         WireMock.containing(
                                                 "[INFO] Starting an alignment process using the corresponding manipulator"),
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.END,
-                                                AdjustProcessStage.ALIGNMENT),
+                                                AdjustProcessStage.ALIGNMENT_ADJUST),
                                         WireMock.containing(
                                                 "[WARN] Exception was: org.jboss.pnc.reqour.adjust.exception.AdjusterException: Oops, alignment exception"),
                                         WireMock.notContaining("[INFO] Pushing aligned changes"))));

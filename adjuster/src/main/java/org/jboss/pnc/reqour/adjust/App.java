@@ -104,7 +104,7 @@ public class App implements Runnable {
                 cloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
             }
 
-            try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.ALIGNMENT.name())) {
+            try (AutoCloseable _c = ProcessStageUtils.startCloseableStage(AdjustProcessStage.ALIGNMENT_ADJUST.name())) {
                 AdjustProvider adjustProvider = adjustProviderPicker.pickAdjustProvider(adjustRequest);
                 ManipulatorResult manipulatorResult = adjustProvider.adjust(adjustRequest);
                 AdjustmentPushResult adjustmentPushResult = adjustmentPusher
