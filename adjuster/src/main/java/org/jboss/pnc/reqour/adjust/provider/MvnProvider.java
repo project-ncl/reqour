@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_SUFFIX_ALTERNATIVES;
@@ -149,7 +150,10 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     private boolean pmeIsDisabled() {
         String pmeDisabled = AdjustmentSystemPropertiesUtils
-                .getSystemPropertyValue("-Dmanipulation.disable", config.getUserSpecifiedAlignmentParameters().stream())
+                .getSystemPropertyValue(
+                        MANIPULATION_DISABLE,
+                        config.getUserSpecifiedAlignmentParameters().stream(),
+                        "true")
                 .orElse("false");
         return "true".equals(pmeDisabled);
     }

@@ -113,7 +113,7 @@ public class CommonManipulatorResultExtractor {
         log.debug("Obtaining removed repositories, manipulator parameters: {}", manipulatorParameters);
 
         Optional<String> repositoriesBackupFilename = AdjustmentSystemPropertiesUtils
-                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters.stream());
+                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters.stream(), "");
 
         if (repositoriesBackupFilename.isEmpty()) {
             log.warn(

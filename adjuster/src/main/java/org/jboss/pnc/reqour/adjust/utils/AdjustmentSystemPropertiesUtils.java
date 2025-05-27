@@ -18,12 +18,34 @@ public class AdjustmentSystemPropertiesUtils {
         return String.format("%s=%s", name.getCliRepresentation(), value);
     }
 
-    public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams) {
-        return streams.filter(p -> p.startsWith(name)).findFirst().map(p -> p.split("=")[1]);
+    /**
+     * In the given {@code Stream<String>}, it tries to find the occurrence for 'name=<value>'. In case there is no '=',
+     * it will apply {@code defaultValue}.<br/>
+     * For instance, when finding '-Dfoo' in '-Dbar -Dfoo=bar', it returns 'bar'.
+     * 
+     * @param name system property name
+     * @param streams string stream, in which to find the value assigned to the given name
+     * @param defaultValue value to return in case there is no '='
+     */
+    public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams, String defaultValue) {
+        return streams.filter(p -> p.startsWith(name)).findFirst().map(p -> {
+            try {
+                return p.split("=")[1];
+            } catch (ArrayIndexOutOfBoundsException _e) {
+                return defaultValue;
+            }
+        });
+    }
+
+    public static Optional<String> getSystemPropertyValue(
+            AdjustmentSystemPropertyName name,
+            Stream<String> streams,
+            String defaultValue) {
+        return getSystemPropertyValue(name.getCliRepresentation(), streams, defaultValue);
     }
 
     public static Optional<String> getSystemPropertyValue(AdjustmentSystemPropertyName name, Stream<String> streams) {
-        return getSystemPropertyValue(name.getCliRepresentation(), streams);
+        return getSystemPropertyValue(name.getCliRepresentation(), streams, "");
     }
 
     public static Stream<String> joinSystemPropertiesListsIntoStream(List<List<String>> lists) {
@@ -39,7 +61,8 @@ public class AdjustmentSystemPropertiesUtils {
         REST_MODE("restMode"),
         VERSION_INCREMENTAL_SUFFIX("versionIncrementalSuffix"),
         BREW_PULL_ACTIVE("restBrewPullActive"),
-        VERSION_SUFFIX_ALTERNATIVES("versionSuffixAlternatives");
+        VERSION_SUFFIX_ALTERNATIVES("versionSuffixAlternatives"),
+        MANIPULATION_DISABLE("manipulation.disable");
 
         private final String cliName;
 
