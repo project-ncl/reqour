@@ -9,6 +9,7 @@ import java.util.List;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.slf4j.Logger;
@@ -55,6 +56,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
             userLogger.info("Manipulator subprocess ended successfully!");
         } else {
             userLogger.warn("Manipulator subprocess ended with failure!");
+            throw new AdjusterException("Manipulator subprocess ended with non-zero exit code");
         }
     }
 
