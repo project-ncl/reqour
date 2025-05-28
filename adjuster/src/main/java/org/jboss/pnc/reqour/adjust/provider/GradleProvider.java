@@ -177,6 +177,6 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
     private Path getPathToAlignmentResultFile() {
         return CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
                 config.getWorkdir().resolve("build/alignmentReport.json"),
-                config.getWorkdir().resolve("manipulations.json"));
+                config.getWorkdir().resolve("manipulation.json"));
     }
 }
