@@ -80,7 +80,7 @@ public class GitExceptionTest {
                                                 ProcessStageUtils.Step.END,
                                                 AdjustProcessStage.SCM_CLONE),
                                         WireMock.containing(
-                                                "[WARN] Exception was: org.jboss.pnc.reqour.common.exceptions.GitException: Oops, git exception"),
+                                                "[WARN] Exception was: Oops, git exception"),
                                         WireMock.notContaining(
                                                 "[INFO] Starting an alignment process using the corresponding manipulator"),
                                         WireMock.notContaining("[INFO] Pushing aligned changes"))));

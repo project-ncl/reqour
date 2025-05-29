@@ -88,7 +88,7 @@ public class AlignmentFailureTest {
                                                 ProcessStageUtils.Step.END,
                                                 AdjustProcessStage.ALIGNMENT_ADJUST),
                                         WireMock.containing(
-                                                "[WARN] Exception was: org.jboss.pnc.reqour.adjust.exception.AdjusterException: Oops, alignment exception"),
+                                                "[WARN] Exception was: Oops, alignment exception"),
                                         WireMock.notContaining("[INFO] Pushing aligned changes"))));
 
         wireMock.verifyThat(

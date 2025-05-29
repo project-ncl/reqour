@@ -16,5 +16,8 @@ public interface AdjustmentPusher {
     /**
      * Push aligned changes into the downstream repository.
      */
-    AdjustmentPushResult pushAlignedChanges(AdjustRequest adjustRequest, ManipulatorResult manipulatorResult);
+    AdjustmentPushResult pushAlignedChanges(
+            AdjustRequest adjustRequest,
+            ManipulatorResult manipulatorResult,
+            boolean failOnNoAlignmentChanges);
 }
