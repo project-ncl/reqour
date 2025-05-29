@@ -18,4 +18,8 @@ public interface AdjustProvider {
      * @return result of alignment operation
      */
     ManipulatorResult adjust(AdjustRequest adjustRequest);
+
+    default boolean failOnNoAlignmentChanges() {
+        return true;
+    }
 }

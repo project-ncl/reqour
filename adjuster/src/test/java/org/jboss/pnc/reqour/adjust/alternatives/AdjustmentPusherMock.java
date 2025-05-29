@@ -24,7 +24,10 @@ public class AdjustmentPusherMock implements AdjustmentPusher {
     Logger userLogger;
 
     @Override
-    public AdjustmentPushResult pushAlignedChanges(AdjustRequest adjustRequest, ManipulatorResult manipulatorResult) {
+    public AdjustmentPushResult pushAlignedChanges(
+            AdjustRequest adjustRequest,
+            ManipulatorResult manipulatorResult,
+            boolean failOnNoAlignmentChanges) {
         userLogger.info("Pushing aligned changes");
         return new AdjustmentPushResult("123", "reqour-eee");
     }

@@ -148,6 +148,11 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .build();
     }
 
+    @Override
+    public boolean failOnNoAlignmentChanges() {
+        return !pmeIsDisabled();
+    }
+
     private boolean pmeIsDisabled() {
         String pmeDisabled = AdjustmentSystemPropertiesUtils
                 .getSystemPropertyValue(

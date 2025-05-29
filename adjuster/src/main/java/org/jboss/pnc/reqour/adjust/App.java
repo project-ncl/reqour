@@ -108,7 +108,10 @@ public class App implements Runnable {
                 AdjustProvider adjustProvider = adjustProviderPicker.pickAdjustProvider(adjustRequest);
                 ManipulatorResult manipulatorResult = adjustProvider.adjust(adjustRequest);
                 AdjustmentPushResult adjustmentPushResult = adjustmentPusher
-                        .pushAlignedChanges(adjustRequest, manipulatorResult);
+                        .pushAlignedChanges(
+                                adjustRequest,
+                                manipulatorResult,
+                                adjustProvider.failOnNoAlignmentChanges());
                 combineResultsOfStages(
                         adjustRequest,
                         cloningResult,
@@ -118,17 +121,17 @@ public class App implements Runnable {
             }
         } catch (AdjusterException e) {
             log.warn("Alignment exception occurred, setting the status to FAILED");
-            userLogger.warn("Exception was: " + e);
+            userLogger.warn("Exception was: {}", e.getMessage(), e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());
         } catch (GitException e) {
             log.warn("Git exception occurred, setting the status to FAILED");
-            userLogger.warn("Exception was: " + e);
+            userLogger.warn("Exception was: {}", e.getMessage(), e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.FAILED).build());
         } catch (Exception e) {
             log.warn("Unexpected exception occurred, setting the status to SYSTEM_ERROR");
-            userLogger.warn("Exception was: " + e);
+            userLogger.warn("Exception was: {}", e.getMessage(), e);
             adjustResponseBuilder.callback(
                     ReqourCallback.builder().id(adjustRequest.getTaskId()).status(ResultStatus.SYSTEM_ERROR).build());
         } finally {
