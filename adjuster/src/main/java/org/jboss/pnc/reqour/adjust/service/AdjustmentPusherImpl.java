@@ -130,21 +130,19 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
             boolean failOnNoAlignmentChanges) {
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
 
-        String commitId = commitChanges(processContextBuilder, failOnNoAlignmentChanges);
+        String commitId = tryCommitChanges(processContextBuilder, failOnNoAlignmentChanges);
 
         log.debug("Going to create a new tag for commit: {}", commitId);
         String tagName = computeTagName(processContextBuilder, alignmentRootVersion, commitId);
         log.debug("The commit is going to be tagged as '{}'", tagName);
 
-        tagCommit(processContextBuilder, tagName, tagMessage, failOnNoAlignmentChanges);
+        tryTagHead(processContextBuilder, tagName, tagMessage, failOnNoAlignmentChanges);
         return tagName;
     }
 
-    private String commitChanges(ProcessContext.Builder processContextBuilder, boolean failOnNoAlignmentChanges) {
-        log.debug("Committing changes done by Reqour");
+    private String tryCommitChanges(ProcessContext.Builder processContextBuilder, boolean failOnNoAlignmentChanges) {
         try {
-            gitCommands.commit("Reqour", processContextBuilder);
-            return gitCommands.revParse(workdir);
+            return commitChanges(processContextBuilder);
         } catch (GitException ex) {
             if (failOnNoAlignmentChanges) {
                 // in case no alignment changes do matter, we (intentionally) re-throw the exception
@@ -154,6 +152,12 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
             // no changes were made, so the current HEAD is the right commit SHA
             return gitCommands.revParse(workdir);
         }
+    }
+
+    private String commitChanges(ProcessContext.Builder processContextBuilder) {
+        log.debug("Committing changes done by Reqour");
+        gitCommands.commit("Reqour", processContextBuilder);
+        return gitCommands.revParse(workdir);
     }
 
     private String computeTagName(
@@ -167,21 +171,25 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
         return tagName;
     }
 
-    private void tagCommit(
+    private void tryTagHead(
             ProcessContext.Builder processContextBuilder,
             String tagName,
             String tagMessage,
             boolean failOnNoAlignmentChanges) {
         try {
-            if (!gitCommands.doesTagExistLocally(tagName, processContextBuilder)) {
-                gitCommands.createAnnotatedTag(tagName, tagMessage, processContextBuilder);
-            }
+            tagHead(processContextBuilder, tagName, tagMessage);
         } catch (GitException ex) {
             if (failOnNoAlignmentChanges) {
                 // in case no alignment changes do matter, we (intentionally) re-throw the exception
                 throw ex;
             }
             log.warn("Reqour failed to create a new tag, but was set not to fail on no alignment changes");
+        }
+    }
+
+    private void tagHead(ProcessContext.Builder processContextBuilder, String tagName, String tagMessage) {
+        if (!gitCommands.doesTagExistLocally(tagName, processContextBuilder)) {
+            gitCommands.createAnnotatedTag(tagName, tagMessage, processContextBuilder);
         }
     }
 

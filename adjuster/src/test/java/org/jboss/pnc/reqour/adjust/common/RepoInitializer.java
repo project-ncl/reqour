@@ -6,35 +6,72 @@ package org.jboss.pnc.reqour.adjust.common;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.apache.commons.io.FileUtils;
 
 public class RepoInitializer {
 
-    public static void createRepositories(Path workdir) {
+    public static void createGitRepositories(Path upstreamDir, Path downstreamDir) {
+        createDirectoryIfNotExists(upstreamDir);
+        createDirectoryIfNotExists(downstreamDir);
+
         ProcessBuilder pb = new ProcessBuilder()
-                .command("./configure_upstream_and_downstream.sh", workdir.toString())
+                .command(
+                        "scripts/configure_upstream_and_downstream.sh",
+                        "-u",
+                        upstreamDir.toString(),
+                        "-d",
+                        downstreamDir.toString())
                 .directory(Path.of("src", "test", "resources").toFile());
         try {
             Process process = pb.start();
-            BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            br.lines().forEach(System.out::println);
+            streamProcessOutput(process.getInputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static void removeRepositories(Path workdir) throws IOException {
-        FileUtils.deleteDirectory(workdir.toFile());
+    public static void makeAlignmentChanges(Path downstreamRepository) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder()
+                    .directory(Path.of("src", "test", "resources").toFile())
+                    .command("scripts/make_alignment_changes.sh", "-d", downstreamRepository.toString());
+            Process process = pb.start();
+            streamProcessOutput(process.getInputStream());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static String getUpstreamPath(Path workdir) {
+    public static void removeGitRepositories(Path upstreamDir, Path downstreamDir) throws IOException {
+        FileUtils.deleteDirectory(upstreamDir.toFile());
+        FileUtils.deleteDirectory(downstreamDir.toFile());
+    }
+
+    public static String getUpstreamRemoteUrl(Path workdir) {
         return "file://" + workdir.resolve("upstream");
     }
 
-    public static String getDownstreamPath(Path workdir) {
+    public static String getDownstreamRemoteUrl(Path workdir) {
         return "file://" + workdir.resolve("downstream");
+    }
+
+    private static void createDirectoryIfNotExists(Path dir) {
+        if (!Files.exists(dir)) {
+            try {
+                Files.createDirectory(dir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private static void streamProcessOutput(InputStream is) {
+        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+        br.lines().forEach(System.out::println);
     }
 }
