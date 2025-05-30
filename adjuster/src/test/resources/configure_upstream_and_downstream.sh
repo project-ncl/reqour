@@ -1,7 +1,66 @@
 #!/usr/bin/env bash
 
-readonly UPSTREAM_DIR="${1%/}/upstream"
-readonly DOWNSTREAM_DIR="${1%/}/downstream"
+function show_usage() {
+  echo
+  echo "Usage: ./configure_upstream_and_downstream.sh ARGUMENTS"
+  echo
+  echo "ARGUMENTS:"
+  echo "  -h, --help            Show this help usage"
+  echo "  -u, --upstream        Location where to create upstream repository"
+  echo "  -d, --downstream      Location where to create downstream repository"
+  echo
+}
+
+function parse_arguments() {
+  readonly OPTIONS="$(getopt -o hu:d: --long help,upstream:downstream: -n 'configure_upstream_and_downstream.sh' -- "$@")"
+  eval set -- "$OPTIONS"
+
+  HELP=false
+  while true; do
+    case $1 in
+    -h | --help)
+      HELP=true
+      break
+      ;;
+    -u | --upstream)
+      UPSTREAM_DIR="$2"
+      shift 2
+      ;;
+    -d | --downstream)
+      DOWNSTREAM_DIR="$2"
+      shift 2
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      echo 2>&1 "Invalid option ($1) given"
+      show_usage
+      exit 1
+      ;;
+    esac
+  done
+
+  if [ "$HELP" = true ]; then
+    show_usage
+    exit 0
+  fi
+
+  validate_arguments
+
+  echo "Parsed arguments are:"
+  echo "  upstream repository: '$UPSTREAM_DIR'"
+  echo "  downstream repository: '$DOWNSTREAM_DIR'"
+}
+
+function validate_arguments() {
+  if [[ -z "$UPSTREAM_DIR" || -z "$DOWNSTREAM_DIR" ]]; then
+    echo 2>&1 "Both upstream repository directory and downstream repository directory have to be set"
+    show_usage
+    exit 1
+  fi
+}
 
 function check_binary_is_installed() {
   local BINARY=$1
@@ -11,7 +70,7 @@ function check_binary_is_installed() {
   if [[ $? -eq 0 ]]; then
     echo -e "\xE2\x9C\x94 OK ($BINARY is installed)"
   else
-    echo -e 2>&1 "\xE2\x9D\x8C NOK ($BINARY has to be present but was not found, exiting)"
+    echo -e "\xE2\x9D\x8C NOK ($BINARY has to be present but was not found, exiting)" 2>&1
     exit 1
   fi
 }
@@ -63,12 +122,12 @@ function configure_downstream() {
   popd
 }
 
-if [[ $# -ne 1 ]]; then
-  echo 2>&1 "Expecting exactly one argument (working directory), exiting"
-  exit 1
-fi
+function main() {
+  parse_arguments "$@"
 
+  check_binaries_are_installed
+  configure_upstream
+  configure_downstream
+}
 
-check_binaries_are_installed
-configure_upstream
-configure_downstream
+main "$@"
