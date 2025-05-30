@@ -12,6 +12,7 @@ import java.nio.file.Path;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.common.RepoInitializer;
@@ -20,7 +21,8 @@ import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -33,10 +35,12 @@ class RepositoryFetcherTest {
     private static final Path repositoriesRoot = createTempDir(
             "repositories-root-",
             "git repositories needed in a test");
-    private static final Path workdir = createTempDir("repository-fetcher-test-", "testing of repository fetcher");
+    private static final Path upstreamDir = repositoriesRoot.resolve("upstream");
+    private static final Path downstreamDir = repositoriesRoot.resolve("downstream");
+    private static Path workdir;
 
     @Inject
-    RepositoryFetcher repositoryFetcher;
+    RepositoryFetcherImpl repositoryFetcher;
 
     @InjectMock
     GitlabApiService gitlabApiService;
@@ -44,24 +48,32 @@ class RepositoryFetcherTest {
     @Inject
     GitCommands gitCommands;
 
-    @BeforeAll
-    static void beforeAll() {
-        RepoInitializer.createRepositories(repositoriesRoot);
+    @BeforeEach
+    void setUp() {
+        RepoInitializer.createGitRepositories(upstreamDir, downstreamDir);
+        workdir = createTempDir("repository-fetcher-test-", "testing of repository fetcher");
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        RepoInitializer.removeGitRepositories(upstreamDir, downstreamDir);
+        FileUtils.deleteDirectory(workdir.toFile());
     }
 
     @AfterAll
     static void afterAll() throws IOException {
-        RepoInitializer.removeRepositories(repositoriesRoot);
+        FileUtils.deleteDirectory(repositoriesRoot.toFile());
+        FileUtils.deleteDirectory(workdir.toFile());
     }
 
     @Test
     void cloneRepository_syncEnabledRefAtUpstream_syncsFromUpstream() {
         Mockito.when(gitlabApiService.doesTagProtectionAlreadyExist(Mockito.any())).thenReturn(true);
         AdjustRequest adjustRequest = AdjustRequest.builder()
-                .originRepoUrl(RepoInitializer.getUpstreamPath(repositoriesRoot))
+                .originRepoUrl(RepoInitializer.getUpstreamRemoteUrl(repositoriesRoot))
                 .internalUrl(
                         InternalGitRepositoryUrl.builder()
-                                .readwriteUrl(RepoInitializer.getDownstreamPath(repositoriesRoot))
+                                .readwriteUrl(RepoInitializer.getDownstreamRemoteUrl(repositoriesRoot))
                                 .build())
                 .sync(true)
                 .ref("main")
@@ -79,10 +91,10 @@ class RepositoryFetcherTest {
     void cloneRepository_syncEnabledRefAtDownstream_noSyncNeeded() {
         Mockito.when(gitlabApiService.doesTagProtectionAlreadyExist(Mockito.any())).thenReturn(true);
         AdjustRequest adjustRequest = AdjustRequest.builder()
-                .originRepoUrl(RepoInitializer.getUpstreamPath(repositoriesRoot))
+                .originRepoUrl(RepoInitializer.getUpstreamRemoteUrl(repositoriesRoot))
                 .internalUrl(
                         InternalGitRepositoryUrl.builder()
-                                .readwriteUrl(RepoInitializer.getDownstreamPath(repositoriesRoot))
+                                .readwriteUrl(RepoInitializer.getDownstreamRemoteUrl(repositoriesRoot))
                                 .build())
                 .sync(true)
                 .ref("1.1")
@@ -104,10 +116,10 @@ class RepositoryFetcherTest {
     void cloneRepository_syncDisabled_noSyncNeeded() {
         Mockito.when(gitlabApiService.doesTagProtectionAlreadyExist(Mockito.any())).thenReturn(true);
         AdjustRequest adjustRequest = AdjustRequest.builder()
-                .originRepoUrl(RepoInitializer.getUpstreamPath(repositoriesRoot))
+                .originRepoUrl(RepoInitializer.getUpstreamRemoteUrl(repositoriesRoot))
                 .internalUrl(
                         InternalGitRepositoryUrl.builder()
-                                .readwriteUrl(RepoInitializer.getDownstreamPath(repositoriesRoot))
+                                .readwriteUrl(RepoInitializer.getDownstreamRemoteUrl(repositoriesRoot))
                                 .build())
                 .sync(false)
                 .ref("main")
