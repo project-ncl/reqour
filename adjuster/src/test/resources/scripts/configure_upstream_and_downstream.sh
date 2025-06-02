@@ -95,6 +95,10 @@ function check_binaries_are_installed() {
   check_binary_is_installed mvn
 }
 
+function configure_git() {
+  git config --global init.defaultBranch main
+}
+
 function configure_upstream() {
   echo "Configuring upstream in the directory '$UPSTREAM_DIR'..."
   pushd "$UPSTREAM_DIR"
@@ -137,6 +141,8 @@ function main() {
   parse_arguments "$@"
 
   check_binaries_are_installed
+  configure_git
+
   configure_upstream
   configure_downstream
 }
