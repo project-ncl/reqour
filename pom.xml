@@ -141,8 +141,7 @@
             <dependency>
                 <groupId>org.jboss.pnc</groupId>
                 <artifactId>pnc-api</artifactId>
-                <!-- TODO: Change to release version, once 3.0.8 is available -->
-                <version>3.0.8-SNAPSHOT</version>
+                <version>3.2.0</version>
                 <classifier>jakarta</classifier>
             </dependency>
 
