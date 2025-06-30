@@ -80,13 +80,44 @@ class NpmProviderTest {
                 Map.ofEntries(
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
-                        MapEntry.entry("versionIncrementalSuffix", 3)));
+                        MapEntry.entry("versionIncrementalSuffix", 4)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY_PREFER_PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("default", "user", "temporary-user"));
+                List.of("default", "user", "config", "temporary-user"));
+    }
+
+    @Test
+    void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                adjustTestUtils.getAdjustRequest(Path.of("npm-request-2.json")),
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+
+        List<String> command = provider.prepareCommand();
+
+        assertThat(command).containsSequence(
+                List.of(
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
+                        "-jar",
+                        config.adjust().npmProviderConfig().cliJarPath().toString()));
+        assertSystemPropertiesContainExactly(
+                command,
+                Map.ofEntries(
+                        MapEntry.entry("override", 1),
+                        MapEntry.entry("restMode", 1),
+                        MapEntry.entry("versionIncrementalSuffix", 4)));
+        assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("config"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "versionIncrementalSuffix",
+                List.of("default", "", "config", "temporary"));
     }
 
     @Test

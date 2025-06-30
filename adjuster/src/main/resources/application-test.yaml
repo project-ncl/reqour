@@ -57,6 +57,7 @@ reqour-adjuster:
       cli-jar-path: '${test.location.providers.npm}/project-manipulator-cli.jar'
       alignment-parameters:
         - '-Doverride=config'
+        - '-DversionIncrementalSuffix=config'
   maven-executable: './mvnw'
   mdc: '{}'
 

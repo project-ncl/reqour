@@ -21,7 +21,8 @@ public class AdjustmentSystemPropertiesUtils {
     /**
      * In the given {@code Stream<String>}, it tries to find the occurrence for 'name=<value>'. In case there is no '=',
      * it will apply {@code defaultValue}.<br/>
-     * For instance, when finding '-Dfoo' in '-Dbar -Dfoo=bar', it returns 'bar'.
+     * For instance, when finding '-Dfoo' in '-Dbar -Dfoo=bar', it returns 'bar'. It prefers the first occurrence over
+     * any other, i.e., it returns 'bar' in case '-Dfoo=bar -Dfoo=baz'.
      * 
      * @param name system property name
      * @param streams string stream, in which to find the value assigned to the given name
