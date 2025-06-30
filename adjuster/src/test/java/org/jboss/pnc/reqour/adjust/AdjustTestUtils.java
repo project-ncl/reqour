@@ -63,7 +63,7 @@ public class AdjustTestUtils {
             List<String> expectedValues) {
         List<String> actualValues = command.stream()
                 .filter(p -> p.startsWith(String.format("-D%s=", systemProperty)))
-                .map(p -> p.split("=")[1])
+                .map(p -> p.endsWith("=") ? "" : p.split("=")[1])
                 .toList();
 
         assertThat(actualValues).isEqualTo(expectedValues);

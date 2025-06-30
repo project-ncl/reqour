@@ -135,10 +135,10 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                     VERSION_INCREMENTAL_SUFFIX,
                     AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoStream(
                             List.of(
-                                    config.getAlignmentConfigParameters(),
                                     config.getUserSpecifiedAlignmentParameters(),
+                                    config.getAlignmentConfigParameters(),
                                     config.getPncDefaultAlignmentParameters())));
-            String newSuffix = originalSuffix.map(s -> "-" + s).orElse("");
+            String newSuffix = originalSuffix.map(s -> s.isEmpty() ? s : "-" + s).orElse("");
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_INCREMENTAL_SUFFIX,
