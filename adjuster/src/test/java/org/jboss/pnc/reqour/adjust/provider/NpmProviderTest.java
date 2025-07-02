@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.provider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.STANDARD_BUILD_CATEGORY;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -16,10 +17,13 @@ import java.util.Map;
 import jakarta.inject.Inject;
 
 import org.assertj.core.data.MapEntry;
+import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
+import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.profile.NpmAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterAll;
@@ -56,6 +60,127 @@ class NpmProviderTest {
     @AfterAll
     static void afterAll() throws IOException {
         IOUtils.deleteTempDir(workdir);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardPersistentRequestWithUserVersionSuffixOverride_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                        STANDARD_BUILD_CATEGORY,
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX,
+                                                "")))
+                        .tempBuild(false)
+                        .build(),
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List
+                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary-config");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardTemporaryRequestWithUserVersionSuffixOverride_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                        STANDARD_BUILD_CATEGORY,
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX,
+                                                "")))
+                        .tempBuild(true)
+                        .build(),
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List
+                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-config");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
+        NpmProvider provider = new NpmProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=SERVICE_TEMPORARY",
+                "-DversionIncrementalSuffix=managedsvc-temporary-config");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
     }
 
     @Test

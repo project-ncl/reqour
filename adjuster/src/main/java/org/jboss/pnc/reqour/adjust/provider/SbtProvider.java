@@ -58,6 +58,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
+                .brewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(sbtProviderConfig.alignmentParameters())
@@ -89,7 +90,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
-                        getComputedAlignmentParameters(),
+                        computeAlignmentParametersOverrides(),
                         List.of("manipulate", "writeReport")));
     }
 
@@ -112,20 +113,21 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
         }
     }
 
-    private List<String> getComputedAlignmentParameters() {
+    @Override
+    List<String> computeAlignmentParametersOverrides() {
         final List<String> alignmentParameters = new ArrayList<>();
 
         alignmentParameters
                 .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        alignmentParameters.add(
-                AdjustmentSystemPropertiesUtils
-                        .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
         if (!config.getPrefixOfVersionSuffix().isBlank()) {
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_INCREMENTAL_SUFFIX,
                             config.getPrefixOfVersionSuffix() + "-redhat"));
         }
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils
+                        .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
 
         return alignmentParameters;
     }

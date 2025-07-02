@@ -67,6 +67,13 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     abstract List<String> prepareCommand();
 
     /**
+     * Several alignment parameters need to be overridden based on some sources (e.g. adjust request and adjust config).
+     * This abstract method enforces the behaviour for every manipulator.<br/>
+     * This method is expected to be called within {@link this#prepareCommand()} method.
+     */
+    abstract List<String> computeAlignmentParametersOverrides();
+
+    /**
      * Obtain the result from the manipulator.<br/>
      * Note: {@link ManipulatorResult} is the common result format returned into the BPM. The usual way of obtaining
      * this result is by parsing the files where the manipulator stores its results.

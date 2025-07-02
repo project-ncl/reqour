@@ -87,7 +87,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
-                        getComputedAlignmentParameters(),
+                        computeAlignmentParametersOverrides(),
                         List.of("--result=" + config.getResultsFilePath())));
     }
 
@@ -125,7 +125,8 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         return adjustedName;
     }
 
-    private List<String> getComputedAlignmentParameters() {
+    @Override
+    List<String> computeAlignmentParametersOverrides() {
         final List<String> alignmentParameters = new ArrayList<>();
 
         alignmentParameters
