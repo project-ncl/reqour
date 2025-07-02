@@ -117,7 +117,36 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
-                        getComputedAlignmentParameters()));
+                        computeAlignmentParametersOverrides()));
+    }
+
+    @Override
+    List<String> computeAlignmentParametersOverrides() {
+        final List<String> alignmentParameters = new ArrayList<>();
+
+        alignmentParameters
+                .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
+        if (!config.getPrefixOfVersionSuffix().isBlank()) {
+            alignmentParameters.add(
+                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                            VERSION_INCREMENTAL_SUFFIX,
+                            config.getPrefixOfVersionSuffix() + "-redhat"));
+        }
+
+        String prefixOfSuffixWithoutTemporary = CommonManipulatorConfigUtils
+                .stripTemporarySuffix(config.getPrefixOfVersionSuffix());
+        if (config.isPreferPersistentEnabled() && !prefixOfSuffixWithoutTemporary.isBlank()) {
+            alignmentParameters.add(
+                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                            VERSION_SUFFIX_ALTERNATIVES,
+                            "redhat," + prefixOfSuffixWithoutTemporary + "-redhat"));
+        }
+
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils
+                        .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
+
+        return alignmentParameters;
     }
 
     @Override
@@ -201,34 +230,6 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     private List<String> getPmeSettingsParameter() {
         return List.of("-s", config.getSettingsFilePath().toString());
-    }
-
-    private List<String> getComputedAlignmentParameters() {
-        final List<String> alignmentParameters = new ArrayList<>();
-
-        alignmentParameters
-                .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        if (!config.getPrefixOfVersionSuffix().isBlank()) {
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-redhat"));
-        }
-
-        String prefixOfSuffixWithoutTemporary = CommonManipulatorConfigUtils
-                .stripTemporarySuffix(config.getPrefixOfVersionSuffix());
-        if (config.isPreferPersistentEnabled() && !prefixOfSuffixWithoutTemporary.isBlank()) {
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_SUFFIX_ALTERNATIVES,
-                            "redhat," + prefixOfSuffixWithoutTemporary + "-redhat"));
-        }
-
-        alignmentParameters.add(
-                AdjustmentSystemPropertiesUtils
-                        .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
-
-        return alignmentParameters;
     }
 
     private Path getPathToAlignmentResultFile() {

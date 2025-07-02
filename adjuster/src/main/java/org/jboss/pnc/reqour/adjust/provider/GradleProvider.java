@@ -95,7 +95,6 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     List<String> prepareCommand() {
-        List<String> computedAlignmentParameters = getComputedAlignmentParameters();
         Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
         List<String> targetAndInit = getTargetAndInit();
 
@@ -106,7 +105,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
-                        computedAlignmentParameters));
+                        computeAlignmentParametersOverrides()));
     }
 
     @Override
@@ -128,7 +127,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .build();
     }
 
-    private List<String> getComputedAlignmentParameters() {
+    @Override
+    List<String> computeAlignmentParametersOverrides() {
         final List<String> alignmentParameters = new ArrayList<>();
 
         alignmentParameters

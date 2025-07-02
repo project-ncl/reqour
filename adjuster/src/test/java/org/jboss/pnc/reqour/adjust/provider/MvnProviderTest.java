@@ -60,6 +60,85 @@ public class MvnProviderTest {
     }
 
     @Test
+    void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
+        MvnProvider provider = new MvnProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DrestBrewPullActive=true");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
+        MvnProvider provider = new MvnProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=TEMPORARY",
+                "-DversionIncrementalSuffix=temporary-redhat",
+                "-DrestBrewPullActive=false");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
+        MvnProvider provider = new MvnProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-redhat", "-DrestBrewPullActive=true");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
+        MvnProvider provider = new MvnProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=SERVICE_TEMPORARY",
+                "-DversionIncrementalSuffix=managedsvc-temporary-redhat",
+                "-DrestBrewPullActive=false");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.adjust(),

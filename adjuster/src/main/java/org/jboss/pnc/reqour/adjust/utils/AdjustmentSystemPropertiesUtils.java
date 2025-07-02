@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.utils;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
@@ -29,7 +30,8 @@ public class AdjustmentSystemPropertiesUtils {
      * @param defaultValue value to return in case there is no '='
      */
     public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams, String defaultValue) {
-        return streams.filter(p -> p.startsWith(name)).findFirst().map(p -> {
+        Pattern pattern = Pattern.compile(String.format("^%s[= ].*$|^%s$", name, name));
+        return streams.filter(p -> pattern.matcher(p).find()).findFirst().map(p -> {
             try {
                 return p.split("=")[1];
             } catch (ArrayIndexOutOfBoundsException _e) {

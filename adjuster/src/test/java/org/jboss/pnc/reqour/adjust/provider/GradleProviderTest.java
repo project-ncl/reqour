@@ -51,6 +51,81 @@ class GradleProviderTest {
     }
 
     @Test
+    void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DrestBrewPullActive=true");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.STANDARD_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=TEMPORARY",
+                "-DversionIncrementalSuffix=temporary-redhat",
+                "-DrestBrewPullActive=false");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-redhat", "-DrestBrewPullActive=true");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
+    void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=SERVICE_TEMPORARY",
+                "-DversionIncrementalSuffix=managedsvc-temporary-redhat",
+                "-DrestBrewPullActive=false");
+
+        List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
+
+        assertThat(actualOverrides).isEqualTo(expectedOverrides);
+    }
+
+    @Test
     void prepareCommand_standardPersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         GradleProvider provider = new GradleProvider(
                 config.adjust(),

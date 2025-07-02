@@ -138,7 +138,7 @@ public class CommonManipulatorConfigUtils {
         String userSpecifiedAlignmentParameters = buildConfigParameters.getOrDefault(ALIGNMENT_PARAMETERS, "");
 
         List<String> parametersSplitted = List.of(userSpecifiedAlignmentParameters.split(" "));
-        if (parametersSplitted.stream().anyMatch(Predicate.not(p -> p.startsWith("-")))) {
+        if (parametersSplitted.stream().filter(p -> !p.isBlank()).anyMatch(Predicate.not(p -> p.startsWith("-")))) {
             throw new AdjusterException(
                     "Parameters which do not start with '-' are not allowed. Given: '"
                             + userSpecifiedAlignmentParameters + "'.");
