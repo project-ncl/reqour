@@ -48,4 +48,16 @@ class AdjustProviderPickerTest {
 
         assertTrue(adjustProvider instanceof MvnProvider);
     }
+
+    @Test
+    void pickAdjustProvider_onRpmBuild_picksMvnProvider() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .buildConfigParameters(Collections.emptyMap())
+                .buildType(BuildType.MVN_RPM)
+                .build();
+
+        AdjustProvider adjustProvider = adjustProviderPicker.pickAdjustProvider(adjustRequest);
+
+        assertTrue(adjustProvider instanceof MvnProvider);
+    }
 }
