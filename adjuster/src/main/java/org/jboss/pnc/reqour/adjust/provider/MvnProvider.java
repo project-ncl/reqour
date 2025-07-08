@@ -40,7 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Provider for {@link org.jboss.pnc.api.enums.BuildType#MVN} builds.
+ * Provider for {@link org.jboss.pnc.api.enums.BuildType#MVN} and {@link org.jboss.pnc.api.enums.BuildType#MVN_RPM}
+ * builds.
  */
 @Slf4j
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {

@@ -50,7 +50,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     @Override
     public AdjustProvider pickAdjustProvider(AdjustRequest adjustRequest) {
         return switch (adjustRequest.getBuildType()) {
-            case MVN -> new MvnProvider(
+            case MVN, MVN_RPM -> new MvnProvider(
                     config.adjust(),
                     adjustRequest,
                     workdir,
