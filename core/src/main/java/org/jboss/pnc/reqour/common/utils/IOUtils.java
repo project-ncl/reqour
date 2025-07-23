@@ -14,6 +14,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 
+import lombok.NonNull;
+
 public class IOUtils {
 
     public static void ignoreOutput(String s) {
@@ -71,12 +73,7 @@ public class IOUtils {
         }
     }
 
-    public static char transformUppercaseCharToLowercase(char c) {
-        if (!('A' <= c && c <= 'Z')) {
-            throw new IllegalArgumentException("Expected uppercase letter, got: '" + c + "'");
-        }
-
-        int diff = c - 'A';
-        return (char) ('a' + diff);
+    public static String unquote(@NonNull String text) {
+        return (text.startsWith("\"") && text.endsWith("\"")) ? text.substring(1, text.length() - 1) : text;
     }
 }

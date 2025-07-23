@@ -44,4 +44,22 @@ class IOUtilsTest {
 
         assertThat(IOUtils.splitByNewLine(text)).isEqualTo(List.of(one, two));
     }
+
+    @Test
+    void unquote_noQuotes_returnsOriginalString() {
+        String text = "foo";
+
+        String actual = IOUtils.unquote(text);
+
+        assertThat(actual).isEqualTo(text);
+    }
+
+    @Test
+    void unquote_withQuotes_returnsUnquotedString() {
+        String text = "foo bar";
+
+        String actual = IOUtils.unquote("\"" + text + "\"");
+
+        assertThat(actual).isEqualTo(text);
+    }
 }

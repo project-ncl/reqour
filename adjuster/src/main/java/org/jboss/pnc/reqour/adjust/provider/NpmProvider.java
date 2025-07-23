@@ -24,6 +24,7 @@ import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -51,12 +52,13 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         super(objectMapper, processExecutor, userLogger);
 
         NpmProviderConfig npmProviderConfig = adjustConfig.npmProviderConfig();
+        UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
         config = ProjectManipulatorConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
-                .userSpecifiedAlignmentParameters(
-                        CommonManipulatorConfigUtils.getUserSpecifiedAlignmentParameters(adjustRequest))
+                .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))

@@ -5,11 +5,11 @@
 package org.jboss.pnc.reqour.adjust.model;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.Value;
 
 /**
@@ -20,7 +20,8 @@ import lombok.Value;
 @Value
 public class UserSpecifiedAlignmentParameters {
 
-    private static final Path DEFAULT_SUB_FOLDER = Path.of("");
+    @Getter
+    private static final Path defaultSubFolder = Path.of("");
 
     /**
      * Sub-folder where is the manipulation results file located.
@@ -34,15 +35,15 @@ public class UserSpecifiedAlignmentParameters {
 
     public static UserSpecifiedAlignmentParameters defaultResult() {
         return UserSpecifiedAlignmentParameters.builder()
-                .subFolderWithResults(DEFAULT_SUB_FOLDER)
+                .subFolderWithResults(defaultSubFolder)
                 .alignmentParameters(Collections.emptyList())
                 .build();
     }
 
-    public static UserSpecifiedAlignmentParameters withoutSubFolder(String alignmentParameters) {
+    public static UserSpecifiedAlignmentParameters withoutSubFolder(List<String> alignmentParameters) {
         return UserSpecifiedAlignmentParameters.builder()
-                .subFolderWithResults(DEFAULT_SUB_FOLDER)
-                .alignmentParameters(Arrays.asList(alignmentParameters.split(" ")))
+                .subFolderWithResults(defaultSubFolder)
+                .alignmentParameters(alignmentParameters)
                 .build();
     }
 }
