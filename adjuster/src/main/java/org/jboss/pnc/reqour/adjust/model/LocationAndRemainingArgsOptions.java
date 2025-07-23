@@ -4,7 +4,6 @@
  */
 package org.jboss.pnc.reqour.adjust.model;
 
-import java.util.List;
 import java.util.Optional;
 
 import lombok.Builder;
@@ -25,5 +24,5 @@ public class LocationAndRemainingArgsOptions {
     /**
      * All the remaining arguments from the array we have been parsing.
      */
-    List<String> remainingArgs;
+    String remainingArgs;
 }
