@@ -130,6 +130,10 @@ public class CommonManipulatorConfigUtils {
 
     static List<String> parseUserSpecifiedAlignmentParametersWithoutLocation(
             String userSpecifiedAlignmentParametersWithoutLocation) {
+        if (userSpecifiedAlignmentParametersWithoutLocation.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         org.apache.commons.exec.CommandLine parsedAlignmentParameters = org.apache.commons.exec.CommandLine
                 .parse(userSpecifiedAlignmentParametersWithoutLocation);
         return Arrays.stream(parsedAlignmentParameters.toStrings())
