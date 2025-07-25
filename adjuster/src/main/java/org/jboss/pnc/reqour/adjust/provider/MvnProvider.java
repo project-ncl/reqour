@@ -65,18 +65,26 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         MvnProviderConfig mvnProviderConfig = adjustConfig.mvnProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
+        Path subFolderWithAlignmentResultFile = workdir
+                .resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults());
+
+        // immutable collection returned, so let's make it mutable, and add there the results file if needed
+        final List<String> userAlignmentParametersWithFile = new ArrayList<>(
+                userSpecifiedAlignmentParameters.getAlignmentParameters());
+        if (!subFolderWithAlignmentResultFile.equals(workdir)) {
+            userAlignmentParametersWithFile.add("--file=" + subFolderWithAlignmentResultFile);
+        }
 
         config = PmeConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
-                .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
+                .userSpecifiedAlignmentParameters(userAlignmentParametersWithFile)
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
                 .workdir(workdir)
-                .subFolderWithAlignmentResultFile(
-                        workdir.resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults()))
+                .subFolderWithAlignmentResultFile(subFolderWithAlignmentResultFile)
                 .cliJarPath(mvnProviderConfig.cliJarPath())
                 .settingsFilePath(
                         getPathToSettingsFile(
@@ -106,11 +114,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     @Override
     List<String> prepareCommand() {
-        List<String> userSpecifiedAlignmentParameters = config.getUserSpecifiedAlignmentParameters();
-        if (!config.getSubFolderWithAlignmentResultFile().equals(config.getWorkdir())) {
-            userSpecifiedAlignmentParameters.add("--file=" + config.getSubFolderWithAlignmentResultFile());
-        }
-        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(userSpecifiedAlignmentParameters);
+        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
                         List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),

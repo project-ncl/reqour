@@ -240,6 +240,47 @@ public class MvnProviderTest {
     }
 
     @Test
+    void prepareCommand_todo_fileAdded() {
+        MvnProvider provider = new MvnProvider(
+                config.adjust(),
+                adjustTestUtils.getAdjustRequest(Path.of("mvn-request-with-results-file.json")),
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+
+        List<String> command = provider.prepareCommand();
+
+        assertThat(command).containsSequence(
+                List.of(
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
+                        "-jar",
+                        config.adjust().mvnProviderConfig().cliJarPath().toString(),
+                        "-s",
+                        config.adjust().mvnProviderConfig().defaultSettingsFilePath().toString()));
+        assertSystemPropertiesContainExactly(
+                command,
+                Map.ofEntries(
+                        MapEntry.entry("override", 2),
+                        MapEntry.entry("configAlignmentParam", 1),
+                        MapEntry.entry("restURL", 1),
+                        MapEntry.entry("restMode", 1),
+                        MapEntry.entry("versionIncrementalSuffix", 1),
+                        MapEntry.entry("restBrewPullActive", 1)));
+        assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "config"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "configAlignmentParam", List.of("foo"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restURL", List.of("https://da.com/rest/v-1"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "versionIncrementalSuffix",
+                List.of("redhat"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+    }
+
+    @Test
     void adjust_manipulatorReturnsNonZeroExitCode_adjusterExceptionIsThrown() {
         Mockito.when(processExecutor.execute(Mockito.any())).thenReturn(1);
         AdjustRequest adjustRequest = adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json"));
