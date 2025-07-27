@@ -62,7 +62,9 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .prefixOfVersionSuffix(
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(sbtProviderConfig.alignmentParameters())
-                .workdir(workdir.resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults()))
+                .workdir(
+                        userSpecifiedAlignmentParameters.getLocationOption().isEmpty() ? workdir
+                                : workdir.resolve(userSpecifiedAlignmentParameters.getLocationOption().get()))
                 .sbtPath(sbtProviderConfig.sbtPath())
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
