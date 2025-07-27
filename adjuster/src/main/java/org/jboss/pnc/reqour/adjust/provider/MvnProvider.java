@@ -27,6 +27,7 @@ import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
@@ -65,14 +66,17 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         MvnProviderConfig mvnProviderConfig = adjustConfig.mvnProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
-        Path subFolderWithAlignmentResultFile = workdir
-                .resolve(userSpecifiedAlignmentParameters.getSubFolderWithResults());
 
+        final Path subFolderWithResults;
         // immutable collection returned, so let's make it mutable, and add there the results file if needed
         final List<String> userAlignmentParametersWithFile = new ArrayList<>(
                 userSpecifiedAlignmentParameters.getAlignmentParameters());
-        if (!subFolderWithAlignmentResultFile.equals(workdir)) {
-            userAlignmentParametersWithFile.add("--file=" + subFolderWithAlignmentResultFile);
+        if (userSpecifiedAlignmentParameters.getLocationOption().isEmpty()) {
+            subFolderWithResults = workdir;
+        } else {
+            userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocationOption().get());
+            Path pomFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocationOption().get());
+            subFolderWithResults = extractPomFileDirectory(pomFile);
         }
 
         config = PmeConfig.builder()
@@ -84,7 +88,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
                 .workdir(workdir)
-                .subFolderWithAlignmentResultFile(subFolderWithAlignmentResultFile)
+                .subFolderWithAlignmentResultFile(subFolderWithResults)
                 .cliJarPath(mvnProviderConfig.cliJarPath())
                 .settingsFilePath(
                         getPathToSettingsFile(
@@ -253,5 +257,22 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             }
         }
         return subFolderTargetDirectory.resolve("alignmentReport.json");
+    }
+
+    private Path extractPomFileDirectory(Path pomFile) {
+        log.debug("Extracting directory of pom file {}", pomFile);
+
+        if (!Files.exists(pomFile)) {
+            throw new AdjusterException(String.format("Pom file '%s' does not exist", pomFile));
+        }
+        if (!Files.isRegularFile(pomFile)) {
+            throw new AdjusterException(String.format("Specified pom location '%s' is not a file", pomFile));
+        }
+        Path pomDirectory = pomFile.getParent();
+        if (pomDirectory == null) {
+            throw new AdjusterException(String.format("Cannot get the directory of the pom file '%s'", pomFile));
+        }
+
+        return pomDirectory;
     }
 }

@@ -10,6 +10,7 @@ import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemProperties
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -240,7 +241,10 @@ public class MvnProviderTest {
     }
 
     @Test
-    void prepareCommand_todo_fileAdded() {
+    void prepareCommand_todo_fileAdded() throws IOException {
+        Files.createDirectory(workdir.resolve("directory")); // pom file checked for existence
+        Files.createFile(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
+
         MvnProvider provider = new MvnProvider(
                 config.adjust(),
                 adjustTestUtils.getAdjustRequest(Path.of("mvn-request-with-results-file.json")),
@@ -260,6 +264,7 @@ public class MvnProviderTest {
                         config.adjust().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
                         config.adjust().mvnProviderConfig().defaultSettingsFilePath().toString()));
+        assertThat(command).containsSequence("--file=directory/pom.xml");
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -278,6 +283,9 @@ public class MvnProviderTest {
                 "versionIncrementalSuffix",
                 List.of("redhat"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+
+        Files.deleteIfExists(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
+        Files.deleteIfExists(workdir.resolve("directory")); // pom file checked for existence
     }
 
     @Test

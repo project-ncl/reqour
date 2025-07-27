@@ -32,7 +32,7 @@ import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
 import org.jboss.pnc.reqour.adjust.config.BuildCategoryConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
-import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingArgsOptions;
+import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 
@@ -84,31 +84,37 @@ public class CommonManipulatorConfigUtils {
             return UserSpecifiedAlignmentParameters.defaultResult();
         }
 
-        LocationAndRemainingArgsOptions optionsSplit = extractLocationFromUsersAlignmentParameters(
+        LocationAndRemainingAlignmentParameters locationAndRemainingAlignmentParameters = extractLocationFromUsersAlignmentParameters(
                 userSpecifiedAlignmentParameters,
                 locationShortOption,
                 locationLongOption);
 
         List<String> parsedUserSpecifiedAlignmentParameters = parseUserSpecifiedAlignmentParametersWithoutLocation(
-                optionsSplit.getRemainingArgs());
-        if (optionsSplit.getLocationOption().isEmpty()) {
+                locationAndRemainingAlignmentParameters.getRemainingAlignmentParameters());
+        if (locationAndRemainingAlignmentParameters.getLocationOption().isEmpty()) {
             return UserSpecifiedAlignmentParameters.withoutSubFolder(parsedUserSpecifiedAlignmentParameters);
         }
 
-        Path folderWithResultsFile = computeFolderWithResults(
+        Optional<Path> location = extractLocation(
                 locationShortOption,
                 locationLongOption,
-                optionsSplit.getLocationOption().get());
+                locationAndRemainingAlignmentParameters.getLocationOption().get());
         return UserSpecifiedAlignmentParameters.builder()
-                .subFolderWithResults(folderWithResultsFile)
+                .locationOption(location)
                 .alignmentParameters(parsedUserSpecifiedAlignmentParameters)
                 .build();
     }
 
-    private static Path computeFolderWithResults(
+    private static Optional<Path> extractLocation(
             String locationShortOption,
             String locationLongOption,
             String location) {
+        log.debug(
+                "Extracting location from '{}' with short option '{}' and long option '{}'",
+                location,
+                locationShortOption,
+                locationLongOption);
+
         CommandLineParser parser = new DefaultParser();
         final Options options = new Options();
         options.addOption(
@@ -121,10 +127,10 @@ public class CommonManipulatorConfigUtils {
                         .build());
         try {
             CommandLine parseResult = parser.parse(options, new String[] { location });
-            return extractFolderFromFile(parseResult.getOptionValue(FILE_ARG_NAME));
+            return Optional.of(Path.of(parseResult.getOptionValue(FILE_ARG_NAME)));
         } catch (ParseException e) {
-            log.warn("Could not parse alignment parameters, returning default");
-            return UserSpecifiedAlignmentParameters.getDefaultSubFolder();
+            log.warn("Could not parse location, returning default location");
+            return UserSpecifiedAlignmentParameters.getDefaultLocationOption();
         }
     }
 
@@ -258,7 +264,7 @@ public class CommonManipulatorConfigUtils {
      * @param locationShortOption short option for location
      * @param locationLongOption long option for location
      */
-    static LocationAndRemainingArgsOptions extractLocationFromUsersAlignmentParameters(
+    static LocationAndRemainingAlignmentParameters extractLocationFromUsersAlignmentParameters(
             String userSpecifiedAlignmentParameters,
             String locationShortOption,
             String locationLongOption) {
@@ -272,25 +278,15 @@ public class CommonManipulatorConfigUtils {
         Matcher matcher = pattern.matcher(userSpecifiedAlignmentParameters);
 
         if (matcher.matches()) {
-            return LocationAndRemainingArgsOptions.builder()
+            return LocationAndRemainingAlignmentParameters.builder()
                     .locationOption(Optional.of(matcher.group(1)))
-                    .remainingArgs(userSpecifiedAlignmentParameters.replace(matcher.group(1), ""))
+                    .remainingAlignmentParameters(userSpecifiedAlignmentParameters.replace(matcher.group(1), ""))
                     .build();
         }
 
-        return LocationAndRemainingArgsOptions.builder()
+        return LocationAndRemainingAlignmentParameters.builder()
                 .locationOption(Optional.empty())
-                .remainingArgs(userSpecifiedAlignmentParameters)
+                .remainingAlignmentParameters(userSpecifiedAlignmentParameters)
                 .build();
-    }
-
-    private static Path extractFolderFromFile(String filePath) {
-        log.debug("Extracting folder from {}", filePath);
-
-        if (filePath == null || !filePath.contains("/")) {
-            return UserSpecifiedAlignmentParameters.getDefaultSubFolder();
-        }
-
-        return Path.of(filePath.substring(0, filePath.lastIndexOf("/")));
     }
 }
