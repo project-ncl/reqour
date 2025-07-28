@@ -241,7 +241,7 @@ public class MvnProviderTest {
     }
 
     @Test
-    void prepareCommand_todo_fileAdded() throws IOException {
+    void prepareCommand_standardBuildWithFileOption_fileOptionAdded() throws IOException {
         Files.createDirectory(workdir.resolve("directory")); // pom file checked for existence
         Files.createFile(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
 

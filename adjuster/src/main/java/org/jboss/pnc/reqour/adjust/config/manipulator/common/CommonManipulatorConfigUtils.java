@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,7 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonManipulatorConfigUtils {
 
     private static final String TEMPORARY_SUFFIX = "temporary";
-    private static final String FILE_ARG_NAME = "file";
     private static final int DEFAULT_JAVA_VERSION = 11;
 
     /**
@@ -121,13 +119,12 @@ public class CommonManipulatorConfigUtils {
                 Option.builder()
                         .option(locationShortOption)
                         .longOpt(locationLongOption)
-                        .argName(FILE_ARG_NAME)
                         .hasArg()
                         .valueSeparator()
                         .build());
         try {
             CommandLine parseResult = parser.parse(options, new String[] { location });
-            return Optional.of(Path.of(parseResult.getOptionValue(FILE_ARG_NAME)));
+            return Optional.of(Path.of(parseResult.getOptionValue(locationLongOption)));
         } catch (ParseException e) {
             log.warn("Could not parse location, returning default location");
             return UserSpecifiedAlignmentParameters.getDefaultLocationOption();
@@ -160,23 +157,6 @@ public class CommonManipulatorConfigUtils {
             return ExecutionRootOverrides.noOverrides();
         }
         return new ExecutionRootOverrides(brewBuildMatcher.group("groupId"), brewBuildMatcher.group("artifactId"));
-    }
-
-    /**
-     * Extract user-specified alignment parameters from the request.
-     */
-    public static List<String> getUserSpecifiedAlignmentParameters(AdjustRequest adjustRequest) {
-        Map<BuildConfigurationParameterKeys, String> buildConfigParameters = adjustRequest.getBuildConfigParameters();
-        String userSpecifiedAlignmentParameters = buildConfigParameters.getOrDefault(ALIGNMENT_PARAMETERS, "");
-
-        List<String> parametersSplitted = List.of(userSpecifiedAlignmentParameters.split(" "));
-        if (parametersSplitted.stream().filter(p -> !p.isBlank()).anyMatch(Predicate.not(p -> p.startsWith("-")))) {
-            throw new AdjusterException(
-                    "Parameters which do not start with '-' are not allowed. Given: '"
-                            + userSpecifiedAlignmentParameters + "'.");
-        }
-
-        return parametersSplitted;
     }
 
     public static String computePrefixOfVersionSuffix(AdjustRequest request, AdjustConfig adjustConfig) {
