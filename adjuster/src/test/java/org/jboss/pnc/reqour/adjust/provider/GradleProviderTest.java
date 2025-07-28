@@ -9,6 +9,7 @@ import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemProperties
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -198,5 +199,44 @@ class GradleProviderTest {
                 command,
                 "versionIncrementalSuffix",
                 List.of("user", "managedsvc-redhat"));
+    }
+
+    @Test
+    void prepareCommand_standardBuildWithTargetOption_targetOptionAdded() throws IOException {
+        Files.createDirectory(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
+
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                adjustTestUtils.getAdjustRequest(Path.of("gradle-request-with-target-directory.json")),
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+
+        List<String> command = provider.prepareCommand();
+
+        assertThat(command).containsSequence(
+                List.of(
+                        "/usr/lib/jvm/java-11-openjdk/bin/java",
+                        "-jar",
+                        config.adjust().gradleProviderConfig().cliJarPath().toString(),
+                        "--target",
+                        workdir.resolve("gradle-directory").toString(),
+                        "--init-script",
+                        config.adjust().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
+                        "-l",
+                        config.adjust().gradleProviderConfig().defaultGradlePath().toString()));
+        assertSystemPropertiesContainExactly(
+                command,
+                Map.ofEntries(
+                        MapEntry.entry("override", 3),
+                        MapEntry.entry("restMode", 1),
+                        MapEntry.entry("restBrewPullActive", 1)));
+        assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+
+        Files.deleteIfExists(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
     }
 }
