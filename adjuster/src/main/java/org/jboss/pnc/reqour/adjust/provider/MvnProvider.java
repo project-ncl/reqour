@@ -222,7 +222,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     private PME getResultWhenPmeIsDisabled() {
         PME manipulatorResult = new PME();
         GAV gav = new GAV();
-        org.jboss.pnc.api.dto.GAV executionRootGav = rootGavExtractor.extractGav(config.getWorkdir());
+        org.jboss.pnc.api.dto.GAV executionRootGav = rootGavExtractor
+                .extractGav(config.getSubFolderWithAlignmentResultFile());
         gav.setGroupId(executionRootGav.getGroupId());
         gav.setArtifactId(executionRootGav.getArtifactId());
         gav.setVersion(executionRootGav.getVersion());

@@ -42,6 +42,7 @@ public class RootGavExtractor {
     private final Path groupIdOutput = resultsDirectory.resolve("groupId.txt");
     private final Path artifactIdOutput = resultsDirectory.resolve("artifactId.txt");
     private final Path versionOutput = resultsDirectory.resolve("version.txt");
+    private static final String HELP_PLUGIN_VERSION = "3.3.0"; // has to be compliant with maven version running in adjuster container https://maven.apache.org/plugins/maven-help-plugin/plugin-info.html
 
     /**
      * Extract the GAV from (effective) pom within the given working directory.
@@ -51,7 +52,8 @@ public class RootGavExtractor {
     public GAV extractGav(Path workdir) {
         log.debug("Extracting GAV from POM in directory '{}'", workdir);
         ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir)
-                .stdoutConsumer(IOUtils::ignoreOutput);
+                .stdoutConsumer(IOUtils::ignoreOutput)
+                .stderrConsumer(log::warn);
 
         int exitCode = 0;
         exitCode += processExecutor
@@ -82,6 +84,11 @@ public class RootGavExtractor {
     }
 
     private List<String> generateHelpEvaluateCommand(String property, Path outputFile) {
-        return List.of(mavenExecutable, "help:evaluate", "-Dexpression=project." + property, "-Doutput=" + outputFile);
+        return List.of(
+                mavenExecutable,
+                "-V",
+                "org.apache.maven.plugins:maven-help-plugin:" + HELP_PLUGIN_VERSION + ":evaluate",
+                "-Dexpression=project." + property,
+                "-Doutput=" + outputFile);
     }
 }
