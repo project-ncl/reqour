@@ -119,6 +119,9 @@ class JobDefinitionCreatorTest {
         assertThat(envVars.get(9).getName()).isEqualTo("SASL_JAAS_CONF");
         assertThat(envVars.get(9).getValue()).isEqualTo("sasl-jaas-config");
 
+        assertThat(envVars.get(10).getName()).isEqualTo("PRIVATE_GITHUB_USER");
+        assertThat(envVars.get(10).getValue()).isEqualTo("github-bot");
+
         assertThat(
                 adjusterJobDefinition.getSpec()
                         .getTemplate()

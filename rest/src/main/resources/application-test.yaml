@@ -14,6 +14,7 @@ reqour:
       available:
         gitlab:
           url: http://${reqour.git.git-backends.available.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+    private-github-user: github-bot
 
 reqour-rest:
   app-environment: test

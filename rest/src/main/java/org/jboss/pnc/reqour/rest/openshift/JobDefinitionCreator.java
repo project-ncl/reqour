@@ -41,6 +41,9 @@ public class JobDefinitionCreator {
     ReqourConfig reqourCoreConfig;
 
     @Inject
+    ReqourConfig coreConfig;
+
+    @Inject
     ReqourRestConfig config;
 
     @ConfigProperty(name = "quarkus.oidc-client.credentials.secret")
@@ -55,6 +58,8 @@ public class JobDefinitionCreator {
     public Job getAdjusterJobDefinition(AdjustRequest adjustRequest, String jobName) {
         final Map<String, Object> properties = new HashMap<>();
 
+        final String privateGithubUser = coreConfig.gitConfigs().privateGithubUser().isEmpty() ? ""
+                : coreConfig.gitConfigs().privateGithubUser().get();
         try {
             properties.put("jobName", jobName);
             properties.put("buildType", adjustRequest.getBuildType());
@@ -67,6 +72,7 @@ public class JobDefinitionCreator {
             properties.put("mdc", objectMapper.writeValueAsString(MDC.getCopyOfContextMap()));
             properties.put("saSecret", saSecret);
             properties.put("saslJaasConf", config.saslJaasConf());
+            properties.put("privateGithubUser", privateGithubUser);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
