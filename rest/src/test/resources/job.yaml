@@ -41,6 +41,8 @@ spec:
               value: '%{saSecret}'
             - name: SASL_JAAS_CONF
               value: '%{saslJaasConf}'
+            - name: PRIVATE_GITHUB_USER
+              value: '%{privateGithubUser}'
           livenessProbe:
             exec:
               command:
