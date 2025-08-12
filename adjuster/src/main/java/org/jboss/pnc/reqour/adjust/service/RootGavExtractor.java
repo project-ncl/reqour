@@ -4,20 +4,19 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
-import java.io.IOException;
+import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
-import org.apache.commons.io.FileUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.GA;
 import org.jboss.pnc.api.dto.GAV;
-import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
-import org.jboss.pnc.reqour.common.utils.IOUtils;
-import org.jboss.pnc.reqour.model.ProcessContext;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,20 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class RootGavExtractor {
 
-    @ConfigProperty(name = "reqour-adjuster.maven-executable")
-    String mavenExecutable;
-
-    @Inject
-    ProcessExecutor processExecutor;
-
-    private final Path resultsDirectory = IOUtils
-            .createTempDir("gav-extractor-results-", "recording of GAV extractor results");
-
-    private final Path groupIdOutput = resultsDirectory.resolve("groupId.txt");
-    private final Path artifactIdOutput = resultsDirectory.resolve("artifactId.txt");
-    private final Path versionOutput = resultsDirectory.resolve("version.txt");
-    private static final String HELP_PLUGIN_VERSION = "3.3.0"; // has to be compliant with maven version running in adjuster container https://maven.apache.org/plugins/maven-help-plugin/plugin-info.html
-
     /**
      * Extract the GAV from (effective) pom within the given working directory.
      *
@@ -51,44 +36,76 @@ public class RootGavExtractor {
      */
     public GAV extractGav(Path workdir) {
         log.debug("Extracting GAV from POM in directory '{}'", workdir);
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir)
-                .stdoutConsumer(IOUtils::ignoreOutput)
-                .stderrConsumer(log::warn);
+        File pom = workdir.resolve("pom.xml").toFile();
+        String groupId = null;
+        String artifactId = null;
+        String version = null;
 
-        int exitCode = 0;
-        exitCode += processExecutor
-                .execute(processContextBuilder.command(generateHelpEvaluateCommand("groupId", groupIdOutput)).build());
-        exitCode += processExecutor.execute(
-                processContextBuilder.command(generateHelpEvaluateCommand("artifactId", artifactIdOutput)).build());
-        exitCode += processExecutor
-                .execute(processContextBuilder.command(generateHelpEvaluateCommand("version", versionOutput)).build());
+        try {
+            groupId = getValueFromDotPath(pom, "project.groupId");
+            artifactId = getValueFromDotPath(pom, "project.artifactId");
+            version = getValueFromDotPath(pom, "project.version");
 
-        if (exitCode != 0) {
-            throw new RuntimeException(String.format("Unable to extract GAV from directory '%s'", workdir));
+            if (groupId == null) {
+                // read from parent groupId if project.groupId missing
+                groupId = getValueFromDotPath(pom, "project.parent.groupId");
+            }
+            if (version == null) {
+                // read from parent version if project.version missing
+                version = getValueFromDotPath(pom, "project.parent.version");
+            }
+        } catch (Exception e) {
+            log.error("Parsing of xml went wrong", e);
+            throw new RuntimeException(e);
         }
 
-        GAV extractedGav = GAV.builder()
+        if (groupId == null || artifactId == null || version == null) {
+            log.error(
+                    "Parsing of pom.xml failed to get the required GAV: groupId: {}, artifactId: {}, version: {}",
+                    groupId,
+                    artifactId,
+                    version);
+            throw new RuntimeException("Parsing of pom.xml failed to get the required GAV");
+        }
+        return GAV.builder()
                 .ga(
                         GA.builder()
-                                .groupId(IOUtils.readFileContent(groupIdOutput))
-                                .artifactId(IOUtils.readFileContent(artifactIdOutput))
+                                .groupId(groupId)
+                                .artifactId(artifactId)
                                 .build())
-                .version(IOUtils.readFileContent(versionOutput))
+                .version(version)
                 .build();
-        try {
-            FileUtils.deleteDirectory(resultsDirectory.toFile());
-        } catch (IOException e) {
-            log.warn("Unable to delete directory with results of GAV extractor: '{}'", resultsDirectory);
-        }
-        return extractedGav;
     }
 
-    private List<String> generateHelpEvaluateCommand(String property, Path outputFile) {
-        return List.of(
-                mavenExecutable,
-                "-V",
-                "org.apache.maven.plugins:maven-help-plugin:" + HELP_PLUGIN_VERSION + ":evaluate",
-                "-Dexpression=project." + property,
-                "-Doutput=" + outputFile);
+    public static String getValueFromDotPath(File xmlFile, String dotPath) throws Exception {
+        String[] parts = dotPath.split("\\.");
+
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setIgnoringElementContentWhitespace(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.parse(xmlFile);
+        doc.getDocumentElement().normalize();
+
+        Node currentNode = doc.getDocumentElement();
+        for (int i = 1; i < parts.length; i++) { // start from 1 because root already matched
+            currentNode = getChildNodeByName(currentNode, parts[i]);
+            if (currentNode == null) {
+                return null;
+            }
+        }
+        return currentNode.getTextContent().trim();
+    }
+
+    private static Node getChildNodeByName(Node parent, String name) {
+        if (parent == null)
+            return null;
+        NodeList children = parent.getChildNodes();
+        for (int i = 0; i < children.getLength(); i++) {
+            Node child = children.item(i);
+            if (child.getNodeName().equals(name)) {
+                return child;
+            }
+        }
+        return null;
     }
 }

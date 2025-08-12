@@ -52,4 +52,17 @@ class RootGavExtractorTest {
 
         assertThat(gav).isEqualTo(expectedGav);
     }
+
+    @Test
+    void extractGav_withParentOnlyGroupIdVersion() {
+        Path workdir = GAV_EXTRACTOR_TEST_DIR.resolve("with-parent-only-groupid-version");
+        GAV expectedGav = GAV.builder()
+                .ga(GA.builder().groupId("com.example").artifactId("bar").build())
+                .version("1.0.0.rh-69")
+                .build();
+
+        GAV gav = rootGavExtractor.extractGav(workdir);
+
+        assertThat(gav).isEqualTo(expectedGav);
+    }
 }
