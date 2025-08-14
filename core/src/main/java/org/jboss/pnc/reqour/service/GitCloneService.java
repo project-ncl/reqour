@@ -20,7 +20,9 @@ import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
+import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.api.CloneService;
+import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,11 +35,13 @@ public class GitCloneService implements CloneService {
 
     private final ConfigUtils configUtils;
     private final GitCommands gitCommands;
+    private final Logger userLogger;
 
     @Inject
-    public GitCloneService(ConfigUtils configUtils, GitCommands gitCommands) {
+    public GitCloneService(ConfigUtils configUtils, GitCommands gitCommands, @UserLogger Logger userLogger) {
         this.configUtils = configUtils;
         this.gitCommands = gitCommands;
+        this.userLogger = userLogger;
     }
 
     @Override
@@ -71,7 +75,8 @@ public class GitCloneService implements CloneService {
     private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing everything");
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn);
 
         String targetRemote = "target";
 
@@ -87,7 +92,8 @@ public class GitCloneService implements CloneService {
     private void cloneRefOnly(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn);
 
         String targetRemote = "target";
 
@@ -102,10 +108,10 @@ public class GitCloneService implements CloneService {
         log.info("Checking if internal repository with url '{}' is new", url);
 
         Path cloneDir = IOUtils.createTempDirForCloning();
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(cloneDir);
 
-        gitCommands.clone(url, processContextBuilder);
+        gitCommands.clone(url, ProcessContext.withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn));
 
+        ProcessContext.Builder processContextBuilder = ProcessContext.withWorkdirAndIgnoringOutput(cloneDir);
         final boolean isInternalRepoNew;
         if (gitCommands.listTags(processContextBuilder).isEmpty()) {
             isInternalRepoNew = gitCommands.listBranches(processContextBuilder).isEmpty();

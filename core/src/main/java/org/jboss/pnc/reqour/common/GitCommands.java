@@ -137,7 +137,8 @@ public class GitCommands {
 
     public void configureCommitter(Path workdir) {
         Committer committer = configUtils.getCommitter();
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, log::debug, log::warn);
         executeGitCommand(
                 GitUtils.configureUserEmail(committer.email()),
                 processContextBuilder,
@@ -293,7 +294,7 @@ public class GitCommands {
 
     public String revParse(Path workdir, String ref) {
         return getSingleValueResultOfGitCommand(
-                ProcessContext.defaultBuilderWithWorkdir(workdir).command(GitUtils.revParse(ref)));
+                ProcessContext.withWorkdirAndIgnoringOutput(workdir).command(GitUtils.revParse(ref)));
     }
 
     public void remove(String filename, boolean cached, ProcessContext.Builder processContextBuilder) {

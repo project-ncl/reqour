@@ -74,7 +74,8 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
                     URLUtils.addUsernameToUrl(adjustRequest.getInternalUrl().getReadwriteUrl(), gitUsername),
                     adjustRequest.getRef(),
                     workdir);
-            gitCommands.setupGitLfsIfPresent(ProcessContext.defaultBuilderWithWorkdir(workdir));
+            gitCommands.setupGitLfsIfPresent(
+                    ProcessContext.withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn));
             isRefInternal = true;
         }
 
@@ -108,7 +109,8 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     private boolean syncExternalRepo(AdjustRequest adjustRequest, Path workdir, String gitUsername) {
         boolean isRefInternal = false;
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
 
@@ -174,7 +176,8 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     }
 
     private void shallowCloneWithTags(String url, String ref, Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         gitCommands.init(false, processContextBuilder);
         gitCommands.addRemote(DEFAULT_REMOTE_NAME, url, processContextBuilder);
@@ -196,8 +199,9 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             return;
         }
 
-        log.debug("Repository '{}' is using git submodules, transforming into fat repository", workdir);
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        userLogger.debug("Repository '{}' is using git submodules, transforming into fat repository", workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.submoduleUpdateInit(processContextBuilder);
 
         List<String> submoduleLocations = getSubmoduleLocations(submodulesFile);
