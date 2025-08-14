@@ -80,12 +80,12 @@ class GitCloneServiceTest {
 
     void setUpEmptyDestRepo() throws IOException {
         Files.createDirectory(EMPTY_DEST_REPO_PATH);
-        gitCommands.init(true, ProcessContext.defaultBuilderWithWorkdir(EMPTY_DEST_REPO_PATH));
+        gitCommands.init(true, ProcessContext.withWorkdirAndIgnoringOutput(EMPTY_DEST_REPO_PATH));
     }
 
     void setUpDestRepoWithOnlyMainBranch() throws IOException {
         Files.createDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH);
-        ProcessContext.Builder pcb = ProcessContext.defaultBuilderWithWorkdir(DEST_REPO_WITH_MAIN_BRANCH_PATH);
+        ProcessContext.Builder pcb = ProcessContext.withWorkdirAndIgnoringOutput(DEST_REPO_WITH_MAIN_BRANCH_PATH);
 
         processExecutor.execute(
                 pcb.command(

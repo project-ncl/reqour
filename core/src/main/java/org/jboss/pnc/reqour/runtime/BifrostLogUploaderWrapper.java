@@ -19,7 +19,6 @@ import org.jboss.pnc.bifrost.upload.TagOption;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
-import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,13 +32,9 @@ public class BifrostLogUploaderWrapper {
     @Inject
     BifrostLogUploader bifrostLogUploader;
 
-    @Inject
-    @UserLogger
-    Logger userLogger;
-
     public void uploadStringFinalLog(String message, FinalLogUploader logUploader) {
         try {
-            userLogger.info("Sending final log '{}' into Bifrost", message);
+            log.info("Sending final log '{}' into Bifrost", message);
             bifrostLogUploader.uploadString(message, computeLogMetadata(logUploader));
         } catch (BifrostUploadException ex) {
             throw new BifrostUploadException("Unable to upload string log to Bifrost, log was: " + message, ex);
@@ -48,7 +43,7 @@ public class BifrostLogUploaderWrapper {
 
     public void uploadFileFinalLog(Path finalLogFilePath, FinalLogUploader logUploader) throws BifrostUploadException {
         try {
-            userLogger.info("Sending final log from the file '{}' into Bifrost", finalLogFilePath);
+            log.info("Sending final log from the file '{}' into Bifrost", finalLogFilePath);
             bifrostLogUploader.uploadFile(finalLogFilePath.toFile(), computeLogMetadata(logUploader));
         } catch (BifrostUploadException ex) {
             try {

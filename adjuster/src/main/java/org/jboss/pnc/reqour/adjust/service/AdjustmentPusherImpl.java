@@ -74,14 +74,16 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void prepareSearchingBranch(Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         gitCommands.createBranch("reqour_search_temp_branch_" + UUID.randomUUID(), processContextBuilder);
         gitCommands.addAll(processContextBuilder);
     }
 
     private String findTag(Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         String currentTreeSha = gitCommands.writeTree(processContextBuilder);
         log.debug("Current tree SHA is: {}", currentTreeSha);
@@ -92,7 +94,8 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
      * Try to find the tag corresponding to the provided tree SHA
      */
     String findTagByTreeSha(Path workdir, String treeSha) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         List<String> tags = IOUtils.splitByNewLine(
                 processExecutor.stdout(
                         processContextBuilder.command(
@@ -119,7 +122,8 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void pushTag(Path workdir, String tagName) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.pushTags(GitUtils.DEFAULT_REMOTE_NAME, List.of(tagName), processContextBuilder);
     }
 
@@ -128,7 +132,8 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
             String alignmentRootVersion,
             String tagMessage,
             boolean failOnNoAlignmentChanges) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         String commitId = tryCommitChanges(processContextBuilder, failOnNoAlignmentChanges);
 
@@ -194,7 +199,9 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private String getCommitOfTag(Path workdir, String tagName) {
-        return gitCommands.getCommitByTag(tagName, ProcessContext.defaultBuilderWithWorkdir(workdir));
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
+        return gitCommands.getCommitByTag(tagName, processContextBuilder);
     }
 
     private static String adjustTagName(String tagName, String commitId) {
@@ -202,18 +209,19 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void createBranchForTaggedCommit(Path workdir, String tagName, String commitId) {
-        ProcessContext.Builder processContextBuilder = ProcessContext.defaultBuilderWithWorkdir(workdir);
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         String branchName = "branch-reqour-" + tagName + "-" + commitId;
 
         boolean doesBranchAlreadyExist = gitCommands.doesBranchExistAtRemote(branchName, processContextBuilder);
         if (doesBranchAlreadyExist) {
-            log.debug("Branch '{}' already exists, skipping the creation", branchName);
+            userLogger.debug("Branch '{}' already exists, skipping the creation", branchName);
             // In case the branch already exists, nothing to do (we're assuming that this means the commit is already in
             // the branch)
             return;
         }
 
-        log.debug("Creating branch '{}'", branchName);
+        userLogger.debug("Creating branch '{}'", branchName);
         gitCommands.createBranch(branchName, processContextBuilder);
         gitCommands.push(branchName, false, processContextBuilder);
     }

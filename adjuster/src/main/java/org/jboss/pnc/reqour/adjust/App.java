@@ -95,6 +95,7 @@ public class App implements Runnable {
         try {
             configureMDC();
             ProcessStageUtils.logProcessStageEnd(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
+            userLogger.info("Adjust request: {}", adjustRequest);
             if (adjustRequest.getHeartbeatConfig() != null) {
                 heartbeatScheduler.subscribeRequest(adjustRequest.getTaskId(), adjustRequest.getHeartbeatConfig());
             }
@@ -173,7 +174,7 @@ public class App implements Runnable {
     }
 
     private void sendCallback(Request callback, AdjustResponse adjustResponse) {
-        log.debug("Gonna send the callback. Payload is: {}", adjustResponse);
+        userLogger.info("Gonna send the callback. Payload is: {}", adjustResponse);
         pncHttpClient.sendRequest(callback, adjustResponse);
     }
 

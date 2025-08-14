@@ -102,7 +102,7 @@ class RepositoryFetcherTest {
         gitCommands.checkout(
                 "1.1",
                 false,
-                ProcessContext.defaultBuilderWithWorkdir(repositoriesRoot.resolve("downstream")));
+                ProcessContext.withWorkdirAndIgnoringOutput(repositoriesRoot.resolve("downstream")));
         CloningResult expectedCloningResult = new CloningResult(
                 gitCommands.revParse(repositoriesRoot.resolve("downstream")),
                 true);

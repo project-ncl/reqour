@@ -88,7 +88,7 @@ class CloningEndpointIT {
 
     private void setUpEmptyDestRepo() throws IOException {
         Files.createDirectory(CloneTestUtils.EMPTY_DEST_REPO_PATH);
-        gitCommands.init(true, ProcessContext.defaultBuilderWithWorkdir(CloneTestUtils.EMPTY_DEST_REPO_PATH));
+        gitCommands.init(true, ProcessContext.withWorkdirAndIgnoringOutput(CloneTestUtils.EMPTY_DEST_REPO_PATH));
     }
 
     @Test

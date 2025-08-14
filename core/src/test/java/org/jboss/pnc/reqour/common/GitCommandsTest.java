@@ -33,7 +33,7 @@ class GitCommandsTest {
     void isLfsPresent_gitattributesNotPresent_returnsFalse() throws IOException {
         Path tempDirectory = Files.createTempDirectory(TEST_LFS_PREFIX);
 
-        assertFalse(gitCommands.isLfsPresent(ProcessContext.defaultBuilderWithWorkdir(tempDirectory)));
+        assertFalse(gitCommands.isLfsPresent(ProcessContext.withWorkdirAndIgnoringOutput(tempDirectory)));
 
         Files.delete(tempDirectory);
     }
@@ -43,7 +43,7 @@ class GitCommandsTest {
         Path tempDirectory = Files.createTempDirectory(TEST_LFS_PREFIX);
         Path gitAttributesFilePath = Files.createFile(tempDirectory.resolve(Path.of(GitCommands.GIT_ATTRIBUTES)));
 
-        assertFalse(gitCommands.isLfsPresent(ProcessContext.defaultBuilderWithWorkdir(tempDirectory)));
+        assertFalse(gitCommands.isLfsPresent(ProcessContext.withWorkdirAndIgnoringOutput(tempDirectory)));
 
         Files.delete(gitAttributesFilePath);
         Files.delete(tempDirectory);
@@ -55,7 +55,7 @@ class GitCommandsTest {
         Path gitAttributesFilePath = Files.createFile(tempDirectory.resolve(Path.of(GitCommands.GIT_ATTRIBUTES)));
         Files.writeString(gitAttributesFilePath, "*.pdf filter=lfs diff=lfs merge=lfs -text");
 
-        assertTrue(gitCommands.isLfsPresent(ProcessContext.defaultBuilderWithWorkdir(tempDirectory)));
+        assertTrue(gitCommands.isLfsPresent(ProcessContext.withWorkdirAndIgnoringOutput(tempDirectory)));
 
         Files.delete(gitAttributesFilePath);
         Files.delete(tempDirectory);
