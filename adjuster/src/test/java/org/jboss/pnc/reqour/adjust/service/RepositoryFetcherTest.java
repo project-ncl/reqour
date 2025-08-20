@@ -8,11 +8,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.common.utils.IOUtils.createTempDir;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.common.RepoInitializer;
@@ -131,5 +135,23 @@ class RepositoryFetcherTest {
         CloningResult actualCloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
 
         assertThat(actualCloningResult).isEqualTo(expectedCloningResult);
+    }
+
+    @Test
+    void testSubmoduleParsing() throws Exception {
+        URL url = IOUtils.resourceToURL("/git-files/gitmodule");
+        Path path = Paths.get(url.toURI());
+        List<String> submoduleLocations = RepositoryFetcherImpl.getSubmoduleLocations(path);
+        assertThat(submoduleLocations).hasSize(1);
+        assertThat(submoduleLocations.get(0)).isEqualTo("submodules/quarkus");
+
+        // now testing for multiple submodules
+        url = IOUtils.resourceToURL("/git-files/gitmodule-multi");
+        path = Paths.get(url.toURI());
+        submoduleLocations = RepositoryFetcherImpl.getSubmoduleLocations(path);
+        assertThat(submoduleLocations).hasSize(2);
+        assertThat(submoduleLocations.get(0)).isEqualTo("submodules/quarkus");
+        assertThat(submoduleLocations.get(1)).isEqualTo("submodules/quarkus-behive/test");
+
     }
 }
