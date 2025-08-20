@@ -209,12 +209,13 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             // 1) Delete the reference to the submodule from the index, but keep the files
             gitCommands.remove(submoduleLocation, true, processContextBuilder);
 
-            // 2) Remove the .git metadata folder
+            // 2) Remove the .git metadata file
             try {
-                log.debug("Removing .git/ folder inside the submodule {}", submoduleLocation);
-                FileUtils.deleteDirectory(workdir.resolve(submoduleLocation).resolve(".git").toFile());
+                log.debug("Removing .git file inside the submodule {}", submoduleLocation);
+                // use forceDelete since it will delete the .git, whether it's a file or a directory
+                FileUtils.forceDelete(workdir.resolve(submoduleLocation).resolve(".git").toFile());
             } catch (IOException e) {
-                throw new RuntimeException("Cannot delete .git/ folder inside the submodule " + submoduleLocation, e);
+                throw new RuntimeException("Cannot delete .git file inside the submodule " + submoduleLocation, e);
             }
 
             // 3) Add the submodule to the main repository index
