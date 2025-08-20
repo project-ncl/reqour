@@ -1,0 +1,3 @@
+[submodule "submodules/quarkus"]
+       path = submodules/quarkus
+       url = https://github.com/quarkusio/quarkus
