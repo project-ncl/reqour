@@ -228,11 +228,12 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
         gitCommands.commit("Removing submodules and transforming into fat repository", processContextBuilder);
     }
 
-    private static List<String> getSubmoduleLocations(Path submodulesFile) {
+    static List<String> getSubmoduleLocations(Path submodulesFile) {
         String pathPrefix = "path =";
         try (BufferedReader br = new BufferedReader(new FileReader(submodulesFile.toFile()))) {
+            // we don't use \w+ to get the path since the path might contain a slash, which is not a word character
             return br.lines()
-                    .filter(l -> l.matches(String.format("^\\s+%s \\w+$", pathPrefix)))
+                    .filter(l -> l.matches(String.format("^\\s+%s \\S+$", pathPrefix)))
                     .map(l -> l.replace(pathPrefix, "").stripLeading())
                     .toList();
         } catch (IOException e) {

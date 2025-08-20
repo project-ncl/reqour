@@ -1,0 +1,6 @@
+[submodule "submodules/quarkus"]
+       path = submodules/quarkus
+       url = https://github.com/quarkusio/quarkus
+[submodule "submodules/quarkus-behive/test"]
+       path = submodules/quarkus-behive/test
+       url = https://github.com/quarkusio/quarkus
