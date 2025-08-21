@@ -26,6 +26,7 @@ import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.slf4j.Logger;
@@ -110,7 +111,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
             NpmResult manipulatorResult = objectMapper.readValue(resultsFilePath.toFile(), NpmResult.class);
             userLogger.info(
                     "Got Project Manipulator result data: {}",
-                    org.jboss.pnc.reqour.adjust.utils.IOUtils.prettyPrint(manipulatorResult));
+                    CommonUtils.prettyPrint(manipulatorResult));
             return VersioningState.builder()
                     .executionRootName(adjustNpmName(manipulatorResult.getName()))
                     .executionRootVersion(manipulatorResult.getVersion())

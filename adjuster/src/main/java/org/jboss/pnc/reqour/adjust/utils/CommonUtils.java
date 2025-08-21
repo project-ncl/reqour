@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class IOUtils {
+public class CommonUtils {
 
     private static final Path ADJUST_DIR = Path.of("/tmp/adjust");
     private static final ObjectMapper prettyPrinter = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);

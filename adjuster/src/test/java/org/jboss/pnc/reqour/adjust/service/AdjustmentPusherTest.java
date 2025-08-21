@@ -23,6 +23,7 @@ import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.common.RepoInitializer;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.CloneTestUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
@@ -41,7 +42,7 @@ class AdjustmentPusherTest {
 
     private static final Path upstreamDir = IOUtils
             .createTempDir("upstream-repo-", "upstream git repository needed in a test");
-    private static Path ADJUST_DIR = org.jboss.pnc.reqour.adjust.utils.IOUtils.createAdjustDirectory();
+    private static Path ADJUST_DIR = CommonUtils.createAdjustDirectory();
 
     @Inject
     AdjustmentPusherImpl adjustmentPusher;
