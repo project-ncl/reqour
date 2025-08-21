@@ -89,7 +89,8 @@ public class App implements Runnable {
 
     @Override
     public void run() {
-        AdjustRequest adjustRequest = config.adjust().request();
+        AdjustRequest adjustRequest = org.jboss.pnc.reqour.common.utils.IOUtils
+                .unescapeUserAlignmentParameters(config.adjust().request());
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {
