@@ -5,6 +5,9 @@ quarkus:
     enabled: false
   otel:
     enabled: false
+  security:
+    auth:
+      enabled-in-dev-mode: false
 
 reqour-rest:
   app-environment: devel
