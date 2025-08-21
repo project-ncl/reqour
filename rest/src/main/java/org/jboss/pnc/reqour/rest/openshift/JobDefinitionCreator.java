@@ -17,6 +17,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -28,8 +29,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
+import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
+@Slf4j
 public class JobDefinitionCreator {
 
     @Inject
@@ -63,7 +66,7 @@ public class JobDefinitionCreator {
         try {
             properties.put("jobName", jobName);
             properties.put("buildType", adjustRequest.getBuildType());
-            properties.put("adjustRequest", objectMapper.writeValueAsString(adjustRequest));
+            properties.put("adjustRequest", prepareAdjustRequest(adjustRequest));
             properties.put("appEnvironment", config.appEnvironment());
             properties.put("resourcesMemory", getResourcesMemory(adjustRequest.getBuildConfigParameters()));
             properties.put("reqourSecretKey", config.reqourSecretKey());
@@ -125,5 +128,9 @@ public class JobDefinitionCreator {
 
     private String getPodMemoryString(double podMemory) {
         return ((int) Math.ceil(podMemory * 1024)) + "Mi";
+    }
+
+    String prepareAdjustRequest(AdjustRequest adjustRequest) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(IOUtils.escapeUserAlignmentParameters(adjustRequest));
     }
 }
