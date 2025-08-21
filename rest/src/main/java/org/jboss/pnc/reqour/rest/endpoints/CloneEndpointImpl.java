@@ -18,7 +18,9 @@ import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.callbacksender.CallbackSender;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
+import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.api.CloneService;
+import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,17 +31,25 @@ public class CloneEndpointImpl implements CloneEndpoint {
     private final CloneService service;
     private final TaskExecutor taskExecutor;
     private final CallbackSender callbackSender;
+    private final Logger userLogger;
 
     @Inject
-    public CloneEndpointImpl(CloneService service, TaskExecutor taskExecutor, CallbackSender callbackSender) {
+    public CloneEndpointImpl(
+            CloneService service,
+            TaskExecutor taskExecutor,
+            CallbackSender callbackSender,
+            @UserLogger Logger logger) {
         this.service = service;
         this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
+        this.userLogger = logger;
     }
 
     @Override
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void clone(RepositoryCloneRequest cloneRequest) {
+        userLogger.info("Clone request: {}", cloneRequest);
+
         taskExecutor.executeAsync(
                 cloneRequest.getCallback(),
                 cloneRequest,
