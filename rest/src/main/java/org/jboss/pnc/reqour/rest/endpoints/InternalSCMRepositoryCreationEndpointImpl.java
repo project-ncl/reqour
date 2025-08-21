@@ -23,8 +23,10 @@ import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutorImpl;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitlabRepositoryCreationService;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
+import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,22 +38,27 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     private final TaskExecutor taskExecutor;
     private final CallbackSender callbackSender;
     private final ConfigUtils configUtils;
+    private final Logger userLogger;
 
     @Inject
     public InternalSCMRepositoryCreationEndpointImpl(
             InternalSCMRepositoryCreationService service,
             TaskExecutorImpl taskExecutor,
             CallbackSender callbackSender,
-            ConfigUtils configUtils) {
+            ConfigUtils configUtils,
+            @UserLogger Logger userLogger) {
         this.service = service;
         this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
         this.configUtils = configUtils;
+        this.userLogger = userLogger;
     }
 
     @Override
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
+        userLogger.info("Internal SCM repository creation request: {}", creationRequest);
+
         taskExecutor.executeAsync(
                 creationRequest.getCallback(),
                 creationRequest,
