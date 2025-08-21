@@ -18,6 +18,7 @@ import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
@@ -46,7 +47,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     @UserLogger
     Logger userLogger;
 
-    private final Path workdir = org.jboss.pnc.reqour.adjust.utils.IOUtils.getAdjustDir();
+    private final Path workdir = CommonUtils.getAdjustDir();
 
     @Override
     public AdjustmentPushResult pushAlignedChanges(
