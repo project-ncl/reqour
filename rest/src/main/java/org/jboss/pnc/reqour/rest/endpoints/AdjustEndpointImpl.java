@@ -53,6 +53,8 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     @Override
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void adjust(AdjustRequest adjustRequest) {
+        userLogger.info("Adjust request: {}", adjustRequest);
+
         managedExecutor.runAsync(() -> {
             ProcessStageUtils.logProcessStageBegin(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
             finalLogManager.addMessage(getMessageStepStartingAlignmentPod(ProcessStageUtils.Step.BEGIN));
