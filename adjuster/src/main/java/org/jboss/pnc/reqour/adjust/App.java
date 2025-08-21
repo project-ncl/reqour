@@ -28,8 +28,9 @@ import org.jboss.pnc.reqour.adjust.provider.AdjustProvider;
 import org.jboss.pnc.reqour.adjust.provider.AdjustProviderPicker;
 import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
-import org.jboss.pnc.reqour.adjust.utils.IOUtils;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
@@ -85,12 +86,11 @@ public class App implements Runnable {
     @Inject
     HeartbeatScheduler heartbeatScheduler;
 
-    private final Path workdir = IOUtils.createAdjustDirectory();
+    private final Path workdir = CommonUtils.createAdjustDirectory();
 
     @Override
     public void run() {
-        AdjustRequest adjustRequest = org.jboss.pnc.reqour.common.utils.IOUtils
-                .unescapeUserAlignmentParameters(config.adjust().request());
+        AdjustRequest adjustRequest = IOUtils.unescapeUserAlignmentParameters(config.adjust().request());
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {

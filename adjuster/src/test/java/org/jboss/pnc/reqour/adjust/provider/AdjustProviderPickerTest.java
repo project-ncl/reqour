@@ -14,7 +14,7 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.adjust.utils.IOUtils;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,12 +29,12 @@ class AdjustProviderPickerTest {
 
     @BeforeAll
     static void beforeAll() {
-        IOUtils.createAdjustDirectory();
+        CommonUtils.createAdjustDirectory();
     }
 
     @AfterAll
     static void afterAll() throws IOException {
-        Files.deleteIfExists(IOUtils.getAdjustDir());
+        Files.deleteIfExists(CommonUtils.getAdjustDir());
     }
 
     @Test
