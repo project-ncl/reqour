@@ -357,6 +357,13 @@ public class GitCommands {
         return getSingleValueResultOfGitCommand(processContextBuilder.command(GitUtils.writeTree()));
     }
 
+    public void resetHard(ProcessContext.Builder processContextBuilder) {
+        executeGitCommand(
+                GitUtils.resetHard(),
+                processContextBuilder,
+                "Cannot reset hard this repository");
+    }
+
     private static String modifyPullRequestRefToBeFetchable(String ref) {
         if (!isReferencePR(ref)) {
             throw new GitException(String.format("Given reference (%s) does not match PR reference format", ref));

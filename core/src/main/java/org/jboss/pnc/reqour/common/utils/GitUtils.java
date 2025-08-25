@@ -48,8 +48,16 @@ public class GitUtils {
         return List.of("git", "clone", "--", url, ".");
     }
 
+    /**
+     * We clone to the .git folder, based on this stackoverflow answer:
+     * https://stackoverflow.com/questions/67699/how-do-i-clone-all-remote-branches/7216269#7216269
+     * However, the current dir containing the .git folder will be a git repository
+     *
+     * @param url git url to clone to
+     * @return
+     */
     public static List<String> cloneMirror(String url) {
-        return List.of("git", "clone", "--mirror", "--", url, ".");
+        return List.of("git", "clone", "--mirror", "--", url, "./.git");
     }
 
     public static List<String> commit(String commitMessage) {
@@ -218,5 +226,9 @@ public class GitUtils {
 
     public static List<String> writeTree() {
         return List.of("git", "write-tree");
+    }
+
+    public static List<String> resetHard() {
+        return List.of("git", "reset", "--hard");
     }
 }
