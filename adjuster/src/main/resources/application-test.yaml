@@ -1,6 +1,10 @@
 quarkus:
   oidc-client:
     enabled: false
+  log:
+    category:
+      "org.jboss.pnc._userlog_":
+        level: DEBUG
 
 reqour-adjuster:
   adjust:
