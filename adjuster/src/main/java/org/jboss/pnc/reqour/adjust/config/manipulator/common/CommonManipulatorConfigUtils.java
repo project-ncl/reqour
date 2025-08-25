@@ -45,7 +45,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonManipulatorConfigUtils {
 
     private static final String TEMPORARY_SUFFIX = "temporary";
-    private static final int DEFAULT_JAVA_VERSION = 11;
+    public static final String DEFAULT_JAVA_VERSION = "11";
 
     /**
      * Extract {@link BuildConfigurationParameterKeys#ALIGNMENT_PARAMETERS} from the {@link AdjustRequest}.
@@ -212,12 +212,17 @@ public class CommonManipulatorConfigUtils {
                 .filter(p -> p.startsWith("-DRepour_Java"))
                 .findFirst();
 
-        int javaVersion = jvmLocationSystemProperty.map(s -> Integer.parseInt(s.split("=")[1]))
+        String javaVersion = jvmLocationSystemProperty.map(s -> s.split("=")[1])
                 .orElse(DEFAULT_JAVA_VERSION);
+        log.debug("Parsed java version: {}", javaVersion);
+        if (!isValidJavaVersion(javaVersion)) {
+            throw new AdjusterException(String.format("Invalid Java version '%s' provided.", javaVersion));
+        }
+
         return getJavaOfVersion(javaVersion);
     }
 
-    private static Path getJavaOfVersion(int javaVersion) {
+    static Path getJavaOfVersion(String javaVersion) {
         return Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-openjdk", "bin", "java");
     }
 
@@ -268,5 +273,19 @@ public class CommonManipulatorConfigUtils {
                 .locationOption(Optional.empty())
                 .remainingAlignmentParameters(userSpecifiedAlignmentParameters)
                 .build();
+    }
+
+    /**
+     * Validates whether the provided java version is valid or not.<br/>
+     * k
+     * Currently, as a valid java version, is considered any string of the SEMVER format, where minor and patch versions
+     * are optional, e.g. 21, or 1.8.0.
+     *
+     * @param javaVersion provided java version
+     * @return true, if the provided java version is considered valid, false otherwise
+     */
+    private static boolean isValidJavaVersion(String javaVersion) {
+        Pattern javaVersionPattern = Pattern.compile("^\\d+(?:\\.\\d+\\.\\d+)?$");
+        return javaVersion.matches(javaVersionPattern.pattern());
     }
 }
