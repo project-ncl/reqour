@@ -83,6 +83,7 @@ public class GitCloneService implements CloneService {
         // From: https://stackoverflow.com/a/7216269/2907906
         gitCommands.cloneMirror(request.getOriginRepoUrl(), processContextBuilder);
         gitCommands.disableBareRepository(processContextBuilder);
+        gitCommands.resetHard(processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);
         gitCommands.pushAll(targetRemote, processContextBuilder);
