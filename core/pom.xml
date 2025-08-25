@@ -13,7 +13,7 @@
     <parent>
         <groupId>org.jboss.pnc.reqour</groupId>
         <artifactId>reqour-parent</artifactId>
-        <version>3.2.14-SNAPSHOT</version>
+        <version>3.2.14</version>
     </parent>
 
     <properties>
