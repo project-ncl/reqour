@@ -71,11 +71,11 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         // immutable collection returned, so let's make it mutable, and add there the results file if needed
         final List<String> userAlignmentParametersWithFile = new ArrayList<>(
                 userSpecifiedAlignmentParameters.getAlignmentParameters());
-        if (userSpecifiedAlignmentParameters.getLocationOption().isEmpty()) {
+        if (userSpecifiedAlignmentParameters.getLocation().isEmpty()) {
             subFolderWithResults = workdir;
         } else {
-            userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocationOption().get());
-            Path pomFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocationOption().get());
+            userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocation().get());
+            Path pomFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get());
             subFolderWithResults = extractPomFileDirectory(pomFile);
         }
 
