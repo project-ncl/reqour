@@ -22,9 +22,6 @@ import org.junit.jupiter.api.Test;
 
 class CommonManipulatorConfigUtilsTest {
 
-    private static final String FILE_SHORT_OPTION_NAME = "f";
-    private static final String FILE_LONG_OPTION_NAME = "file";
-
     @Test
     void parseUserSpecifiedAlignmentParameters_noLocation_returnsParsedAlignmentParametersWithDefaultLocation() {
         AdjustRequest request = AdjustRequest.builder()
@@ -32,18 +29,18 @@ class CommonManipulatorConfigUtilsTest {
                         Map.of(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS, "-Dfoo=bar -Dbaz=\"baz baz\""))
                 .build();
         UserSpecifiedAlignmentParameters expected = UserSpecifiedAlignmentParameters.builder()
-                .locationOption(UserSpecifiedAlignmentParameters.getDefaultLocationOption())
+                .location(UserSpecifiedAlignmentParameters.getDefaultLocation())
                 .alignmentParameters(List.of("-Dfoo=bar", "-Dbaz=baz baz"))
                 .build();
 
         UserSpecifiedAlignmentParameters actual = CommonManipulatorConfigUtils
-                .parseUserSpecifiedAlignmentParameters(request);
+                .parseUserSpecifiedAlignmentParameters(request, "f", "file");
 
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
-    void parseUserSpecifiedAlignmentParameters_withLocation_returnsParsedAlignmentParametersWithLocation() {
+    void parseUserSpecifiedAlignmentParameters_withLongLocationOptionSeparatedByEquals_returnsParsedAlignmentParametersWithLocation() {
         AdjustRequest request = AdjustRequest.builder()
                 .buildConfigParameters(
                         Map.of(
@@ -51,12 +48,69 @@ class CommonManipulatorConfigUtilsTest {
                                 "-Dfoo=bar --file=/tmp/dir/file -Dbaz=\"baz baz\""))
                 .build();
         UserSpecifiedAlignmentParameters expected = UserSpecifiedAlignmentParameters.builder()
-                .locationOption(Optional.of(Path.of("/tmp/dir/file")))
+                .location(Optional.of(Path.of("/tmp/dir/file")))
                 .alignmentParameters(List.of("-Dfoo=bar", "-Dbaz=baz baz"))
                 .build();
 
         UserSpecifiedAlignmentParameters actual = CommonManipulatorConfigUtils
-                .parseUserSpecifiedAlignmentParameters(request);
+                .parseUserSpecifiedAlignmentParameters(request, "f", "file");
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void parseUserSpecifiedAlignmentParameters_withLongLocationOptionSeparatedBySpace_returnsParsedAlignmentParametersWithLocation() {
+        AdjustRequest request = AdjustRequest.builder()
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Dfoo=bar --file /tmp/dir/file -Dbaz=\"baz baz\""))
+                .build();
+        UserSpecifiedAlignmentParameters expected = UserSpecifiedAlignmentParameters.builder()
+                .location(Optional.of(Path.of("/tmp/dir/file")))
+                .alignmentParameters(List.of("-Dfoo=bar", "-Dbaz=baz baz"))
+                .build();
+
+        UserSpecifiedAlignmentParameters actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParameters(request, "f", "file");
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void parseUserSpecifiedAlignmentParameters_withShortLocationOptionSeparatedByEquals_returnsParsedAlignmentParametersWithLocation() {
+        AdjustRequest request = AdjustRequest.builder()
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Dfoo=bar -f=/tmp/dir/file -Dbaz=\"baz baz\""))
+                .build();
+        UserSpecifiedAlignmentParameters expected = UserSpecifiedAlignmentParameters.builder()
+                .location(Optional.of(Path.of("/tmp/dir/file")))
+                .alignmentParameters(List.of("-Dfoo=bar", "-Dbaz=baz baz"))
+                .build();
+
+        UserSpecifiedAlignmentParameters actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParameters(request, "f", "file");
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void parseUserSpecifiedAlignmentParameters_withShortLocationOptionSeparatedBySpace_returnsParsedAlignmentParametersWithLocation() {
+        AdjustRequest request = AdjustRequest.builder()
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Dfoo=bar -f /tmp/dir/file -Dbaz=\"baz baz\""))
+                .build();
+        UserSpecifiedAlignmentParameters expected = UserSpecifiedAlignmentParameters.builder()
+                .location(Optional.of(Path.of("/tmp/dir/file")))
+                .alignmentParameters(List.of("-Dfoo=bar", "-Dbaz=baz baz"))
+                .build();
+
+        UserSpecifiedAlignmentParameters actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParameters(request, "f", "file");
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -65,15 +119,15 @@ class CommonManipulatorConfigUtilsTest {
     void extractLocationFromUsersAlignmentParameters_noLocation_returnsUnchangedString() {
         String userSpecifiedAlignmentParams = "-Dfoo=bar  -Dbaz=baz";
         LocationAndRemainingAlignmentParameters expected = LocationAndRemainingAlignmentParameters.builder()
-                .locationOption(Optional.empty())
+                .location(Optional.empty())
                 .remainingAlignmentParameters(userSpecifiedAlignmentParams)
                 .build();
 
         LocationAndRemainingAlignmentParameters actual = CommonManipulatorConfigUtils
                 .extractLocationFromUsersAlignmentParameters(
                         userSpecifiedAlignmentParams,
-                        FILE_SHORT_OPTION_NAME,
-                        FILE_LONG_OPTION_NAME);
+                        "f",
+                        "file");
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -82,15 +136,15 @@ class CommonManipulatorConfigUtilsTest {
     void extractLocationFromUsersAlignmentParameters_withShortLocationOption_returnsParametersWithoutLocation() {
         String userSpecifiedAlignmentParams = "-Dfoo=bar -f dir/pom.xml -Dbaz=baz";
         LocationAndRemainingAlignmentParameters expected = LocationAndRemainingAlignmentParameters.builder()
-                .locationOption(Optional.of("-f dir/pom.xml"))
+                .location(Optional.of(Path.of("dir/pom.xml")))
                 .remainingAlignmentParameters("-Dfoo=bar  -Dbaz=baz")
                 .build();
 
         LocationAndRemainingAlignmentParameters actual = CommonManipulatorConfigUtils
                 .extractLocationFromUsersAlignmentParameters(
                         userSpecifiedAlignmentParams,
-                        FILE_SHORT_OPTION_NAME,
-                        FILE_LONG_OPTION_NAME);
+                        "f",
+                        "file");
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -99,15 +153,15 @@ class CommonManipulatorConfigUtilsTest {
     void extractLocationFromUsersAlignmentParameters_withLongLocationOption_returnsParametersWithoutLocation() {
         String userSpecifiedAlignmentParams = "-Dfoo=bar --file=dir/subdir/pom.tpl.xml -Dbaz=baz";
         LocationAndRemainingAlignmentParameters expected = LocationAndRemainingAlignmentParameters.builder()
-                .locationOption(Optional.of("--file=dir/subdir/pom.tpl.xml"))
+                .location(Optional.of(Path.of("dir/subdir/pom.tpl.xml")))
                 .remainingAlignmentParameters("-Dfoo=bar  -Dbaz=baz")
                 .build();
 
         LocationAndRemainingAlignmentParameters actual = CommonManipulatorConfigUtils
                 .extractLocationFromUsersAlignmentParameters(
                         userSpecifiedAlignmentParams,
-                        FILE_SHORT_OPTION_NAME,
-                        FILE_LONG_OPTION_NAME);
+                        "f",
+                        "file");
 
         assertThat(actual).isEqualTo(expected);
     }
@@ -116,7 +170,7 @@ class CommonManipulatorConfigUtilsTest {
     void extractLocationFromUsersAlignmentParameters_customLocationOptionWithLongLocationOption_returnsParametersWithoutLocation() {
         String userSpecifiedAlignmentParams = "-Dfoo=bar --target=dir/subdir -Dbaz=baz";
         LocationAndRemainingAlignmentParameters expected = LocationAndRemainingAlignmentParameters.builder()
-                .locationOption(Optional.of("--target=dir/subdir"))
+                .location(Optional.of(Path.of("dir/subdir")))
                 .remainingAlignmentParameters("-Dfoo=bar  -Dbaz=baz")
                 .build();
 

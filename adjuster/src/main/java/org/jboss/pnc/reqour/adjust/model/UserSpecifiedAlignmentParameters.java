@@ -22,12 +22,12 @@ import lombok.Value;
 public class UserSpecifiedAlignmentParameters {
 
     @Getter
-    private static final Optional<Path> defaultLocationOption = Optional.empty();
+    private static final Optional<Path> defaultLocation = Optional.empty();
 
     /**
      * Location.
      */
-    Optional<Path> locationOption;
+    Optional<Path> location;
 
     /**
      * All the remaining user-specified alignment parameters.
@@ -40,7 +40,7 @@ public class UserSpecifiedAlignmentParameters {
 
     public static UserSpecifiedAlignmentParameters withoutSubFolder(List<String> alignmentParameters) {
         return UserSpecifiedAlignmentParameters.builder()
-                .locationOption(defaultLocationOption)
+                .location(defaultLocation)
                 .alignmentParameters(alignmentParameters)
                 .build();
     }
