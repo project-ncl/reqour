@@ -66,8 +66,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
                 .alignmentConfigParameters(gradleProviderConfig.alignmentParameters())
                 .workdir(
-                        userSpecifiedAlignmentParameters.getLocationOption().isEmpty() ? workdir
-                                : workdir.resolve(userSpecifiedAlignmentParameters.getLocationOption().get()))
+                        userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
+                                : workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get()))
                 .gradleAnalyzerPluginInitFilePath(gradleProviderConfig.gradleAnalyzerPluginInitFilePath())
                 .cliJarPath(gradleProviderConfig.cliJarPath())
                 .defaultGradlePath(gradleProviderConfig.defaultGradlePath())

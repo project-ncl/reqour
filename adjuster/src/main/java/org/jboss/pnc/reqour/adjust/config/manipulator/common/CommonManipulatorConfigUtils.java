@@ -18,12 +18,6 @@ import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -89,46 +83,14 @@ public class CommonManipulatorConfigUtils {
 
         List<String> parsedUserSpecifiedAlignmentParameters = parseUserSpecifiedAlignmentParametersWithoutLocation(
                 locationAndRemainingAlignmentParameters.getRemainingAlignmentParameters());
-        if (locationAndRemainingAlignmentParameters.getLocationOption().isEmpty()) {
+        if (locationAndRemainingAlignmentParameters.getLocation().isEmpty()) {
             return UserSpecifiedAlignmentParameters.withoutSubFolder(parsedUserSpecifiedAlignmentParameters);
         }
 
-        Optional<Path> location = extractLocation(
-                locationShortOption,
-                locationLongOption,
-                locationAndRemainingAlignmentParameters.getLocationOption().get());
         return UserSpecifiedAlignmentParameters.builder()
-                .locationOption(location)
+                .location(locationAndRemainingAlignmentParameters.getLocation())
                 .alignmentParameters(parsedUserSpecifiedAlignmentParameters)
                 .build();
-    }
-
-    private static Optional<Path> extractLocation(
-            String locationShortOption,
-            String locationLongOption,
-            String location) {
-        log.debug(
-                "Extracting location from '{}' with short option '{}' and long option '{}'",
-                location,
-                locationShortOption,
-                locationLongOption);
-
-        CommandLineParser parser = new DefaultParser();
-        final Options options = new Options();
-        options.addOption(
-                Option.builder()
-                        .option(locationShortOption)
-                        .longOpt(locationLongOption)
-                        .hasArg()
-                        .valueSeparator()
-                        .build());
-        try {
-            CommandLine parseResult = parser.parse(options, new String[] { location });
-            return Optional.of(Path.of(parseResult.getOptionValue(locationLongOption)));
-        } catch (ParseException e) {
-            log.warn("Could not parse location, returning default location");
-            return UserSpecifiedAlignmentParameters.getDefaultLocationOption();
-        }
     }
 
     static List<String> parseUserSpecifiedAlignmentParametersWithoutLocation(
@@ -242,7 +204,8 @@ public class CommonManipulatorConfigUtils {
      * Extract location information together with all remaining user-specified alignment parameters.<br/>
      * For instance, when having: {@code ALIGNMENT_PARAMETERS="-Dfoo=bar --file=h2/pom.xml -Dbar=baz"} and long option
      * for location is "--file", it will return:<br/>
-     * - "--file=h2/pom.xml" as location - ["-Dfoo=bar", "-Dbar=baz"] as remaining args
+     * - "h2/pom.xml" as location<br/>
+     * - ["-Dfoo=bar", "-Dbar=baz"] as remaining args<br/>
      *
      * @param userSpecifiedAlignmentParameters user-specified alignment parameters taken from the key
      *        {@link BuildConfigurationParameterKeys#ALIGNMENT_PARAMETERS}
@@ -253,24 +216,31 @@ public class CommonManipulatorConfigUtils {
             String userSpecifiedAlignmentParameters,
             String locationShortOption,
             String locationLongOption) {
+        log.debug(
+                "Extracting location and remaining alignment parameters from '{}' with short location option '{}' and long location option '{}'",
+                userSpecifiedAlignmentParameters,
+                locationShortOption,
+                locationLongOption);
+
         String regex = String.format(
-                "^.*(-%s=\\S+|-%s \\S+|--%s=\\S+|--%s \\S+).*$",
+                "^.*(?<optionWithLocation>(?:-%s=|-%s |--%s=|--%s )(?<location>\\S+)).*$",
                 locationShortOption,
                 locationShortOption,
                 locationLongOption,
-                locationShortOption);
+                locationLongOption);
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(userSpecifiedAlignmentParameters);
 
         if (matcher.matches()) {
             return LocationAndRemainingAlignmentParameters.builder()
-                    .locationOption(Optional.of(matcher.group(1)))
-                    .remainingAlignmentParameters(userSpecifiedAlignmentParameters.replace(matcher.group(1), ""))
+                    .location(Optional.of(Path.of(matcher.group("location"))))
+                    .remainingAlignmentParameters(
+                            userSpecifiedAlignmentParameters.replace(matcher.group("optionWithLocation"), ""))
                     .build();
         }
 
         return LocationAndRemainingAlignmentParameters.builder()
-                .locationOption(Optional.empty())
+                .location(Optional.empty())
                 .remainingAlignmentParameters(userSpecifiedAlignmentParameters)
                 .build();
     }
