@@ -7,15 +7,11 @@ package org.jboss.pnc.reqour.common.utils;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.io.FileUtils;
-import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
-import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 
 import lombok.NonNull;
@@ -79,36 +75,5 @@ public class IOUtils {
 
     public static String unquote(@NonNull String text) {
         return (text.startsWith("\"") && text.endsWith("\"")) ? text.substring(1, text.length() - 1) : text;
-    }
-
-    public static AdjustRequest escapeUserAlignmentParameters(AdjustRequest adjustRequest) {
-        return adjustUserAlignmentParameters(adjustRequest, s -> s.replace("$", "\\$"));
-    }
-
-    public static AdjustRequest unescapeUserAlignmentParameters(AdjustRequest adjustRequest) {
-        // Why not unescaping only '\$'?
-        // Because reqour-rest sends adjust request as env variable which is serialized in JSON format. And since escaping '-Dfoo=${VAR}' is: '-Dfoo=\${VAR}', there is one extra escaping done because of JSON nature: '\$' -> '\\$'. Hence, after reqour-rest escaping and JSON escaping, '${VAR}' is '\\${VAR}'.
-        return adjustUserAlignmentParameters(adjustRequest, s -> s.replace("\\\\$", "$"));
-    }
-
-    private static AdjustRequest adjustUserAlignmentParameters(
-            AdjustRequest adjustRequest,
-            Function<String, String> adjuster) {
-        if (adjustRequest.getBuildConfigParameters() == null) {
-            return adjustRequest;
-        }
-        var buildConfigParameters = new HashMap<>(adjustRequest.getBuildConfigParameters());
-
-        String userAlignmentParameters = buildConfigParameters
-                .get(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS);
-        if (userAlignmentParameters == null) {
-            return adjustRequest;
-        }
-
-        String adjustedUserAlignmentParameters = adjuster.apply(userAlignmentParameters);
-        buildConfigParameters
-                .put(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS, adjustedUserAlignmentParameters);
-
-        return adjustRequest.toBuilder().buildConfigParameters(buildConfigParameters).build();
     }
 }

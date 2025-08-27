@@ -178,37 +178,4 @@ class JobDefinitionCreatorTest {
 
         assertThat(jobDefinitionCreator.getResourcesMemory(buildConfigParameters)).isEqualTo(expectedAdjusterMemory);
     }
-
-    @Test
-    void prepareAdjustRequest_userAlignmentParametersWithNoDollars_returnsUnchanged() throws JsonProcessingException {
-        assertThat(
-                jobDefinitionCreator.prepareAdjustRequest(
-                        AdjustRequest.builder()
-                                .buildType(BuildType.MVN)
-                                .buildConfigParameters(
-                                        Map.of(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS, "-Dfoo=bar"))
-                                .brewPullActive(true)
-                                .taskId("task-id")
-                                .build()))
-                .isEqualTo(
-                        "{\"internalUrl\":null,\"ref\":null,\"callback\":null,\"sync\":false,\"originRepoUrl\":null,\"buildConfigParameters\":{\"ALIGNMENT_PARAMETERS\":\"-Dfoo=bar\"},\"tempBuild\":false,\"alignmentPreference\":null,\"buildType\":\"MVN\",\"pncDefaultAlignmentParameters\":null,\"brewPullActive\":true,\"taskId\":\"task-id\",\"heartbeatConfig\":null}");
-    }
-
-    @Test
-    void prepareAdjustRequest_userAlignmentParametersWithDollars_returnsEscaped() throws JsonProcessingException {
-        assertThat(
-                jobDefinitionCreator.prepareAdjustRequest(
-                        AdjustRequest.builder()
-                                .buildType(BuildType.MVN)
-                                .buildConfigParameters(
-                                        Map.of(
-                                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                                "-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'"))
-                                .brewPullActive(true)
-                                .taskId("task-id")
-                                .build()))
-                .isEqualTo(
-                        // Note: since we escape '$' -> '\$', it will be escaped as '\\$' in json (since escaping '\' is done as '\\').
-                        "{\"internalUrl\":null,\"ref\":null,\"callback\":null,\"sync\":false,\"originRepoUrl\":null,\"buildConfigParameters\":{\"ALIGNMENT_PARAMETERS\":\"-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:\\\\${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'\"},\"tempBuild\":false,\"alignmentPreference\":null,\"buildType\":\"MVN\",\"pncDefaultAlignmentParameters\":null,\"brewPullActive\":true,\"taskId\":\"task-id\",\"heartbeatConfig\":null}");
-    }
 }
