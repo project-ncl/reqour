@@ -63,7 +63,7 @@ public class JobDefinitionCreator {
         try {
             properties.put("jobName", jobName);
             properties.put("buildType", adjustRequest.getBuildType());
-            properties.put("adjustRequest", objectMapper.writeValueAsString(adjustRequest));
+            properties.put("adjustRequest", prepareAdjustRequest(adjustRequest));
             properties.put("appEnvironment", config.appEnvironment());
             properties.put("resourcesMemory", getResourcesMemory(adjustRequest.getBuildConfigParameters()));
             properties.put("reqourSecretKey", config.reqourSecretKey());
@@ -125,5 +125,9 @@ public class JobDefinitionCreator {
 
     private String getPodMemoryString(double podMemory) {
         return ((int) Math.ceil(podMemory * 1024)) + "Mi";
+    }
+
+    String prepareAdjustRequest(AdjustRequest adjustRequest) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(adjustRequest);
     }
 }
