@@ -69,53 +69,6 @@ class IOUtilsTest {
     }
 
     @Test
-    void escapeUserAlignmentParameters_noBuildConfigParameters_returnsUnchanged() {
-        AdjustRequest adjustRequest = AdjustRequest.builder()
-                .build();
-
-        assertThat(IOUtils.escapeUserAlignmentParameters(adjustRequest)).isEqualTo(adjustRequest);
-    }
-
-    @Test
-    void escapeUserAlignmentParameters_noUserAlignmentParameters_returnsUnchanged() {
-        AdjustRequest adjustRequest = AdjustRequest.builder()
-                .buildConfigParameters(Collections.emptyMap())
-                .build();
-
-        assertThat(IOUtils.escapeUserAlignmentParameters(adjustRequest)).isEqualTo(adjustRequest);
-    }
-
-    @Test
-    void escapeUserAlignmentParameters_userAlignmentParametersWithoutDollars_returnsUnchanged() {
-        AdjustRequest adjustRequest = AdjustRequest.builder()
-                .buildType(BuildType.MVN)
-                .buildConfigParameters(Map.of(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS, "-Dfoo=bar"))
-                .build();
-
-        assertThat(IOUtils.escapeUserAlignmentParameters(adjustRequest)).isEqualTo(adjustRequest);
-    }
-
-    @Test
-    void escapeUserAlignmentParameters_userAlignmentParametersWithDollars_returnsEscaped() {
-        AdjustRequest adjustRequest = AdjustRequest.builder()
-                .buildType(BuildType.MVN)
-                .buildConfigParameters(
-                        Map.of(
-                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                "-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'"))
-                .build();
-        AdjustRequest escapedRequest = AdjustRequest.builder()
-                .buildType(BuildType.MVN)
-                .buildConfigParameters(
-                        Map.of(
-                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                "-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:\\${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'"))
-                .build();
-
-        assertThat(IOUtils.escapeUserAlignmentParameters(adjustRequest)).isEqualTo(escapedRequest);
-    }
-
-    @Test
     void unescapeUserAlignmentParameters_noBuildConfigParameters_returnsUnchanged() {
         AdjustRequest adjustRequest = AdjustRequest.builder()
                 .build();
@@ -149,7 +102,7 @@ class IOUtilsTest {
                 .buildConfigParameters(
                         Map.of(
                                 BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                "-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:\\\\${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'"))
+                                "-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:\\${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'"))
                 .build();
         AdjustRequest unescapedRequest = AdjustRequest.builder()
                 .buildType(BuildType.MVN)

@@ -8,6 +8,7 @@ import java.io.IOException;
 
 import org.eclipse.microprofile.config.spi.Converter;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -25,9 +26,11 @@ public class AdjustRequestConverter implements Converter<AdjustRequest> {
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public AdjustRequest convert(String value) throws IllegalArgumentException, NullPointerException {
+    public AdjustRequest convert(String serializedAdjustRequestInJson)
+            throws IllegalArgumentException, NullPointerException {
         try {
-            return objectMapper.readValue(value, AdjustRequest.class);
+            return IOUtils.unescapeUserAlignmentParameters(
+                    objectMapper.readValue(serializedAdjustRequestInJson, AdjustRequest.class));
         } catch (IOException e) {
             throw new RuntimeException("Error occurred when reading the request from ADJUST_REQUEST env variable", e);
         }

@@ -195,7 +195,7 @@ class JobDefinitionCreatorTest {
     }
 
     @Test
-    void prepareAdjustRequest_userAlignmentParametersWithDollars_returnsEscaped() throws JsonProcessingException {
+    void prepareAdjustRequest_userAlignmentParametersWithDollars_returnsUnchanged() throws JsonProcessingException {
         assertThat(
                 jobDefinitionCreator.prepareAdjustRequest(
                         AdjustRequest.builder()
@@ -208,7 +208,8 @@ class JobDefinitionCreatorTest {
                                 .taskId("task-id")
                                 .build()))
                 .isEqualTo(
-                        // Note: since we escape '$' -> '\$', it will be escaped as '\\$' in json (since escaping '\' is done as '\\').
-                        "{\"internalUrl\":null,\"ref\":null,\"callback\":null,\"sync\":false,\"originRepoUrl\":null,\"buildConfigParameters\":{\"ALIGNMENT_PARAMETERS\":\"-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:\\\\${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'\"},\"tempBuild\":false,\"alignmentPreference\":null,\"buildType\":\"MVN\",\"pncDefaultAlignmentParameters\":null,\"brewPullActive\":true,\"taskId\":\"task-id\",\"heartbeatConfig\":null}");
+                        // Note: escaping is done from shell (see start script of adjuster image) in order to have '$' escaped as '\$'
+                        //       because in case we would do it from Java, we would escape '$' to '\$' and then jackson would escape '\' once more, so it would be '\\$'
+                        "{\"internalUrl\":null,\"ref\":null,\"callback\":null,\"sync\":false,\"originRepoUrl\":null,\"buildConfigParameters\":{\"ALIGNMENT_PARAMETERS\":\"-Dfoo=bar '-DaddDependency.io.netty:netty-transport-native-epoll:${netty.version}:compile:linux-x86_64@flink-shaded-netty-4'\"},\"tempBuild\":false,\"alignmentPreference\":null,\"buildType\":\"MVN\",\"pncDefaultAlignmentParameters\":null,\"brewPullActive\":true,\"taskId\":\"task-id\",\"heartbeatConfig\":null}");
     }
 }
