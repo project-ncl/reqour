@@ -190,7 +190,9 @@ public class CommonManipulatorResultExtractor {
      */
     public static Path getAlignmentResultsFilePath(Path... candidates) {
         for (var candidate : candidates) {
+            log.debug("Trying to find the alignment results file: {}", candidate);
             if (Files.exists(candidate)) {
+                log.debug("Found the alignment results file: {}", candidate);
                 return candidate;
             }
         }
