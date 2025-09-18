@@ -19,6 +19,9 @@ reqour-adjuster:
       /tmp/file-log.txt
 
 quarkus:
+  http:
+    enable-compression: true
+    enable-decompression: true
   oidc-client:
     auth-server-url: https://keycloak-host/auth/realms/realm # overridden in runtime config
     client-id: sa # overridden in runtime config
