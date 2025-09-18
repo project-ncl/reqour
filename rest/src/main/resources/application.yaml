@@ -1,4 +1,7 @@
 quarkus:
+  http:
+    enable-compression: true
+    enable-decompression: true
   swagger-ui:
     always-include: true
   oidc:
