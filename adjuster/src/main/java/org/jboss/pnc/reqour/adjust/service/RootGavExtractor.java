@@ -37,6 +37,12 @@ public class RootGavExtractor {
     public GAV extractGav(Path workdir) {
         log.debug("Extracting GAV from POM in directory '{}'", workdir);
         File pom = workdir.resolve("pom.xml").toFile();
+
+        if (!pom.exists()) {
+            log.warn("File {} doesn't exist", pom);
+            return GAV.builder().ga(GA.builder().artifactId(null).groupId(null).build()).version(null).build();
+        }
+
         String groupId = null;
         String artifactId = null;
         String version = null;
