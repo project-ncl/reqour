@@ -17,6 +17,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.context.ManagedExecutor;
+import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
@@ -55,7 +56,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
                     processContext.getCommand(),
                     processContext.getWorkingDirectory(),
                     processContext.getExtraEnvVariables());
-            userLogger.info("Executing the command with the process context: {}", loggedProcessContext);
+            userLogger.info("Executing {}", loggedProcessContext);
             Process processStart = processBuilder.start();
             CompletableFuture<Void> stdoutConsumerProcess = createOutputConsumerProcess(
                     processStart.inputReader(),
@@ -102,14 +103,22 @@ public class ProcessExecutorImpl implements ProcessExecutor {
         });
     }
 
-    private static String logProcessContext(
+    static String logProcessContext(
             List<String> command,
             Path workingDirectory,
             Map<String, String> extraEnvVariables) {
-        return String.format(
-                "{command: %s, working directory: %s, extra env variables: %s}",
-                command,
-                workingDirectory,
-                extraEnvVariables);
+        final StringBuilder result = new StringBuilder();
+        if (workingDirectory != null) {
+            IOUtils.quoteIfNeeded(result.append("cd "), workingDirectory.toString()).append(" && ");
+        }
+        if (extraEnvVariables != null && !extraEnvVariables.isEmpty()) {
+            extraEnvVariables.forEach((k, v) -> IOUtils.quoteIfNeeded(result.append(k).append("="), v).append(' '));
+        }
+        command.forEach(arg -> IOUtils.quoteIfNeeded(result, arg).append(' '));
+        final int newLen = result.length() - 1;
+        if (newLen >= 0 && result.charAt(newLen) == ' ') {
+            result.setLength(newLen);
+        }
+        return result.toString();
     }
 }
