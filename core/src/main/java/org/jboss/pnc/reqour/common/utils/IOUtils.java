@@ -20,6 +20,8 @@ import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import lombok.NonNull;
 
 public class IOUtils {
+    private static final Pattern QUOTABLE_PATTERN = Pattern.compile("[\\s\"]");
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile("([\"\\\\])");
 
     public static void ignoreOutput(String s) {
     }
@@ -78,6 +80,15 @@ public class IOUtils {
 
     public static String unquote(@NonNull String text) {
         return (text.startsWith("\"") && text.endsWith("\"")) ? text.substring(1, text.length() - 1) : text;
+    }
+
+    public static StringBuilder quoteIfNeeded(StringBuilder result, String v) {
+        if (QUOTABLE_PATTERN.matcher(v).find()) {
+            result.append('"').append(ESCAPE_PATTERN.matcher(v).replaceAll("\\\\$1")).append('"');
+        } else {
+            result.append(v);
+        }
+        return result;
     }
 
     public static AdjustRequest unescapeUserAlignmentParameters(AdjustRequest adjustRequest) {

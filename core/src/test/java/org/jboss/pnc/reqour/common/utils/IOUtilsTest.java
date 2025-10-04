@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.enums.BuildType;
@@ -66,6 +67,16 @@ class IOUtilsTest {
         String actual = IOUtils.unquote("\"" + text + "\"");
 
         assertThat(actual).isEqualTo(text);
+    }
+
+    @Test
+    void quoteIfNeeded() {
+        final Function<String, String> str = s -> IOUtils.quoteIfNeeded(new StringBuilder(), s).toString();
+        assertThat(str.apply("foo")).isEqualTo("foo");
+        assertThat(str.apply("foo\"")).isEqualTo("\"foo\\\"\"");
+        assertThat(str.apply("foo bar")).isEqualTo("\"foo bar\"");
+        assertThat(str.apply("foo\tbar")).isEqualTo("\"foo\tbar\"");
+        assertThat(str.apply("foo\nbar")).isEqualTo("\"foo\nbar\"");
     }
 
     @Test
