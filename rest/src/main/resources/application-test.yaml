@@ -10,10 +10,9 @@ quarkus:
 
 reqour:
   git:
-    git-backends:
-      available:
-        gitlab:
-          url: http://${reqour.git.git-backends.available.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+    git-providers:
+      gitlab:
+        url: http://${reqour.git.git-providers.gitlab.hostname}:${quarkus.wiremock.devservices.port}
     private-github-user: github-bot
 
 reqour-rest:

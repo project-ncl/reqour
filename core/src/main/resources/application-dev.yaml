@@ -7,21 +7,28 @@ quarkus:
 
 reqour:
   git:
-    git-backends:
-      available:
-        gitlab:
-          hostname: gitlab.com
-          username: dev-user
-          workspace: dev-workspace
-          workspace-id: 1
-          token: 'Change me to gitlab group token.'
-          protected-tags-pattern: '*'
-          protected-tags-accepted-patterns:
-          url: http://${reqour.git.git-backends.available.gitlab.hostname}
-          git-url-internal-template: git@${reqour.git.git-backends.available.gitlab.hostname}:${reqour.git.git-backends.available.gitlab.workspace}
-          read-only-template: http://${reqour.git.git-backends.available.gitlab.hostname}/${reqour.git.git-backends.available.gitlab.workspace}/%s.git
-          read-write-template: git@${reqour.git.git-backends.available.gitlab.hostname}:${reqour.git.git-backends.available.gitlab.workspace}/%s.git
-      active: gitlab
+    git-providers:
+      gitlab:
+        hostname: gitlab.com
+        username: dev-user
+        workspace: dev-workspace
+        workspace-id: 1
+        token: 'Change me to gitlab group token.'
+        protected-tags-pattern: '*'
+        protected-tags-accepted-patterns:
+        url: http://${reqour.git.git-providers.gitlab.hostname}
+        read-only-template: http://${reqour.git.git-providers.gitlab.hostname}/${reqour.git.git-providers.gitlab.workspace}/%s.git
+      github:
+        hostname: github.com
+        username: dev-user
+        workspace: dev-organization
+        workspace-id: 1
+        token: 'Change me to github token.'
+        protected-tags-pattern: '*'
+        protected-tags-accepted-patterns:
+        url: http://${reqour.git.git-providers.github.hostname}
+        read-only-template: http://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.workspace}/%s.git
+      active: github
     acceptable-schemes:
       - https
       - http

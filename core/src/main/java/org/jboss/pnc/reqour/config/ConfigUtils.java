@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.common.http.PNCHttpClientConfig;
+import org.jboss.pnc.reqour.service.translation.GitProvider;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,17 +26,16 @@ public class ConfigUtils {
         return config.gitConfigs().acceptableSchemes();
     }
 
-    public GitBackendConfig getActiveGitBackend() {
-        String activeGitBackendName = getActiveGitBackendName();
-        return config.gitConfigs().gitBackendsConfig().availableGitBackends().get(activeGitBackendName);
+    public GitProviderConfig getActiveGitProviderConfig() {
+        return config.gitConfigs().gitProvidersConfig().gitProviders().get(getActiveGitProvider().name().toLowerCase());
     }
 
     public PNCHttpClientConfig getPncHttpClientConfig() {
         return config.pncHttpClientConfig();
     }
 
-    public String getActiveGitBackendName() {
-        return config.gitConfigs().gitBackendsConfig().activeGitBackend();
+    public GitProvider getActiveGitProvider() {
+        return GitProvider.fromString(config.gitConfigs().gitProvidersConfig().activeGitProvider());
     }
 
     public Optional<String> getPrivateGithubUser() {

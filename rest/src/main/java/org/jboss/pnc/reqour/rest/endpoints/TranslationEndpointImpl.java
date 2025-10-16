@@ -5,7 +5,7 @@
 package org.jboss.pnc.reqour.rest.endpoints;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
+import jakarta.enterprise.inject.Instance;
 
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
@@ -23,9 +23,8 @@ public class TranslationEndpointImpl implements TranslateEndpoint {
     private final TranslationService service;
     private final Logger userLogger;
 
-    @Inject
-    public TranslationEndpointImpl(TranslationService service, @UserLogger Logger logger) {
-        this.service = service;
+    public TranslationEndpointImpl(Instance<TranslationService> service, @UserLogger Logger logger) {
+        this.service = service.get();
         this.userLogger = logger;
     }
 

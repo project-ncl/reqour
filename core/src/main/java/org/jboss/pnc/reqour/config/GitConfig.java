@@ -9,17 +9,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.jboss.pnc.reqour.config.validation.WithExistingActive;
-
 import io.smallrye.config.WithName;
+import io.smallrye.config.WithParentName;
 
 /**
- * Configuration of all git-related stuff, e.g. git backends and acceptable schemes.
+ * Configuration of all git-related stuff, e.g. git providers and acceptable schemes.
  */
 public interface GitConfig {
 
-    @WithName("git-backends")
-    GitBackendsConfig gitBackendsConfig();
+    @WithName("git-providers")
+    GitProvidersConfig gitProvidersConfig();
 
     Set<String> acceptableSchemes();
 
@@ -29,13 +28,12 @@ public interface GitConfig {
 
     Committer user();
 
-    @WithExistingActive
-    interface GitBackendsConfig {
+    interface GitProvidersConfig {
 
-        @WithName("available")
-        Map<String, GitBackendConfig> availableGitBackends();
+        @WithParentName
+        Map<String, GitProviderConfig> gitProviders();
 
         @WithName("active")
-        String activeGitBackend();
+        String activeGitProvider();
     }
 }
