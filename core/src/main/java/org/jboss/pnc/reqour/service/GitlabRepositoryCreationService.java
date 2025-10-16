@@ -14,7 +14,7 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 
@@ -22,28 +22,27 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Implementation of {@link InternalSCMRepositoryCreationService} using internal GitLab.
+ * Implementation of {@link InternalSCMRepositoryCreationService} using GitLab as its provider.
  */
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-backends.active", stringValue = "gitlab")
+@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "gitlab")
 @Slf4j
 public class GitlabRepositoryCreationService implements InternalSCMRepositoryCreationService {
 
     private static final String GIT_SUFFIX = ".git";
 
-    private final ConfigUtils configUtils;
+    private final GitProviderConfig gitProviderConfig;
     private final GitlabApiService gitlabApiService;
 
     @Inject
     public GitlabRepositoryCreationService(ConfigUtils configUtils, GitlabApiService gitlabApiService) {
-        this.configUtils = configUtils;
+        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.gitlabApiService = gitlabApiService;
     }
 
     @Override
     public InternalSCMCreationResponse createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
-        GitBackendConfig gitlabConfig = configUtils.getActiveGitBackend();
-        long workspaceId = gitlabConfig.workspaceId();
+        long workspaceId = gitProviderConfig.workspaceId();
         Group workspaceGroup = gitlabApiService.getGroup(workspaceId);
         Project project = parseProjectPath(creationRequest.getProject());
 
@@ -62,8 +61,12 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
         }
 
         log.debug("Project path within the PNC workspace: '{}'", pathWithinWorkspace);
-        String projectReadonlyUrl = completeTemplateWithProjectPath(gitlabConfig.readOnlyTemplate(), pathToTemplate);
-        String projectReadwriteUrl = completeTemplateWithProjectPath(gitlabConfig.readWriteTemplate(), pathToTemplate);
+        String projectReadonlyUrl = completeTemplateWithProjectPath(
+                gitProviderConfig.readOnlyTemplate(),
+                pathToTemplate);
+        String projectReadwriteUrl = completeTemplateWithProjectPath(
+                gitProviderConfig.readWriteTemplate(),
+                pathToTemplate);
         log.debug("Readonly URL is: {}", projectReadonlyUrl);
         log.debug("Readwrite URL is: {}", projectReadwriteUrl);
 

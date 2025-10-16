@@ -16,7 +16,7 @@ import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.profile.TranslationProfile;
-import org.jboss.pnc.reqour.service.api.TranslationService;
+import org.jboss.pnc.reqour.service.translation.GitlabTranslationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -34,7 +34,7 @@ import io.restassured.response.Response;
 class TranslationEndpointTest {
 
     @InjectMock
-    TranslationService service;
+    GitlabTranslationService service;
 
     @Test
     void externalToInternal_validURL_returnsResponse() {

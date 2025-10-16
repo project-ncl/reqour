@@ -32,6 +32,7 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
+import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,7 +64,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
     public CloningResult cloneRepository(AdjustRequest adjustRequest, Path workdir) {
         checkTagProtection(adjustRequest);
-        String gitUsername = configUtils.getActiveGitBackend().username();
+        String gitUsername = configUtils.getActiveGitProviderConfig().username();
 
         final boolean isRefInternal;
         if (syncEnabled(adjustRequest)) {
@@ -92,7 +93,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     private void checkTagProtection(AdjustRequest adjustRequest) {
         log.debug("Checking whether tag protection respects Reqour's tag protection configuration");
         String projectPath = extractProjectPathFromInternalUrl(adjustRequest.getInternalUrl());
-        if ("gitlab".equals(configUtils.getActiveGitBackendName())
+        if (GitProvider.GITLAB.equals(configUtils.getActiveGitProvider())
                 && !gitlabApiService.doesTagProtectionAlreadyExist(projectPath)) {
             throw new AdjusterException(
                     String.format(

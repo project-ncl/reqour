@@ -25,7 +25,7 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -36,17 +36,17 @@ import lombok.extern.slf4j.Slf4j;
  * Thin wrapper around {@link GitLabApi} for performing GitLab API calls.
  */
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-backends.active", stringValue = "gitlab")
+@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "gitlab")
 @Slf4j
 public class GitlabApiService {
 
     private final GitLabApi delegate;
-    private final GitBackendConfig gitlabConfig;
+    private final GitProviderConfig gitProviderConfig;
 
     @Inject
     public GitlabApiService(ConfigUtils configUtils) {
-        gitlabConfig = configUtils.getActiveGitBackend();
-        delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitlabConfig.url(), gitlabConfig.token());
+        gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitProviderConfig.url(), gitProviderConfig.token());
     }
 
     public Group createGroup(String name, long parentId) {
@@ -72,7 +72,7 @@ public class GitlabApiService {
 
     public Group getOrCreateSubgroup(long parentId, String subgroupName) {
         try {
-            return delegate.getGroupApi().getGroup(gitlabConfig.workspaceName() + "/" + subgroupName);
+            return delegate.getGroupApi().getGroup(gitProviderConfig.workspaceName() + "/" + subgroupName);
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
                 return createGroup(subgroupName, parentId);
@@ -145,7 +145,7 @@ public class GitlabApiService {
 
     public void configureProtectedTags(Long projectId, boolean projectAlreadyExisted) {
         try {
-            GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
+            GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitProviderConfig.tagProtection();
             if (tagProtectionConfig.protectedTagsPattern().isEmpty()) {
                 return;
             }
@@ -165,7 +165,7 @@ public class GitlabApiService {
     }
 
     public boolean doesTagProtectionAlreadyExist(Object projectIdOrPath) {
-        GitBackendConfig.TagProtectionConfig tagProtectionConfig = gitlabConfig.tagProtection();
+        GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitProviderConfig.tagProtection();
         Optional<String> protectedTagsPattern = tagProtectionConfig.protectedTagsPattern();
         List<String> protectedTagsAcceptedPatterns = tagProtectionConfig.protectedTagsAcceptedPatterns()
                 .orElse(new ArrayList<>());
