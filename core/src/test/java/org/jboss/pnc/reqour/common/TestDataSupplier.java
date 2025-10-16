@@ -19,7 +19,7 @@ import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitProviderConfig;
 
 public class TestDataSupplier {
 
@@ -30,23 +30,7 @@ public class TestDataSupplier {
     public static class Translation {
 
         private static final String INTERNAL_URL = ConfigProvider.getConfig()
-                .getValue("reqour.git.git-backends.available.gitlab.git-url-internal-template", String.class);
-
-        public static TranslateResponse noProtocol() {
-            return createTranslateResponseFromExternalUrl("github.com/repo", getInternalUrlWithoutOrganization());
-        }
-
-        public static TranslateResponse httpWithoutOrganizationWithoutGitSuffix() {
-            return createTranslateResponseFromExternalUrl(
-                    "http://github.com/repo",
-                    getInternalUrlWithoutOrganization());
-        }
-
-        public static TranslateResponse httpsWithoutOrganizationWithGitSuffix() {
-            return createTranslateResponseFromExternalUrl(
-                    "https://gitlab.com/repo.git",
-                    getInternalUrlWithoutOrganization());
-        }
+                .getValue("reqour.git.git-providers.gitlab.git-url-internal-template", String.class);
 
         public static TranslateResponse httpsWithOrganizationAndGitSuffix() {
             return createTranslateResponseFromExternalUrl(
@@ -54,54 +38,12 @@ public class TestDataSupplier {
                     getInternalUrlWithOrganization());
         }
 
-        public static TranslateResponse gitWithOrganizationAndGitSuffix() {
-            return createTranslateResponseFromExternalUrl(
-                    "git@github.com:project/repo.git",
-                    getInternalUrlWithOrganization());
-        }
-
-        public static TranslateResponse gitPlusSshWithOrganizationAndGitSuffix() {
-            return createTranslateResponseFromExternalUrl(
-                    "git+ssh://github.com/project/repo.git",
-                    getInternalUrlWithOrganization());
-        }
-
-        public static TranslateResponse sshWithOrganizationAndGitSuffix() {
-            return createTranslateResponseFromExternalUrl(
-                    "ssh://github.com/project/repo.git",
-                    getInternalUrlWithOrganization());
-        }
-
-        public static TranslateResponse sshWithOrganizationAndPort() {
-            return createTranslateResponseFromExternalUrl(
-                    "ssh://github.com:22/project/repo.git",
-                    getInternalUrlWithOrganization());
-        }
-
-        public static TranslateRequest invalidScpLikeWithoutSemicolon() {
-            return createTranslateRequestFromExternalUrl("git@github.com/project/repo.git");
-        }
-
         public static TranslateRequest withoutRepository() {
             return createTranslateRequestFromExternalUrl("http://github.com");
         }
 
-        public static TranslateResponse nonScpLikeWithUser() {
-            return createTranslateResponseFromExternalUrl(
-                    "git@github.com/project/repo.git",
-                    getInternalUrlWithOrganization());
-        }
-
-        public static TranslateRequest withUnavailableSchema() {
-            return createTranslateRequestFromExternalUrl("httprd://github.com/repo.git");
-        }
-
-        private static String getInternalUrlWithoutOrganization() {
-            return INTERNAL_URL + "/repo.git";
-        }
-
         public static String getInternalUrlWithOrganization() {
-            return INTERNAL_URL + "/project/repo.git";
+            return INTERNAL_URL + "project/repo.git";
         }
     }
 
@@ -176,8 +118,8 @@ public class TestDataSupplier {
         }
     }
 
-    public static GitBackendConfig dummyGitBackendConfig() {
-        return new GitBackendConfig() {
+    public static GitProviderConfig dummyGitProviderConfig() {
+        return new GitProviderConfig() {
             @Override
             public String username() {
                 return "";

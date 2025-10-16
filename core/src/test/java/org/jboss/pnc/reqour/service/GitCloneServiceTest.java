@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.service.clone;
+package org.jboss.pnc.reqour.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -38,7 +38,6 @@ import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
-import org.jboss.pnc.reqour.service.GitCloneService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
