@@ -10,6 +10,8 @@ import java.util.Map;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
+import org.jboss.pnc.reqour.config.ConfigConstants;
+
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.arc.profile.IfBuildProfile;
 import io.quarkus.oidc.client.OidcClient;
@@ -18,7 +20,7 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.core.json.JsonObject;
 
 @ApplicationScoped
-@LookupIfProperty(name = "quarkus.oidc-client.enabled", stringValue = "false")
+@LookupIfProperty(name = ConfigConstants.OIDC_CLIENT_ENABLED, stringValue = "false")
 @IfBuildProfile(anyOf = { "dev", "test" })
 /*
  * To be able to start in development/test mode without authorization

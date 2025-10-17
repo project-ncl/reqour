@@ -7,6 +7,8 @@ package org.jboss.pnc.reqour.common.profile;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.pnc.reqour.config.ConfigConstants;
+
 public class TranslationWithGithubProviderProfile extends CommonTestProfile {
 
     @Override
@@ -16,6 +18,6 @@ public class TranslationWithGithubProviderProfile extends CommonTestProfile {
 
     @Override
     public Map<String, String> getConfigOverrides() {
-        return Map.of("reqour.git.git-providers.active", "github");
+        return Map.of(ConfigConstants.ACTIVE_GIT_PROVIDER, ConfigConstants.GITHUB);
     }
 }
