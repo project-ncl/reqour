@@ -28,10 +28,12 @@ import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
+import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +60,12 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     @Inject
     GitlabApiService gitlabApiService;
 
-    @ConfigProperty(name = "reqour.git.internal-urls")
+    @ConfigProperty(name = ConfigConstants.INTERNAL_URLS)
     Optional<List<String>> internalUrls;
 
     public CloningResult cloneRepository(AdjustRequest adjustRequest, Path workdir) {
         checkTagProtection(adjustRequest);
-        String gitUsername = configUtils.getActiveGitBackend().username();
+        String gitUsername = configUtils.getActiveGitProviderConfig().username();
 
         final boolean isRefInternal;
         if (syncEnabled(adjustRequest)) {
@@ -92,7 +94,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     private void checkTagProtection(AdjustRequest adjustRequest) {
         log.debug("Checking whether tag protection respects Reqour's tag protection configuration");
         String projectPath = extractProjectPathFromInternalUrl(adjustRequest.getInternalUrl());
-        if ("gitlab".equals(configUtils.getActiveGitBackendName())
+        if (GitProvider.GITLAB.equals(configUtils.getActiveGitProvider())
                 && !gitlabApiService.doesTagProtectionAlreadyExist(projectPath)) {
             throw new AdjusterException(
                     String.format(

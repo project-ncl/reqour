@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -15,7 +16,7 @@ public class LoggerFactory {
 
     private final Logger userLogger;
 
-    public LoggerFactory(@ConfigProperty(name = "reqour.log.user-log.user-logger-name") String userLoggerName) {
+    public LoggerFactory(@ConfigProperty(name = ConfigConstants.USER_LOGGER_NAME) String userLoggerName) {
         userLogger = org.slf4j.LoggerFactory.getLogger(userLoggerName);
     }
 

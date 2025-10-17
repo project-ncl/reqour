@@ -22,7 +22,7 @@ import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutorImpl;
 import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.config.GitBackendConfig;
+import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitlabRepositoryCreationService;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
@@ -37,7 +37,7 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     private final InternalSCMRepositoryCreationService service;
     private final TaskExecutor taskExecutor;
     private final CallbackSender callbackSender;
-    private final ConfigUtils configUtils;
+    private final GitProviderConfig gitProviderConfig;
     private final Logger userLogger;
 
     @Inject
@@ -50,7 +50,7 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
         this.service = service;
         this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
-        this.configUtils = configUtils;
+        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.userLogger = userLogger;
     }
 
@@ -84,15 +84,14 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
             log.error("Async SCM repository creation task ended with unexpected exception", t);
         }
 
-        GitBackendConfig gitlabConfig = configUtils.getActiveGitBackend();
         return InternalSCMCreationResponse.builder()
                 .readonlyUrl(
                         GitlabRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitlabConfig.readOnlyTemplate(),
+                                gitProviderConfig.readOnlyTemplate(),
                                 creationRequest.getProject()))
                 .readwriteUrl(
                         GitlabRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitlabConfig.readWriteTemplate(),
+                                gitProviderConfig.readWriteTemplate(),
                                 creationRequest.getProject()))
                 .status(InternalSCMCreationStatus.FAILED)
                 .callback(ReqourCallback.builder().status(status).id(creationRequest.getTaskId()).build())

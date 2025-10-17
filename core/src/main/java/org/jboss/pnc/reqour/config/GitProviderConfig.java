@@ -10,7 +10,10 @@ import java.util.Optional;
 import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
-public interface GitBackendConfig {
+/**
+ * General configuration for any git provider.
+ */
+public interface GitProviderConfig {
 
     String url();
 
@@ -18,9 +21,6 @@ public interface GitBackendConfig {
 
     String hostname();
 
-    /**
-     * Do not end the workspace name with the trailing '/'.
-     */
     @WithName("workspace")
     String workspaceName();
 
