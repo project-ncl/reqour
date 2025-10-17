@@ -11,6 +11,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
  * Translation service used when the git provider is GitLab.
  */
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "gitlab")
+@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITLAB)
 @Slf4j
 public class GitlabTranslationService implements TranslationService {
 

@@ -17,6 +17,7 @@ import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -48,7 +49,7 @@ public class JobDefinitionCreator {
     @Inject
     ReqourRestConfig config;
 
-    @ConfigProperty(name = "quarkus.oidc-client.credentials.secret")
+    @ConfigProperty(name = ConfigConstants.OIDC_CLIENT_SECRET)
     String saSecret;
 
     @Inject
