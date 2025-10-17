@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.service.translation;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.GitHubProviderConfig;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.service.api.TranslationService;
@@ -15,7 +16,7 @@ import io.quarkus.arc.lookup.LookupIfProperty;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "github")
+@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = "github")
 @Slf4j
 public class GithubTranslationService implements TranslationService {
 

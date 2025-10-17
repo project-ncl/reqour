@@ -13,6 +13,7 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.GitLabProviderConfig;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
@@ -25,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * Implementation of {@link InternalSCMRepositoryCreationService} using GitLab as its provider.
  */
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "gitlab")
+@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = "gitlab")
 @Slf4j
 public class GitlabRepositoryCreationService implements InternalSCMRepositoryCreationService {
 

@@ -12,11 +12,12 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.ComponentVersion;
 import org.jboss.pnc.api.endpoints.VersionEndpoint;
 import org.jboss.pnc.reqour.BuildInformationConstants;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 
 @ApplicationScoped
 public class VersionEndpointImpl implements VersionEndpoint {
 
-    @ConfigProperty(name = "quarkus.application.name")
+    @ConfigProperty(name = ConfigConstants.APP_NAME)
     String name;
 
     @Override

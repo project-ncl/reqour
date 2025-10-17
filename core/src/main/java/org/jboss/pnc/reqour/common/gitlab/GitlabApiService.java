@@ -24,6 +24,7 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.GitLabProviderConfig;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.config.ReqourConfig;
@@ -37,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * Thin wrapper around {@link GitLabApi} for performing GitLab API calls.
  */
 @ApplicationScoped
-@LookupIfProperty(name = "reqour.git.git-providers.active", stringValue = "gitlab")
+@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = "gitlab")
 @Slf4j
 public class GitlabApiService {
 
