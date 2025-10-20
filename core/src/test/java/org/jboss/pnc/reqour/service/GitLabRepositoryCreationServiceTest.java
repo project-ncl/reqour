@@ -18,11 +18,11 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
+import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
-import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
+import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
 import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
-import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
+import org.jboss.pnc.reqour.model.GitLabGetOrCreateProjectResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -32,13 +32,13 @@ import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
-class GitlabRepositoryCreationServiceTest {
+class GitLabRepositoryCreationServiceTest {
 
     @InjectMock
-    GitlabApiService gitlabApiService;
+    GitLabApiService gitlabApiService;
 
     @Inject
-    GitlabRepositoryCreationService service;
+    GitLabRepositoryCreationService service;
 
     @Test
     void createInternalSCMRepository_newProjectWithoutSubgroup_createsNewProject() {
@@ -49,7 +49,7 @@ class GitlabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitlabGetOrCreateProjectResult(
+                new GitLabGetOrCreateProjectResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
                         expectedResponse))
                 .when(gitlabApiService)
@@ -89,7 +89,7 @@ class GitlabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitlabGetOrCreateProjectResult(
+                new GitLabGetOrCreateProjectResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
                         expectedResponse))
                 .when(gitlabApiService)
@@ -129,7 +129,7 @@ class GitlabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitlabGetOrCreateProjectResult(
+                new GitLabGetOrCreateProjectResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
                         expectedResponse))
                 .when(gitlabApiService)
@@ -169,7 +169,7 @@ class GitlabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitlabGetOrCreateProjectResult(
+                new GitLabGetOrCreateProjectResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
                         expectedResponse))
                 .when(gitlabApiService)
@@ -210,7 +210,7 @@ class GitlabRepositoryCreationServiceTest {
                 .when(gitlabApiService)
                 .getOrCreateSubgroup(Mockito.anyLong(), Mockito.anyString());
         Mockito.doReturn(
-                new GitlabGetOrCreateProjectResult(
+                new GitLabGetOrCreateProjectResult(
                         TestDataSupplier.InternalSCM.projectFromDifferentWorkspace(),
                         expectedResponse))
                 .when(gitlabApiService)
@@ -247,7 +247,7 @@ class GitlabRepositoryCreationServiceTest {
     @Test
     void createInternalSCMRepository_workspaceDoesNotExist_throwsException() {
         String errorMessage = "Such a workspace does not exist";
-        Mockito.doThrow(new GitlabApiRuntimeException(new GitLabApiException(errorMessage)))
+        Mockito.doThrow(new GitLabApiRuntimeException(new GitLabApiException(errorMessage)))
                 .when(gitlabApiService)
                 .getGroup(Mockito.anyLong());
 

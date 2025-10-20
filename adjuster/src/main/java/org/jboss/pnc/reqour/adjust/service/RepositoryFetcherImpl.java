@@ -26,7 +26,7 @@ import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.common.GitCommands;
-import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
+import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
@@ -58,7 +58,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     GitCloneService gitCloneService;
 
     @Inject
-    GitlabApiService gitlabApiService;
+    GitLabApiService gitlabApiService;
 
     @ConfigProperty(name = ConfigConstants.INTERNAL_URLS)
     Optional<List<String>> internalUrls;

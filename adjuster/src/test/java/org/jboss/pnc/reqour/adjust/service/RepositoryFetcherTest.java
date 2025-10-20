@@ -22,7 +22,7 @@ import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.common.RepoInitializer;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.common.GitCommands;
-import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
+import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -47,7 +47,7 @@ class RepositoryFetcherTest {
     RepositoryFetcherImpl repositoryFetcher;
 
     @InjectMock
-    GitlabApiService gitlabApiService;
+    GitLabApiService gitlabApiService;
 
     @Inject
     GitCommands gitCommands;

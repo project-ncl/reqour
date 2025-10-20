@@ -9,9 +9,9 @@ import static org.jboss.pnc.reqour.service.translation.TranslationServiceCommons
 import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -23,12 +23,12 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITLAB)
 @Slf4j
-public class GitlabTranslationService implements TranslationService {
+public class GitLabTranslationService implements TranslationService {
 
     private final GitProviderConfig gitLabProviderConfig;
     private final TranslationServiceCommons translationServiceCommons;
 
-    public GitlabTranslationService(ConfigUtils configUtils, TranslationServiceCommons translationServiceCommons) {
+    public GitLabTranslationService(ConfigUtils configUtils, TranslationServiceCommons translationServiceCommons) {
         this.gitLabProviderConfig = configUtils.getActiveGitProviderConfig();
         this.translationServiceCommons = translationServiceCommons;
     }

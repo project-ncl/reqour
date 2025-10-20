@@ -23,15 +23,11 @@ import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
-import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
-<<<<<<< HEAD
-import org.jboss.pnc.reqour.config.ConfigUtils;
-=======
+import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.GitLabProviderConfig;
->>>>>>> 6242a11 (Extract config names into constants)
+import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
+import org.jboss.pnc.reqour.model.GitLabGetOrCreateProjectResult;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -43,13 +39,13 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITLAB)
 @Slf4j
-public class GitlabApiService {
+public class GitLabApiService {
 
     private final GitLabApi delegate;
     private final GitProviderConfig gitProviderConfig;
 
     @Inject
-    public GitlabApiService(ConfigUtils configUtils) {
+    public GitLabApiService(ConfigUtils configUtils) {
         gitProviderConfig = configUtils.getActiveGitProviderConfig();
         delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitProviderConfig.url(), gitProviderConfig.token());
     }
@@ -63,7 +59,7 @@ public class GitlabApiService {
                                     .withParentId(parentId)
                                     .withDefaultBranchProtection(Constants.DefaultBranchProtectionLevel.NOT_PROTECTED));
         } catch (GitLabApiException e) {
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 
@@ -71,7 +67,7 @@ public class GitlabApiService {
         try {
             return delegate.getGroupApi().getGroup(workspaceId);
         } catch (GitLabApiException e) {
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 
@@ -82,11 +78,11 @@ public class GitlabApiService {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
                 return createGroup(subgroupName, parentId);
             }
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 
-    public GitlabGetOrCreateProjectResult getOrCreateProject(
+    public GitLabGetOrCreateProjectResult getOrCreateProject(
             String projectName,
             long parentId,
             String projectPath,
@@ -99,7 +95,7 @@ public class GitlabApiService {
                 .readwriteUrl(readwriteUrl)
                 .callback(ReqourCallback.builder().status(ResultStatus.SUCCESS).id(taskId).build());
         try {
-            GitlabGetOrCreateProjectResult foundProject = new GitlabGetOrCreateProjectResult(
+            GitLabGetOrCreateProjectResult foundProject = new GitLabGetOrCreateProjectResult(
                     getProject(projectPath),
                     scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS).build());
             log.debug(
@@ -109,7 +105,7 @@ public class GitlabApiService {
             return foundProject;
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
-                GitlabGetOrCreateProjectResult createdProject = createProject(
+                GitLabGetOrCreateProjectResult createdProject = createProject(
                         projectName,
                         parentId,
                         scmCreationResponseBuilder);
@@ -119,7 +115,7 @@ public class GitlabApiService {
                         createdProject.project().getId());
                 return createdProject;
             }
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 
@@ -127,16 +123,16 @@ public class GitlabApiService {
         return delegate.getProjectApi().getProject(projectPath);
     }
 
-    private GitlabGetOrCreateProjectResult createProject(
+    private GitLabGetOrCreateProjectResult createProject(
             String projectName,
             long parentId,
             InternalSCMCreationResponse.InternalSCMCreationResponseBuilder scmCreationResponseBuilder) {
         try {
-            return new GitlabGetOrCreateProjectResult(
+            return new GitLabGetOrCreateProjectResult(
                     delegate.getProjectApi().createProject(parentId, projectName),
                     scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_CREATED).build());
         } catch (GitLabApiException ex) {
-            throw new GitlabApiRuntimeException(ex);
+            throw new GitLabApiRuntimeException(ex);
         }
     }
 
@@ -144,7 +140,7 @@ public class GitlabApiService {
         try {
             return delegate.getTagsApi().getProtectedTags(projectIdOrPath, 1, 100);
         } catch (GitLabApiException e) {
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 
@@ -165,7 +161,7 @@ public class GitlabApiService {
                     .protectTag(projectId, tagProtectionConfig.protectedTagsPattern().get(), AccessLevel.DEVELOPER);
             log.debug("Tag protection for project with id={} successfully initialized", projectId);
         } catch (GitLabApiException e) {
-            throw new GitlabApiRuntimeException(e);
+            throw new GitLabApiRuntimeException(e);
         }
     }
 

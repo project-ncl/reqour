@@ -11,5 +11,5 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
  * Aggregated model for storing the project together with another metadata, e.g. whether the project has already been
  * existing in the internal SCM repository before.
  */
-public record GitlabGetOrCreateProjectResult(Project project, InternalSCMCreationResponse result) {
+public record GitLabGetOrCreateProjectResult(Project project, InternalSCMCreationResponse result) {
 }

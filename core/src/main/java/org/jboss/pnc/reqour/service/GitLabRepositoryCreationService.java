@@ -12,11 +12,11 @@ import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
-import org.jboss.pnc.reqour.common.gitlab.GitlabApiService;
+import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.model.GitlabGetOrCreateProjectResult;
+import org.jboss.pnc.reqour.model.GitLabGetOrCreateProjectResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -28,15 +28,15 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITLAB)
 @Slf4j
-public class GitlabRepositoryCreationService implements InternalSCMRepositoryCreationService {
+public class GitLabRepositoryCreationService implements InternalSCMRepositoryCreationService {
 
     private static final String GIT_SUFFIX = ".git";
 
     private final GitProviderConfig gitProviderConfig;
-    private final GitlabApiService gitlabApiService;
+    private final GitLabApiService gitlabApiService;
 
     @Inject
-    public GitlabRepositoryCreationService(ConfigUtils configUtils, GitlabApiService gitlabApiService) {
+    public GitLabRepositoryCreationService(ConfigUtils configUtils, GitLabApiService gitlabApiService) {
         this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.gitlabApiService = gitlabApiService;
     }
@@ -71,7 +71,7 @@ public class GitlabRepositoryCreationService implements InternalSCMRepositoryCre
         log.debug("Readonly URL is: {}", projectReadonlyUrl);
         log.debug("Readwrite URL is: {}", projectReadwriteUrl);
 
-        GitlabGetOrCreateProjectResult fetchedProjectResult = gitlabApiService.getOrCreateProject(
+        GitLabGetOrCreateProjectResult fetchedProjectResult = gitlabApiService.getOrCreateProject(
                 project.projectName(),
                 parentId,
                 pathWithinWorkspace,

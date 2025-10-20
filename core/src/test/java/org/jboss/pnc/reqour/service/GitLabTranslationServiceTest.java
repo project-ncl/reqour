@@ -20,7 +20,7 @@ import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
 @TestProfile(TranslationProfile.class)
-class GitlabTranslationServiceTest {
+class GitLabTranslationServiceTest {
 
     @Inject
     Instance<TranslationService> service;
