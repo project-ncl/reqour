@@ -10,9 +10,9 @@ import org.gitlab4j.api.GitLabApiException;
  * Own GitLab API exception, which is used to wrap {@link org.gitlab4j.api.GitLabApiException} in order to make it
  * unchecked exception.
  */
-public class GitlabApiRuntimeException extends RuntimeException {
+public class GitLabApiRuntimeException extends RuntimeException {
 
-    public GitlabApiRuntimeException(GitLabApiException cause) {
+    public GitLabApiRuntimeException(GitLabApiException cause) {
         super(cause);
     }
 }

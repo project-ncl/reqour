@@ -13,7 +13,7 @@ import org.jboss.pnc.reqour.adjust.alternatives.FailingRepositoryFetcherMock2;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
-public class WithGitlabExceptionAlternative implements QuarkusTestProfile {
+public class WithGitLabExceptionAlternative implements QuarkusTestProfile {
 
     @Override
     public Set<Class<?>> getEnabledAlternatives() {

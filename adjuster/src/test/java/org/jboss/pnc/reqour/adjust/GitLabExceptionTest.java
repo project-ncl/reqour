@@ -15,7 +15,7 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.common.log.ProcessStageUtils;
-import org.jboss.pnc.reqour.adjust.profile.WithGitlabExceptionAlternative;
+import org.jboss.pnc.reqour.adjust.profile.WithGitLabExceptionAlternative;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,9 +31,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(WithGitlabExceptionAlternative.class)
+@TestProfile(WithGitLabExceptionAlternative.class)
 @ConnectWireMock
-public class GitlabExceptionTest {
+public class GitLabExceptionTest {
 
     @Inject
     @TopCommand

@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.jboss.pnc.reqour.config.ConfigConstants;
 
-public class TranslationWithGithubProviderProfile extends CommonTestProfile {
+public class TranslationWithGitHubProviderProfile extends CommonTestProfile {
 
     @Override
     public Set<String> tags() {

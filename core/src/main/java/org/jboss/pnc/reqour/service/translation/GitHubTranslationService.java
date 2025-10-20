@@ -7,9 +7,9 @@ package org.jboss.pnc.reqour.service.translation;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -18,14 +18,14 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITHUB)
 @Slf4j
-public class GithubTranslationService implements TranslationService {
+public class GitHubTranslationService implements TranslationService {
 
     private static final String ORGANIZATION_REPOSITORY_SEPARATOR = "-";
 
     private final GitProviderConfig gitProviderConfig;
     private final TranslationServiceCommons translationServiceCommons;
 
-    public GithubTranslationService(ConfigUtils configUtils, TranslationServiceCommons translationServiceCommons) {
+    public GitHubTranslationService(ConfigUtils configUtils, TranslationServiceCommons translationServiceCommons) {
         this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.translationServiceCommons = translationServiceCommons;
     }

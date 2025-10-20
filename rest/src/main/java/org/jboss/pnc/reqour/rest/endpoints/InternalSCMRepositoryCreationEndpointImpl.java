@@ -17,14 +17,14 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
 import org.jboss.pnc.reqour.common.callbacksender.CallbackSender;
-import org.jboss.pnc.reqour.common.exceptions.GitlabApiRuntimeException;
+import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutorImpl;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
-import org.jboss.pnc.reqour.service.GitlabRepositoryCreationService;
+import org.jboss.pnc.reqour.service.GitLabRepositoryCreationService;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 import org.slf4j.Logger;
 
@@ -73,7 +73,7 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
         t = t.getCause();
 
         ResultStatus status;
-        if (t instanceof GitlabApiRuntimeException) {
+        if (t instanceof GitLabApiRuntimeException) {
             status = ResultStatus.FAILED;
             log.warn("Async SCM repository creation task ended with GitLab API-related exception", t);
         } else if (t instanceof InvalidProjectPathException) {
@@ -86,11 +86,11 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
 
         return InternalSCMCreationResponse.builder()
                 .readonlyUrl(
-                        GitlabRepositoryCreationService.completeTemplateWithProjectPath(
+                        GitLabRepositoryCreationService.completeTemplateWithProjectPath(
                                 gitProviderConfig.readOnlyTemplate(),
                                 creationRequest.getProject()))
                 .readwriteUrl(
-                        GitlabRepositoryCreationService.completeTemplateWithProjectPath(
+                        GitLabRepositoryCreationService.completeTemplateWithProjectPath(
                                 gitProviderConfig.readWriteTemplate(),
                                 creationRequest.getProject()))
                 .status(InternalSCMCreationStatus.FAILED)
