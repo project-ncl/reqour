@@ -43,7 +43,7 @@ public class GitHubTranslationService implements TranslationService {
         return internalUrl;
     }
 
-    private String adjustRepositoryName(String repository, String organization, String internalOrganization) {
+    public String adjustRepositoryName(String repository, String organization, String internalOrganization) {
         String repositoryWithoutGitSuffix = TranslationServiceCommons.removeGitSuffix(repository);
         if (organization == null || organization.equals(internalOrganization)) {
             return repositoryWithoutGitSuffix;

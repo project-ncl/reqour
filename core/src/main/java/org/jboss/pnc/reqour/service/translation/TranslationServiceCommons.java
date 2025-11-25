@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TranslationServiceCommons {
 
     static final String GIT_SUFFIX = ".git";
-    static final String URL_PATH_SEPARATOR = "/";
+    public static final String URL_PATH_SEPARATOR = "/";
 
     @Inject
     ConfigUtils configUtils;
