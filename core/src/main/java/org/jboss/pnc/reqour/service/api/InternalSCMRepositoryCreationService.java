@@ -18,4 +18,16 @@ public interface InternalSCMRepositoryCreationService {
      * @param creationRequest internal SCM repository creation request
      */
     InternalSCMCreationResponse createInternalSCMRepository(InternalSCMCreationRequest creationRequest);
+
+    /**
+     * Compute project path (under the internal workspace/organization) from the request.
+     *
+     * @param creationRequest creation request
+     * @return computed project path from the given request
+     */
+    String computeProjectPath(InternalSCMCreationRequest creationRequest);
+
+    static String completeTemplateWithProjectPath(String template, String projectPath) {
+        return String.format(template, projectPath);
+    }
 }

@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.service;
+package org.jboss.pnc.reqour.service.scmcreation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,15 +14,15 @@ import jakarta.inject.Inject;
 
 import org.gitlab4j.api.GitLabApiException;
 import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
-import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
 import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
-import org.jboss.pnc.reqour.model.GitLabGetOrCreateProjectResult;
+import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -49,16 +49,13 @@ class GitLabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitLabGetOrCreateProjectResult(
+                new GitLabProjectCreationResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
-                        expectedResponse))
+                        InternalSCMCreationStatus.SUCCESS_CREATED))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
                         Mockito.anyString());
         Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
@@ -73,10 +70,7 @@ class GitLabRepositoryCreationServiceTest {
                 .getOrCreateProject(
                         TestDataSupplier.InternalSCM.PROJECT_NAME,
                         TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                        projectPath,
-                        expectedResponse.getReadonlyUrl(),
-                        expectedResponse.getReadwriteUrl(),
-                        TestDataSupplier.TASK_ID);
+                        projectPath);
         Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
@@ -89,16 +83,13 @@ class GitLabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitLabGetOrCreateProjectResult(
+                new GitLabProjectCreationResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
-                        expectedResponse))
+                        InternalSCMCreationStatus.SUCCESS_CREATED))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
                         Mockito.anyString());
         Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
@@ -113,10 +104,7 @@ class GitLabRepositoryCreationServiceTest {
                 .getOrCreateProject(
                         TestDataSupplier.InternalSCM.PROJECT_NAME,
                         TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                        projectPath,
-                        expectedResponse.getReadonlyUrl(),
-                        expectedResponse.getReadwriteUrl(),
-                        TestDataSupplier.TASK_ID);
+                        projectPath);
         Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
@@ -129,16 +117,13 @@ class GitLabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitLabGetOrCreateProjectResult(
+                new GitLabProjectCreationResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
-                        expectedResponse))
+                        InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
                         Mockito.anyString());
         Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
@@ -153,10 +138,7 @@ class GitLabRepositoryCreationServiceTest {
                 .getOrCreateProject(
                         TestDataSupplier.InternalSCM.PROJECT_NAME,
                         TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                        projectPath,
-                        expectedResponse.getReadonlyUrl(),
-                        expectedResponse.getReadwriteUrl(),
-                        TestDataSupplier.TASK_ID);
+                        projectPath);
         Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, true);
     }
 
@@ -169,16 +151,13 @@ class GitLabRepositoryCreationServiceTest {
         Mockito.when(gitlabApiService.getGroup(Mockito.anyLong()))
                 .thenReturn(TestDataSupplier.InternalSCM.workspaceGroup());
         Mockito.doReturn(
-                new GitLabGetOrCreateProjectResult(
+                new GitLabProjectCreationResult(
                         TestDataSupplier.InternalSCM.projectFromTestWorkspace(),
-                        expectedResponse))
+                        InternalSCMCreationStatus.SUCCESS_CREATED))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
                         Mockito.anyString());
         Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
@@ -190,10 +169,7 @@ class GitLabRepositoryCreationServiceTest {
                 .getOrCreateProject(
                         TestDataSupplier.InternalSCM.PROJECT_NAME,
                         TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                        projectPath,
-                        expectedResponse.getReadonlyUrl(),
-                        expectedResponse.getReadwriteUrl(),
-                        TestDataSupplier.TASK_ID);
+                        projectPath);
         Mockito.verify(gitlabApiService).configureProtectedTags(TestDataSupplier.InternalSCM.PROJECT_ID, false);
     }
 
@@ -210,16 +186,13 @@ class GitLabRepositoryCreationServiceTest {
                 .when(gitlabApiService)
                 .getOrCreateSubgroup(Mockito.anyLong(), Mockito.anyString());
         Mockito.doReturn(
-                new GitLabGetOrCreateProjectResult(
+                new GitLabProjectCreationResult(
                         TestDataSupplier.InternalSCM.projectFromDifferentWorkspace(),
-                        expectedResponse))
+                        InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS))
                 .when(gitlabApiService)
                 .getOrCreateProject(
                         Mockito.anyString(),
                         Mockito.anyLong(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
-                        Mockito.anyString(),
                         Mockito.anyString());
         Mockito.doNothing().when(gitlabApiService).configureProtectedTags(Mockito.anyLong(), Mockito.anyBoolean());
 
@@ -236,10 +209,7 @@ class GitLabRepositoryCreationServiceTest {
                 .getOrCreateProject(
                         TestDataSupplier.InternalSCM.PROJECT_NAME,
                         TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_ID,
-                        TestDataSupplier.InternalSCM.projectFromDifferentWorkspace().getPathWithNamespace(),
-                        expectedResponse.getReadonlyUrl(),
-                        expectedResponse.getReadwriteUrl(),
-                        TestDataSupplier.TASK_ID);
+                        TestDataSupplier.InternalSCM.projectFromDifferentWorkspace().getPathWithNamespace());
         Mockito.verify(gitlabApiService)
                 .configureProtectedTags(TestDataSupplier.InternalSCM.DIFFERENT_PROJECT_ID, true);
     }

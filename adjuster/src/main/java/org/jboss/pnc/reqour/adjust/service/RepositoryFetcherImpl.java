@@ -26,13 +26,13 @@ import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
 import org.jboss.pnc.reqour.common.GitCommands;
-import org.jboss.pnc.reqour.common.gitlab.GitLabApiService;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
+import org.jboss.pnc.reqour.service.scmcreation.GitLabApiService;
 import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
 

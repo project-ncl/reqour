@@ -13,6 +13,9 @@ reqour:
     git-providers:
       gitlab:
         url: http://${reqour.git.git-providers.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+      github:
+        url: http://${reqour.git.git-providers.github.hostname}:${quarkus.wiremock.devservices.port}
+      active: gitlab
     private-github-user: github-bot
 
 reqour-rest:

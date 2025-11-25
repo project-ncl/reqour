@@ -38,7 +38,7 @@ import io.restassured.RestAssured;
 @TestProfile(InternalSCMRepositoryCreationProfile.class)
 @ConnectWireMock
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
-public class InternalSCMRepoCreationEndpointTest {
+public class GitLabInternalSCMRepoCreationEndpointTest {
 
     private static final String GITLAB_API_PATH = "/api/v4";
 

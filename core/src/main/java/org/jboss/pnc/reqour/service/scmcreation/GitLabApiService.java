@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.common.gitlab;
+package org.jboss.pnc.reqour.service.scmcreation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,14 +20,11 @@ import org.gitlab4j.api.models.GroupParams;
 import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.ProtectedTag;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
-import org.jboss.pnc.api.enums.ResultStatus;
-import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
-import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.model.GitLabGetOrCreateProjectResult;
+import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.quarkus.arc.lookup.LookupIfProperty;
@@ -45,9 +42,9 @@ public class GitLabApiService {
     private final GitProviderConfig gitProviderConfig;
 
     @Inject
-    public GitLabApiService(ConfigUtils configUtils) {
+    public GitLabApiService(ConfigUtils configUtils, GitLabApi delegate) {
         gitProviderConfig = configUtils.getActiveGitProviderConfig();
-        delegate = new GitLabApi(GitLabApi.ApiVersion.V4, gitProviderConfig.url(), gitProviderConfig.token());
+        this.delegate = delegate;
     }
 
     public Group createGroup(String name, long parentId) {
@@ -82,22 +79,14 @@ public class GitLabApiService {
         }
     }
 
-    public GitLabGetOrCreateProjectResult getOrCreateProject(
+    public GitLabProjectCreationResult getOrCreateProject(
             String projectName,
             long parentId,
-            String projectPath,
-            String readonlyUrl,
-            String readwriteUrl,
-            String taskId) {
-        InternalSCMCreationResponse.InternalSCMCreationResponseBuilder scmCreationResponseBuilder = InternalSCMCreationResponse
-                .builder()
-                .readonlyUrl(readonlyUrl)
-                .readwriteUrl(readwriteUrl)
-                .callback(ReqourCallback.builder().status(ResultStatus.SUCCESS).id(taskId).build());
+            String projectPath) {
         try {
-            GitLabGetOrCreateProjectResult foundProject = new GitLabGetOrCreateProjectResult(
+            GitLabProjectCreationResult foundProject = new GitLabProjectCreationResult(
                     getProject(projectPath),
-                    scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS).build());
+                    InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS);
             log.debug(
                     "Project '{}' (id={}) already exists",
                     foundProject.project().getName(),
@@ -105,10 +94,9 @@ public class GitLabApiService {
             return foundProject;
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
-                GitLabGetOrCreateProjectResult createdProject = createProject(
+                GitLabProjectCreationResult createdProject = createProject(
                         projectName,
-                        parentId,
-                        scmCreationResponseBuilder);
+                        parentId);
                 log.debug(
                         "Project '{}' (id={}) was newly created",
                         createdProject.project().getName(),
@@ -123,14 +111,13 @@ public class GitLabApiService {
         return delegate.getProjectApi().getProject(projectPath);
     }
 
-    private GitLabGetOrCreateProjectResult createProject(
+    private GitLabProjectCreationResult createProject(
             String projectName,
-            long parentId,
-            InternalSCMCreationResponse.InternalSCMCreationResponseBuilder scmCreationResponseBuilder) {
+            long parentId) {
         try {
-            return new GitLabGetOrCreateProjectResult(
+            return new GitLabProjectCreationResult(
                     delegate.getProjectApi().createProject(parentId, projectName),
-                    scmCreationResponseBuilder.status(InternalSCMCreationStatus.SUCCESS_CREATED).build());
+                    InternalSCMCreationStatus.SUCCESS_CREATED);
         } catch (GitLabApiException ex) {
             throw new GitLabApiRuntimeException(ex);
         }

@@ -138,6 +138,11 @@
                 <version>3.2.4</version>
                 <classifier>jakarta</classifier>
             </dependency>
+            <dependency>
+                <groupId>org.kohsuke</groupId>
+                <artifactId>github-api</artifactId>
+                <version>1.330</version>
+            </dependency>
 
             <!-- Test dependencies -->
             <dependency>
