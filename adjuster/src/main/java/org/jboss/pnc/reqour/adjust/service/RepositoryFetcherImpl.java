@@ -70,6 +70,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             userLogger.info("Auto-Sync feature activated");
             isRefInternal = syncExternalRepo(adjustRequest, workdir, gitUsername);
         } else {
+            userLogger.warn("Auto-Sync feature disabled, working with the downstream repository only");
             shallowCloneWithTags(
                     URLUtils.addUsernameToUrl(adjustRequest.getInternalUrl().getReadwriteUrl(), gitUsername),
                     adjustRequest.getRef(),
