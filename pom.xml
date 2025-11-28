@@ -9,7 +9,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.jboss.pnc.reqour</groupId>
     <artifactId>reqour-parent</artifactId>
-    <version>3.3.2-SNAPSHOT</version>
+    <version>3.3.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
