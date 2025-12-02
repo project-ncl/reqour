@@ -21,7 +21,6 @@ import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.AdjustEndpoint;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 import org.jboss.pnc.reqour.rest.service.FinalLogManager;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -39,7 +38,6 @@ import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.junit.mockito.InjectSpy;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
@@ -47,7 +45,6 @@ import io.restassured.http.Header;
 import io.restassured.response.Response;
 
 @QuarkusTest
-@TestProfile(AdjustProfile.class)
 @TestHTTPEndpoint(AdjustEndpoint.class)
 @ConnectWireMock
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })

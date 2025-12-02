@@ -16,8 +16,4 @@ public abstract class CommonTestProfile implements QuarkusTestProfile {
     public String getConfigProfile() {
         return "test";
     }
-
-    protected enum TestTag {
-        ADJUST, CANCEL, CLONING, CONFIG, GRADLE, INTERNAL_SCM_CREATION, MVN, NPM, SBT, TRANSLATION, UTILS, VERSION,
-    }
 }

@@ -15,14 +15,11 @@ import jakarta.inject.Inject;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
-import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(AdjustProfile.class)
 class CommonManipulatorResultExtractorTest {
 
     @Inject

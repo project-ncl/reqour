@@ -9,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
-import org.jboss.pnc.reqour.common.profile.TranslationWithGitHubProviderProfile;
+import org.jboss.pnc.reqour.common.profile.WithGitHubProvider;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(TranslationWithGitHubProviderProfile.class)
+@TestProfile(WithGitHubProvider.class)
 class GitHubTranslationServiceTest {
 
     @Inject

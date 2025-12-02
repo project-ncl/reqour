@@ -24,7 +24,6 @@ import org.jboss.pnc.reqour.common.CloneTestUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -39,14 +38,12 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 @QuarkusTest
 @TestHTTPEndpoint(CloneEndpoint.class)
-@TestProfile(CloningProfile.class)
 @ConnectWireMock
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class CloningEndpointIT {

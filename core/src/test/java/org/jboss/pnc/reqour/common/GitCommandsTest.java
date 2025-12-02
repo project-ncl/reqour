@@ -13,15 +13,12 @@ import java.nio.file.Path;
 
 import jakarta.inject.Inject;
 
-import org.jboss.pnc.reqour.common.profile.UtilsProfile;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(UtilsProfile.class)
 class GitCommandsTest {
 
     private static final String TEST_LFS_PREFIX = "test-lfs";
