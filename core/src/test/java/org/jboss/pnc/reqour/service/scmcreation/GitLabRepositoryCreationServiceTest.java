@@ -21,17 +21,14 @@ import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidProjectPathException;
-import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
 import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(InternalSCMRepositoryCreationProfile.class)
 class GitLabRepositoryCreationServiceTest {
 
     @InjectMock

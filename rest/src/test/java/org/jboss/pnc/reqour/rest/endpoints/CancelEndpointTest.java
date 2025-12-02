@@ -19,7 +19,6 @@ import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.CancelEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.CancelProfile;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +31,6 @@ import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.kubernetes.client.KubernetesServer;
 import io.quarkus.test.kubernetes.client.KubernetesTestServer;
 import io.quarkus.test.kubernetes.client.WithKubernetesTestServer;
@@ -40,7 +38,6 @@ import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 
 @QuarkusTest
-@TestProfile(CancelProfile.class)
 @TestHTTPEndpoint(CancelEndpoint.class)
 @WithKubernetesTestServer(crud = false)
 @ConnectWireMock

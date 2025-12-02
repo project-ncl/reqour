@@ -12,14 +12,11 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.dto.GA;
 import org.jboss.pnc.api.dto.GAV;
-import org.jboss.pnc.reqour.common.profile.AdjustProfile;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(AdjustProfile.class)
 class RootGavExtractorTest {
 
     @Inject

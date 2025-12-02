@@ -15,7 +15,6 @@ import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.api.reqour.rest.TranslateEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.TranslationProfile;
 import org.jboss.pnc.reqour.service.translation.GitLabTranslationService;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -24,13 +23,11 @@ import org.mockito.Mockito;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 @QuarkusTest
 @TestHTTPEndpoint(TranslateEndpoint.class)
-@TestProfile(TranslationProfile.class)
 class TranslationEndpointTest {
 
     @InjectMock

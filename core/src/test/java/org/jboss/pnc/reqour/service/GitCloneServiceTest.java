@@ -35,7 +35,6 @@ import org.jboss.pnc.reqour.common.CloneTestUtils;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
-import org.jboss.pnc.reqour.common.profile.CloningProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
@@ -45,10 +44,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
-@TestProfile(CloningProfile.class)
 class GitCloneServiceTest {
 
     @Inject

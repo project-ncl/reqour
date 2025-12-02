@@ -14,12 +14,8 @@ import java.util.function.Function;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.common.profile.UtilsProfile;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.junit.TestProfile;
-
-@TestProfile(UtilsProfile.class)
 class IOUtilsTest {
 
     @Test

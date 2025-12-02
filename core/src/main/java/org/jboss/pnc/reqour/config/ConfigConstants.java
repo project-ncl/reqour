@@ -16,4 +16,5 @@ public class ConfigConstants {
     public static final String APP_NAME = "quarkus.application.name";
     public static final String USER_LOGGER_NAME = "reqour.log.user-log.user-logger-name";
     public static final String GIT_PROVIDERS_FAULT_TOLERANCE = "reqour.git.git-providers.fault-tolerance";
+    public static final String BIFROST_UPLOADER_URL = "reqour.log.final-log.bifrost-uploader.base-url";
 }

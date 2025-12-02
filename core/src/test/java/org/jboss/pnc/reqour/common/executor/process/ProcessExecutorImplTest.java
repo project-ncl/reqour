@@ -10,12 +10,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import org.jboss.pnc.reqour.common.profile.CommonTestProfile;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.junit.TestProfile;
-
-@TestProfile(CommonTestProfile.class)
 public class ProcessExecutorImplTest {
 
     @Test

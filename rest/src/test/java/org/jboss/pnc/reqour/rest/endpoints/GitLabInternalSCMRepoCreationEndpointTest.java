@@ -17,7 +17,6 @@ import org.gitlab4j.api.utils.UrlEncoder;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
-import org.jboss.pnc.reqour.common.profile.InternalSCMRepositoryCreationProfile;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,13 +28,11 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
-import io.quarkus.test.junit.TestProfile;
 import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 
 @QuarkusTest
 @TestHTTPEndpoint(InternalSCMRepositoryCreationEndpoint.class)
-@TestProfile(InternalSCMRepositoryCreationProfile.class)
 @ConnectWireMock
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 public class GitLabInternalSCMRepoCreationEndpointTest {
