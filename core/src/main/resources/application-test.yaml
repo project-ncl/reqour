@@ -27,6 +27,11 @@ reqour:
         protected-tags-pattern: '*'
         protected-tags-accepted-patterns:
       active: gitlab
+      fault-tolerance:
+        retry:
+          max-retries: 2
+          initial-delay: 1
+          initial-delay-unit: seconds
     acceptable-schemes:
       - https
       - http

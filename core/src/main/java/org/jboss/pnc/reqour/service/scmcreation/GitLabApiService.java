@@ -24,10 +24,12 @@ import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.quarkus.arc.lookup.LookupIfProperty;
+import io.smallrye.faulttolerance.api.ApplyGuard;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -47,6 +49,7 @@ public class GitLabApiService {
         this.delegate = delegate;
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public Group createGroup(String name, long parentId) {
         try {
             return delegate.getGroupApi()
@@ -60,6 +63,7 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public Group getGroup(long workspaceId) {
         try {
             return delegate.getGroupApi().getGroup(workspaceId);
@@ -68,6 +72,7 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public Group getOrCreateSubgroup(long parentId, String subgroupName) {
         try {
             return delegate.getGroupApi().getGroup(gitProviderConfig.workspaceName() + "/" + subgroupName);
@@ -79,6 +84,7 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public GitLabProjectCreationResult getOrCreateProject(
             String projectName,
             long parentId,
@@ -107,11 +113,13 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public Project getProject(String projectPath) throws GitLabApiException {
         return delegate.getProjectApi().getProject(projectPath);
     }
 
-    private GitLabProjectCreationResult createProject(
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public GitLabProjectCreationResult createProject(
             String projectName,
             long parentId) {
         try {
@@ -123,6 +131,7 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public List<ProtectedTag> getProtectedTags(Object projectIdOrPath) {
         try {
             return delegate.getTagsApi().getProtectedTags(projectIdOrPath, 1, 100);
@@ -131,6 +140,7 @@ public class GitLabApiService {
         }
     }
 
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public void configureProtectedTags(Long projectId, boolean projectAlreadyExisted) {
         try {
             GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitProviderConfig.tagProtection();

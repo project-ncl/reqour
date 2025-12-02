@@ -27,7 +27,7 @@ public class ConfigUtils {
     }
 
     public GitProviderConfig getActiveGitProviderConfig() {
-        return config.gitConfigs().gitProvidersConfig().gitProviders().get(getActiveGitProvider().name().toLowerCase());
+        return config.gitConfigs().gitProviders().gitProviders().get(getActiveGitProvider().name().toLowerCase());
     }
 
     public PNCHttpClientConfig getPncHttpClientConfig() {
@@ -35,7 +35,7 @@ public class ConfigUtils {
     }
 
     public GitProvider getActiveGitProvider() {
-        return GitProvider.fromString(config.gitConfigs().gitProvidersConfig().activeGitProvider());
+        return GitProvider.fromString(config.gitConfigs().gitProviders().activeGitProvider());
     }
 
     public Optional<String> getPrivateGithubUser() {

@@ -14,13 +14,17 @@ import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.ReqourConfig;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.oidc.client.OidcClient;
+import io.smallrye.common.annotation.Identifier;
+import io.smallrye.faulttolerance.api.Guard;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
@@ -59,6 +63,36 @@ public class BeanFactory {
                 bifrostUploaderConfig.maxRetries(),
                 bifrostUploaderConfig.retryDelay(),
                 () -> oidcClient.getTokens().await().indefinitely().getAccessToken());
+    }
+
+    @Produces
+    @Identifier(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public Guard internalRetry(
+            GitProviderFaultTolerancePolicy gitProviderFaultTolerancePolicy,
+            @UserLogger Logger userLogger) {
+        return Guard.create()
+                .withDescription(gitProviderFaultTolerancePolicy.description())
+                .withRetry()
+                .maxRetries(gitProviderFaultTolerancePolicy.retry().maxRetries())
+                .delay(
+                        gitProviderFaultTolerancePolicy.retry().initialDelay(),
+                        gitProviderFaultTolerancePolicy.retry().initialDelayUnit())
+                .withExponentialBackoff()
+                .factor(gitProviderFaultTolerancePolicy.retry().exponentialBackoff().factor())
+                .maxDelay(
+                        gitProviderFaultTolerancePolicy.retry().exponentialBackoff().maxDelay(),
+                        gitProviderFaultTolerancePolicy.retry().exponentialBackoff().maxDelayUnit())
+                .done()
+                .beforeRetry(
+                        t -> userLogger
+                                .warn("Performing retry, last exception was: {}: {}", t.getMessage(), t.getCause(), t))
+                .done()
+                .withTimeout()
+                .duration(
+                        gitProviderFaultTolerancePolicy.timeout().duration(),
+                        gitProviderFaultTolerancePolicy.timeout().durationUnit())
+                .done()
+                .build();
     }
 
     @Produces
