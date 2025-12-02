@@ -26,6 +26,19 @@ reqour:
         read-only-template: https://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.workspace}/%s.git
         read-write-template: git@${reqour.git.git-providers.github.hostname}:${reqour.git.git-providers.github.workspace}/%s.git
         token: ${GITHUB_TOKEN}
+      fault-tolerance:
+        description: 'Fault Tolerance Policy for Git Providers'
+        retry:
+          max-retries: 10
+          initial-delay: 5
+          initial-delay-unit: seconds
+          exponential-backoff:
+            factor: 2
+            max-delay: 20
+            max-delay-unit: seconds
+        timeout:
+          duration: 60
+          duration-unit: seconds
     internal-urls: []  # overridden in runtime config
     private-github-user: ${PRIVATE_GITHUB_USER}
   log:

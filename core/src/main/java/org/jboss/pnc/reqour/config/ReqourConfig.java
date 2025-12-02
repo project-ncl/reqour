@@ -15,7 +15,7 @@ public interface ReqourConfig {
     @WithName("git")
     GitConfig gitConfigs();
 
-    PNCHttpClientConfig pncHttpClientConfig();
-
     LogConfig log();
+
+    PNCHttpClientConfig pncHttpClientConfig();
 }

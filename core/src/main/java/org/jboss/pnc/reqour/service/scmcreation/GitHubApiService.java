@@ -14,6 +14,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.kohsuke.github.GHOrganization;
@@ -22,6 +23,7 @@ import org.kohsuke.github.GitHub;
 import org.slf4j.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
+import io.smallrye.faulttolerance.api.ApplyGuard;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -65,8 +67,8 @@ public class GitHubApiService {
                 InternalSCMCreationStatus.SUCCESS_CREATED);
     }
 
-    // fixme: add retries
-    private GHOrganization getInternalOrganization() {
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public GHOrganization getInternalOrganization() {
         try {
             return delegate.getOrganization(gitProviderConfig.workspaceName());
         } catch (IOException e) {
@@ -76,8 +78,8 @@ public class GitHubApiService {
         }
     }
 
-    // fixme: add retries
-    private static GHRepository getInternalRepository(GHOrganization organization, String repositoryName) {
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public GHRepository getInternalRepository(GHOrganization organization, String repositoryName) {
         try {
             return organization.getRepository(repositoryName);
         } catch (IOException e) {
@@ -90,8 +92,8 @@ public class GitHubApiService {
         }
     }
 
-    // fixme: add retries
-    private static GHRepository createInternalRepository(String repositoryName, GHOrganization internalOrganization) {
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public GHRepository createInternalRepository(String repositoryName, GHOrganization internalOrganization) {
         try {
             return internalOrganization.createRepository(repositoryName).create();
         } catch (IOException e) {
