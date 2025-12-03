@@ -49,6 +49,18 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     @BeforeEach
     void setUp() throws IOException {
         wireMock.register(WireMock.post(CALLBACK_PATH).willReturn(WireMock.ok()));
+    }
+
+    @AfterEach
+    void tearDown() {
+        wireMock.resetMappings();
+        wireMock.resetRequests();
+    }
+
+    @Test
+    void createInternalSCMRepository_repositoryDoesNotExist_newRepositoryCreated()
+            throws InterruptedException, IOException {
+        String projectPath = "organization/newrepo";
         WireMockUtils.registerGet(
                 wireMock,
                 "/orgs/test-prefix",
@@ -61,17 +73,6 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 wireMock,
                 "/repos/test-prefix/organization-existingrepo",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repository.json")));
-    }
-
-    @AfterEach
-    void tearDown() {
-        wireMock.resetRequests();
-    }
-
-    @Test
-    void createInternalSCMRepository_repositoryDoesNotExist_newRepositoryCreated()
-            throws InterruptedException, IOException {
-        String projectPath = "organization/newrepo";
         wireMock.register(
                 WireMock.post("/orgs/test-prefix/repos")
                         .willReturn(WireMock.ok(Files.readString(GITHUB_OBJECTS_DIR.resolve("new-repo.json")))));
@@ -101,6 +102,18 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     void createInternalSCMRepository_repositoryAlreadyExists_successWithAlreadyExists()
             throws InterruptedException, IOException {
         String projectPath = "organization/existingrepo";
+        WireMockUtils.registerGet(
+                wireMock,
+                "/orgs/test-prefix",
+                Files.readString(GITHUB_OBJECTS_DIR.resolve("organization.json")));
+        WireMockUtils.registerGet(
+                wireMock,
+                "/orgs/test-prefix/repos",
+                Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
+        WireMockUtils.registerGet(
+                wireMock,
+                "/repos/test-prefix/organization-existingrepo",
+                Files.readString(GITHUB_OBJECTS_DIR.resolve("repository.json")));
 
         RestAssured.given()
                 .when()
@@ -129,7 +142,11 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     void createInternalSCMRepository_githubUnavailable_failsToCreateRepository()
             throws InterruptedException, IOException {
         String projectPath = "organization/repository";
-        wireMock.register(WireMock.get("/orgs/test-prefix").willReturn(WireMock.serviceUnavailable()));
+        WireMockUtils.registerGet(
+                wireMock,
+                "/orgs/test-prefix/repos",
+                Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
+        WireMockUtils.registerFailures(wireMock, "/orgs/test-prefix", WireMock.serviceUnavailable(), 3);
 
         RestAssured.given()
                 .when()
@@ -144,7 +161,7 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(6_000); // will be retrying 1s after first fail, and 2s after second fail
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,

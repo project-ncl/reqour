@@ -59,10 +59,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
                 + TestDataSupplier.InternalSCM.PROJECT_NAME;
-        WireMockUtils.registerGet(
-                wireMock,
-                GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()));
         wireMock.register(
                 WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath))
                         .willReturn(
@@ -116,7 +112,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
@@ -128,10 +124,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
                 + TestDataSupplier.InternalSCM.PROJECT_NAME;
-        WireMockUtils.registerGet(
-                wireMock,
-                GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()));
         WireMockUtils.registerGet(
                 wireMock,
                 GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath),
@@ -155,7 +147,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
@@ -167,10 +159,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
                 + TestDataSupplier.InternalSCM.PROJECT_NAME;
-        WireMockUtils.registerGet(
-                wireMock,
-                GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()));
         wireMock.register(
                 WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath))
                         .willReturn(
@@ -224,7 +212,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
@@ -236,10 +224,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME + "/"
                 + TestDataSupplier.InternalSCM.PROJECT_NAME;
-        WireMockUtils.registerGet(
-                wireMock,
-                GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()));
         WireMockUtils.registerGet(
                 wireMock,
                 GITLAB_API_PATH + "/groups/"
@@ -272,7 +256,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
@@ -287,10 +271,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
             throws JsonProcessingException, InterruptedException {
         String projectPath = TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME + "/"
                 + TestDataSupplier.InternalSCM.PROJECT_NAME;
-        WireMockUtils.registerGet(
-                wireMock,
-                GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID,
-                objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()));
         wireMock.register(
                 WireMock.get(
                         GITLAB_API_PATH + "/groups/"
@@ -313,7 +293,9 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                                                 TestDataSupplier.InternalSCM.differentWorkspaceGroup()))
                                         .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         wireMock.register(
-                WireMock.get(GITLAB_API_PATH + "/projects/" + UrlEncoder.urlEncode(projectPath))
+                WireMock.get(
+                        GITLAB_API_PATH + "/projects/"
+                                + UrlEncoder.urlEncode(TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/" + projectPath))
                         .willReturn(
                                 WireMock.notFound()
                                         .withBody(
@@ -364,7 +346,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(
                 wireMock,
                 CALLBACK_PATH,
@@ -377,12 +359,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     @Test
     void createInternalSCMRepository_invalidRequestWithTooDeepHierarchy_sendsFailInCallback()
             throws JsonProcessingException, InterruptedException {
-        wireMock.register(
-                WireMock.get(GITLAB_API_PATH + "/groups/" + TestDataSupplier.InternalSCM.WORKSPACE_ID)
-                        .willReturn(
-                                WireMock.ok(
-                                        objectMapper.writeValueAsString(TestDataSupplier.InternalSCM.workspaceGroup()))
-                                        .withHeader(CONTENT_TYPE_STRING, MediaType.APPLICATION_JSON)));
         String projectPath = "group/subgroup/project";
         String expectedBody = objectMapper.writeValueAsString(
                 TestUtils.failed(
@@ -402,7 +378,7 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
                 .then()
                 .statusCode(202);
 
-        Thread.sleep(2_000);
+        Thread.sleep(5_000);
         WireMockUtils.verifyThatCallbackWasSent(wireMock, CALLBACK_PATH, expectedBody);
     }
 }
