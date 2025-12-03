@@ -49,7 +49,6 @@
         <dependency>
             <groupId>io.quarkiverse.loggingjson</groupId>
             <artifactId>quarkus-logging-json</artifactId>
-            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -69,19 +68,11 @@
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-common</artifactId>
-            <version>3.3.4</version>
             <classifier>jakarta</classifier>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.jboss.pnc</groupId>
-                    <artifactId>pnc-api</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jboss.pnc</groupId>
             <artifactId>bifrost-upload-client</artifactId>
-            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -90,7 +81,6 @@
         <dependency>
             <groupId>org.gitlab4j</groupId>
             <artifactId>gitlab4j-api</artifactId>
-            <version>6.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.kohsuke</groupId>
@@ -99,7 +89,6 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.19.0</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
@@ -125,15 +114,16 @@
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.quarkiverse.wiremock</groupId>
             <artifactId>quarkus-wiremock-test</artifactId>
-            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -143,7 +133,6 @@
             <plugin>
                 <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
-                <version>3.3.2</version>
                 <executions>
                     <execution>
                         <id>make-index</id>
@@ -156,7 +145,6 @@
             <plugin>
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
-                <version>4.9.10</version>
                 <executions>
                     <execution>
                         <goals>
@@ -171,7 +159,6 @@
             <plugin>
                 <groupId>com.google.code.maven-replacer-plugin</groupId>
                 <artifactId>maven-replacer-plugin</artifactId>
-                <version>1.4.1</version>
                 <executions>
                     <execution>
                         <phase>process-sources</phase>
@@ -202,7 +189,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.4.2</version>
                 <executions>
                     <execution>
                         <goals>
