@@ -49,7 +49,7 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
             CallbackSender callbackSender,
             @UserLogger Logger userLogger) {
         this.service = service.get();
-        gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
         this.userLogger = userLogger;

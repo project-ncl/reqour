@@ -16,11 +16,9 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
-import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
-import org.slf4j.Logger;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.smallrye.faulttolerance.api.ApplyGuard;
@@ -36,17 +34,16 @@ public class GitHubApiService {
 
     private final GitHub delegate;
     private final GitProviderConfig gitProviderConfig;
-    private final Logger userLogger;
 
     @Inject
-    public GitHubApiService(GitHub delegate, ConfigUtils configUtils, @UserLogger Logger userLogger) {
+    public GitHubApiService(GitHub delegate, ConfigUtils configUtils) {
         this.delegate = delegate;
-        gitProviderConfig = configUtils.getActiveGitProviderConfig();
-        this.userLogger = userLogger;
+        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
     }
 
     /**
-     * Gets a repository given by its repository name from the GitHub's internal organization.
+     * Gets (or creates if it does not yet exist) a repository given by its repository name from (at) the GitHub's
+     * internal organization.
      *
      * @param repositoryName name of the repository
      * @return the repository corresponding to the requested repository name, together with the information whether the
@@ -57,11 +54,11 @@ public class GitHubApiService {
         GHRepository foundRepository = getInternalRepository(internalOrganization, repositoryName);
 
         if (foundRepository != null) {
-            userLogger.info("Repository with the path '{}' already exists: {}", repositoryName, foundRepository);
+            log.info("Repository with the path '{}' already exists: {}", repositoryName, foundRepository);
             return new GitHubProjectCreationResult(foundRepository, InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS);
         }
 
-        userLogger.info("Repository with the path '{}' doesn't exist yet, creating it now", repositoryName);
+        log.info("Repository with the path '{}' doesn't exist yet, creating it now", repositoryName);
         return new GitHubProjectCreationResult(
                 createInternalRepository(repositoryName, internalOrganization),
                 InternalSCMCreationStatus.SUCCESS_CREATED);
@@ -86,8 +83,8 @@ public class GitHubApiService {
             throw new GitHubApiException(
                     String.format(
                             "Cannot fetch the repository %s from the organization %s",
-                            organization,
-                            repositoryName),
+                            repositoryName,
+                            organization),
                     e);
         }
     }
