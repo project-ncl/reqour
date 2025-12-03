@@ -22,6 +22,18 @@
     </properties>
 
     <dependencies>
+        <!-- Inter-module dependencies -->
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-core</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Quarkus dependencies -->
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -64,7 +76,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-text</artifactId>
-            <version>1.13.1</version>
         </dependency>
 
         <!-- Test dependencies -->
@@ -86,16 +97,17 @@
         <dependency>
             <groupId>io.quarkiverse.wiremock</groupId>
             <artifactId>quarkus-wiremock-test</artifactId>
-            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
@@ -103,26 +115,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.kohsuke</groupId>
-            <artifactId>github-api</artifactId>
-            <scope>test</scope>
-        </dependency>
-
-        <!-- Inter-module dependencies -->
-        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-test-kubernetes-client</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-core</artifactId>
-            <type>test-jar</type>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-core</artifactId>
         </dependency>
     </dependencies>
 
