@@ -45,7 +45,7 @@ public class GitLabApiService {
 
     @Inject
     public GitLabApiService(ConfigUtils configUtils, GitLabApi delegate) {
-        gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
         this.delegate = delegate;
     }
 
