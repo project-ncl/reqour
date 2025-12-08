@@ -122,7 +122,7 @@ public class App implements Runnable {
                         adjustResponseBuilder,
                         manipulatorResult);
             }
-        } catch (AdjusterException | GitException | GitLabApiRuntimeException e) {
+        } catch (AdjusterException | GitException | GitLabApiRuntimeException e) { // GitLab exception can occur because it's checking whether tag protection is properly configured
             log.warn("{} exception occurred, setting the status to FAILED", e.getClass().getSimpleName());
             userLogger.warn("Exception was: {}", e.getMessage(), e);
             adjustResponseBuilder.callback(
