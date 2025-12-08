@@ -32,6 +32,7 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
+import org.jboss.pnc.reqour.service.scmcreation.GitHubApiService;
 import org.jboss.pnc.reqour.service.scmcreation.GitLabApiService;
 import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
@@ -62,6 +63,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
     @ConfigProperty(name = ConfigConstants.INTERNAL_URLS)
     Optional<List<String>> internalUrls;
+    GitHubApiService gitHubApiService;
 
     public CloningResult cloneRepository(AdjustRequest adjustRequest, Path workdir) {
         checkTagProtection(adjustRequest);
@@ -95,13 +97,24 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     private void checkTagProtection(AdjustRequest adjustRequest) {
         log.debug("Checking whether tag protection respects Reqour's tag protection configuration");
         String projectPath = extractProjectPathFromInternalUrl(adjustRequest.getInternalUrl());
-        if (GitProvider.GITLAB.equals(configUtils.getActiveGitProvider())
-                && !gitlabApiService.doesTagProtectionAlreadyExist(projectPath)) {
-            throw new AdjusterException(
-                    String.format(
-                            "GitLab repository at path '%s' does not have well-configured protected tags",
-                            projectPath));
-        }
+        boolean _isValid = switch (configUtils.getActiveGitProvider()) {
+            case GITLAB -> {
+                if (!gitlabApiService.doesTagProtectionAlreadyExist(projectPath)) {
+                    throw new AdjusterException(
+                            String.format(
+                                    "GitLab repository at path '%s' does not have well-configured protected tags",
+                                    projectPath));
+                }
+                yield true;
+            }
+            case GITHUB -> {
+                // todo [NCL-9465]: check GitHub protected tags configuration
+                log.warn(
+                        "{} configured as downstream git provider, skipping tag protection check",
+                        GitProvider.GITHUB.name());
+                yield true;
+            }
+        };
     }
 
     private boolean syncEnabled(AdjustRequest adjustRequest) {
