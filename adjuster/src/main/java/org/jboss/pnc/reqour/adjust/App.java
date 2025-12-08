@@ -136,7 +136,7 @@ public class App implements Runnable {
             try {
                 FileUtils.deleteDirectory(workdir.toFile());
             } catch (IOException e) {
-                log.error(String.format("Unable to delete directory '%s' after adjustments", workdir));
+                log.error("Unable to delete directory '{}' after adjustments", workdir);
             }
 
             try {
