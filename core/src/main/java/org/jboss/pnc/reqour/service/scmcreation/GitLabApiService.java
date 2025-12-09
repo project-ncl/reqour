@@ -91,7 +91,7 @@ public class GitLabApiService {
             String projectPath) {
         try {
             GitLabProjectCreationResult foundProject = new GitLabProjectCreationResult(
-                    getProject(projectPath),
+                    _getProject(projectPath),
                     InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS);
             log.debug(
                     "Project '{}' (id={}) already exists",
@@ -100,7 +100,7 @@ public class GitLabApiService {
             return foundProject;
         } catch (GitLabApiException e) {
             if (e.getHttpStatus() == HttpResponseStatus.NOT_FOUND.code()) {
-                GitLabProjectCreationResult createdProject = createProject(
+                GitLabProjectCreationResult createdProject = _createProject(
                         projectName,
                         parentId);
                 log.debug(
@@ -115,6 +115,13 @@ public class GitLabApiService {
 
     @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public Project getProject(String projectPath) throws GitLabApiException {
+        return _getProject((projectPath));
+    }
+
+    /**
+     * Use when you do not want fault tolerance being applied from the caller, unlike {@link this#getProject(String)}.
+     */
+    private Project _getProject(String projectPath) throws GitLabApiException {
         return delegate.getProjectApi().getProject(projectPath);
     }
 
@@ -122,6 +129,14 @@ public class GitLabApiService {
     public GitLabProjectCreationResult createProject(
             String projectName,
             long parentId) {
+        return _createProject(projectName, parentId);
+    }
+
+    /**
+     * Use when you do not want fault tolerance being applied from the caller, unlike {@link this#createProject(String,
+     * long)}.
+     */
+    private GitLabProjectCreationResult _createProject(String projectName, long parentId) {
         try {
             return new GitLabProjectCreationResult(
                     delegate.getProjectApi().createProject(parentId, projectName),
