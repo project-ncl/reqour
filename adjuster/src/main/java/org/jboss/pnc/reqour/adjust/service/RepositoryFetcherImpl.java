@@ -34,7 +34,6 @@ import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.GitCloneService;
 import org.jboss.pnc.reqour.service.scmcreation.GitHubApiService;
 import org.jboss.pnc.reqour.service.scmcreation.GitLabApiService;
-import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
@@ -61,9 +60,11 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     @Inject
     GitLabApiService gitlabApiService;
 
+    @Inject
+    GitHubApiService gitHubApiService;
+
     @ConfigProperty(name = ConfigConstants.INTERNAL_URLS)
     Optional<List<String>> internalUrls;
-    GitHubApiService gitHubApiService;
 
     public CloningResult cloneRepository(AdjustRequest adjustRequest, Path workdir) {
         checkTagProtection(adjustRequest);
@@ -95,8 +96,11 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     }
 
     private void checkTagProtection(AdjustRequest adjustRequest) {
-        log.debug("Checking whether tag protection respects Reqour's tag protection configuration");
         String projectPath = extractProjectPathFromInternalUrl(adjustRequest.getInternalUrl());
+        log.debug(
+                "Checking whether tag protection respects Reqour's tag protection configuration for project '{}'",
+                projectPath);
+
         boolean _isValid = switch (configUtils.getActiveGitProvider()) {
             case GITLAB -> {
                 if (!gitlabApiService.doesTagProtectionAlreadyExist(projectPath)) {
@@ -108,10 +112,12 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
                 yield true;
             }
             case GITHUB -> {
-                // todo [NCL-9465]: check GitHub protected tags configuration
-                log.warn(
-                        "{} configured as downstream git provider, skipping tag protection check",
-                        GitProvider.GITHUB.name());
+                if (!gitHubApiService.doesTagProtectionAlreadyExists(projectPath)) {
+                    throw new AdjusterException(
+                            String.format(
+                                    "GitHub repository at path '%s' does not have well-configured protected tags",
+                                    projectPath));
+                }
                 yield true;
             }
         };

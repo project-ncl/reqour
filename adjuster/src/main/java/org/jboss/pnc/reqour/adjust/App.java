@@ -30,6 +30,7 @@ import org.jboss.pnc.reqour.adjust.service.AdjustmentPusher;
 import org.jboss.pnc.reqour.adjust.service.RepositoryFetcher;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
+import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
@@ -122,7 +123,7 @@ public class App implements Runnable {
                         adjustResponseBuilder,
                         manipulatorResult);
             }
-        } catch (AdjusterException | GitException | GitLabApiRuntimeException e) { // GitLab exception can occur because it's checking whether tag protection is properly configured
+        } catch (AdjusterException | GitException | GitLabApiRuntimeException | GitHubApiException e) {
             log.warn("{} exception occurred, setting the status to FAILED", e.getClass().getSimpleName());
             userLogger.warn("Exception was: {}", e.getMessage(), e);
             adjustResponseBuilder.callback(

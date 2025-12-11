@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
@@ -15,6 +16,7 @@ import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
+import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHOrganization;
@@ -30,6 +32,9 @@ public class GitHubApiServiceFaultToleranceTest {
 
     @InjectMock
     GitHub gitHub;
+
+    @InjectMock
+    GitHubRestClient gitHubRestClient;
 
     @Inject
     GitHubApiService service;
@@ -81,5 +86,21 @@ public class GitHubApiServiceFaultToleranceTest {
         assertThatThrownBy(() -> service.getOrCreateInternalRepository(REPOSITORY_NAME))
                 .isInstanceOf(GitHubApiException.class)
                 .hasMessage("Service unavailable x3");
+    }
+
+    @Test
+    void doesTagProtectionAlreadyExists_validTagProtectionExists_returnsTrueAfterRetries() {
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+                .thenThrow(new GitHubApiException("Service unavailable"))
+                .thenThrow(new GitHubApiException("Service unavailable x2"))
+                .thenReturn(List.of(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET));
+        Mockito.when(
+                gitHubRestClient.getRuleset(
+                        TestDataSupplier.InternalSCM.WORKSPACE_NAME,
+                        TestDataSupplier.Cloning.TAG_PROTECTION_RULESET.getId()))
+                .thenThrow(new GitHubApiException("Service unavailable"))
+                .thenReturn(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET);
+
+        assertThat(service.doesTagProtectionAlreadyExists(REPOSITORY_NAME)).isTrue();
     }
 }
