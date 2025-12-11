@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.runtime;
 
 import java.io.IOException;
+import java.net.URI;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -16,6 +17,8 @@ import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.ReqourConfig;
+import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
+import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClientHeadersFactory;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
@@ -23,6 +26,7 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.oidc.client.OidcClient;
+import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import io.smallrye.common.annotation.Identifier;
 import io.smallrye.faulttolerance.api.Guard;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +56,15 @@ public class BeanFactory {
             log.error("Class for accessing GitHub API cannot be created", e);
             throw new RuntimeException(e);
         }
+    }
+
+    @Produces
+    @ApplicationScoped
+    public GitHubRestClient gitHubRestClient(ConfigUtils configUtils, GitHubRestClientHeadersFactory headersFactory) {
+        return QuarkusRestClientBuilder.newBuilder()
+                .baseUri(URI.create(configUtils.getActiveGitProviderConfig().url()))
+                .clientHeadersFactory(headersFactory)
+                .build(GitHubRestClient.class);
     }
 
     @Produces

@@ -7,12 +7,15 @@ package org.jboss.pnc.reqour.service.scmcreation;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
+import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHOrganization;
@@ -28,6 +31,9 @@ class GitHubApiServiceTest {
 
     @InjectMock
     GitHub gitHub;
+
+    @InjectMock
+    GitHubRestClient gitHubRestClient;
 
     @Inject
     GitHubApiService service;
@@ -65,5 +71,26 @@ class GitHubApiServiceTest {
 
         assertThat(result.status()).isEqualTo(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS);
         assertThat(result.repository().getOwnerName()).isEqualTo(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+    }
+
+    @Test
+    void doesTagProtectionAlreadyExists_validTagProtectionExists_returnsTrue() {
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+                .thenReturn(List.of(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET));
+        Mockito.when(
+                gitHubRestClient.getRuleset(
+                        TestDataSupplier.InternalSCM.WORKSPACE_NAME,
+                        TestDataSupplier.Cloning.TAG_PROTECTION_RULESET.getId()))
+                .thenReturn(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET);
+
+        assertThat(service.doesTagProtectionAlreadyExists(REPOSITORY_NAME)).isTrue();
+    }
+
+    @Test
+    void doesTagProtectionAlreadyExists_validTagProtectionDoesNotExist_returnsFalse() {
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+                .thenReturn(Collections.emptyList());
+
+        assertThat(service.doesTagProtectionAlreadyExists(REPOSITORY_NAME)).isFalse();
     }
 }

@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.service.scmcreation;
 
 import java.io.IOException;
+import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,6 +17,13 @@ import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
+import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetCondition;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetEnforcement;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetRule;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetSourceType;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetTarget;
 import org.kohsuke.github.GHOrganization;
 import org.kohsuke.github.GHRepository;
 import org.kohsuke.github.GitHub;
@@ -32,13 +40,17 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GitHubApiService {
 
+    public static final String ALL_REPOSITORIES_PATTERN = "~ALL";
+
     private final GitHub delegate;
     private final GitProviderConfig gitProviderConfig;
+    private final GitHubRestClient gitHubRestClient;
 
     @Inject
-    public GitHubApiService(GitHub delegate, ConfigUtils configUtils) {
+    public GitHubApiService(GitHub delegate, ConfigUtils configUtils, GitHubRestClient gitHubRestClient) {
         this.delegate = delegate;
         this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        this.gitHubRestClient = gitHubRestClient;
     }
 
     /**
@@ -101,5 +113,49 @@ public class GitHubApiService {
                             internalOrganization),
                     e);
         }
+    }
+
+    public boolean doesTagProtectionAlreadyExists(String repositoryName) {
+        List<GHRuleset> rulesets = getInternalOrganizationRulesets();
+        return rulesets.stream()
+                .filter(ruleset -> ruleset.getEnforcement().equals(GHRulesetEnforcement.ACTIVE))
+                .filter(ruleset -> ruleset.getTarget().equals(GHRulesetTarget.TAG))
+                .map(GHRuleset::getId)
+                .anyMatch(tagRulesetId -> isValidProtectedTagConfiguration(tagRulesetId, repositoryName));
+    }
+
+    private boolean isValidProtectedTagConfiguration(Integer rulesetId, String repositoryName) {
+        GHRuleset ruleset = getRuleset(rulesetId);
+        log.debug("Checking the ruleset: {}", ruleset);
+
+        if (!ruleset.getTarget().equals(GHRulesetTarget.TAG)) {
+            throw new IllegalArgumentException("Expected tag ruleset, got: " + ruleset);
+        }
+
+        return ruleset.getSourceType().equals(GHRulesetSourceType.ORGANIZATION) &&
+                ruleset.getSource().equals(gitProviderConfig.workspaceName()) &&
+                ruleset.getEnforcement().equals(GHRulesetEnforcement.ACTIVE) &&
+                isValidRulesetCondition(ruleset.getConditions(), repositoryName) &&
+                ruleset.getRules().contains(GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.DELETION)) &&
+                ruleset.getRules().contains(GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.NON_FAST_FORWARD));
+    }
+
+    private boolean isValidRulesetCondition(GHRulesetCondition condition, String repositoryName) {
+        GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitProviderConfig.tagProtection();
+        return (condition.getRepositoryName().getInclude().contains(repositoryName)
+                || condition.getRepositoryName().getInclude().contains(ALL_REPOSITORIES_PATTERN))
+                && (tagProtectionConfig.protectedTagsPattern().isEmpty() || condition.getRefName()
+                        .getInclude()
+                        .contains("refs/tags/" + tagProtectionConfig.protectedTagsPattern().get()));
+    }
+
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public List<GHRuleset> getInternalOrganizationRulesets() {
+        return gitHubRestClient.getAllRulesets(gitProviderConfig.workspaceName());
+    }
+
+    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    public GHRuleset getRuleset(Integer rulesetId) {
+        return gitHubRestClient.getRuleset(gitProviderConfig.workspaceName(), rulesetId);
     }
 }

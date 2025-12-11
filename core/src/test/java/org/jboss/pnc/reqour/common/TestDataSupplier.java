@@ -8,6 +8,7 @@ import static org.jboss.pnc.reqour.common.TestUtils.createTranslateRequestFromEx
 import static org.jboss.pnc.reqour.common.TestUtils.createTranslateResponseFromExternalUrl;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -20,6 +21,13 @@ import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetCondition;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetEnforcement;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetRule;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetSourceType;
+import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetTarget;
+import org.jboss.pnc.reqour.service.scmcreation.GitHubApiService;
 
 public class TestDataSupplier {
 
@@ -48,6 +56,33 @@ public class TestDataSupplier {
     }
 
     public static class Cloning {
+
+        public static GHRuleset TAG_PROTECTION_RULESET = GHRuleset.builder()
+                .id(42)
+                .name("test-tag-protection")
+                .enforcement(GHRulesetEnforcement.ACTIVE)
+                .target(GHRulesetTarget.TAG)
+                .sourceType(GHRulesetSourceType.ORGANIZATION)
+                .source(TestDataSupplier.InternalSCM.WORKSPACE_NAME)
+                .conditions(
+                        GHRulesetCondition.builder()
+                                .repositoryName(
+                                        GHRulesetCondition.ConditionRepositoryName.builder()
+                                                .include(List.of(GitHubApiService.ALL_REPOSITORIES_PATTERN))
+                                                .exclude(Collections.emptyList())
+                                                .build())
+                                .refName(
+                                        GHRulesetCondition.ConditionRefName.builder()
+                                                .include(List.of("refs/tags/*"))
+                                                .exclude(Collections.emptyList())
+                                                .build())
+                                .build())
+                .rules(
+                        List.of(
+                                GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.DELETION),
+                                GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.REQUIRED_LINEAR_HISTORY),
+                                GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.NON_FAST_FORWARD)))
+                .build();
 
         public static RepositoryCloneRequest withMissingTargetUrl() {
             return RepositoryCloneRequest.builder()
