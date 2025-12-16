@@ -99,8 +99,10 @@ public class CommonManipulatorConfigUtils {
             return Collections.emptyList();
         }
 
+        final String userSpecifiedAlignmentParametersParsed = userSpecifiedAlignmentParametersWithoutLocation
+                .replaceAll("\\s+", " ");
         org.apache.commons.exec.CommandLine parsedAlignmentParameters = org.apache.commons.exec.CommandLine
-                .parse(userSpecifiedAlignmentParametersWithoutLocation);
+                .parse(userSpecifiedAlignmentParametersParsed);
         return Arrays.stream(parsedAlignmentParameters.toStrings())
                 .map(IOUtils::unquote)
                 .toList();
