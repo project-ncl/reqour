@@ -184,6 +184,15 @@ class CommonManipulatorConfigUtilsTest {
     }
 
     @Test
+    void parseUserSpecifiedAlignmentParametersWithNewlineAsDelimiter() {
+        String userParams = "-Dversion=1\n-Dtest=1";
+
+        List<String> actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParametersWithoutLocation(userParams);
+        assertThat(actual.size()).isEqualTo(2);
+    }
+
+    @Test
     void getJavaLocation_noJavaVersionOverride_defaultIsUsed() {
         assertThat(CommonManipulatorConfigUtils.getJavaLocation(Collections.emptyList())).isEqualTo(
                 CommonManipulatorConfigUtils.getJavaOfVersion(CommonManipulatorConfigUtils.DEFAULT_JAVA_VERSION));
