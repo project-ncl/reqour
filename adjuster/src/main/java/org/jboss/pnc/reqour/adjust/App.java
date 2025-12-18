@@ -123,6 +123,7 @@ public class App implements Runnable {
                         adjustResponseBuilder,
                         manipulatorResult);
             }
+            userLogger.info("Adjust request was successful: {}", adjustRequest.getTaskId());
         } catch (AdjusterException | GitException | GitLabApiRuntimeException | GitHubApiException e) {
             log.warn("{} exception occurred, setting the status to FAILED", e.getClass().getSimpleName());
             userLogger.warn("Exception was: {}", e.getMessage(), e);

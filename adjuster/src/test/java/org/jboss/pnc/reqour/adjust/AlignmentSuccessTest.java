@@ -92,7 +92,8 @@ class AlignmentSuccessTest {
                                         WireMock.containing("[INFO] Pushing aligned changes"),
                                         AdjustTestUtils.getWireMockContainingPredicate(
                                                 ProcessStageUtils.Step.END,
-                                                AdjustProcessStage.ALIGNMENT_ADJUST))));
+                                                AdjustProcessStage.ALIGNMENT_ADJUST),
+                                        WireMock.containing("[INFO] Adjust request was successful"))));
         wireMock.verifyThat(
                 1,
                 WireMock.postRequestedFor(WireMock.urlEqualTo(CALLBACK_PATH))
