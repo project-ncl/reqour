@@ -12,8 +12,8 @@ import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.config.GitHubProviderConfig;
+import org.jboss.pnc.reqour.config.GitProvidersConfig;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 import org.jboss.pnc.reqour.service.translation.GitHubTranslationService;
@@ -25,20 +25,20 @@ import lombok.extern.slf4j.Slf4j;
  * Implementation of {@link InternalSCMRepositoryCreationService} using GitHub as its provider.
  */
 @ApplicationScoped
-@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITHUB)
+@LookupIfProperty(name = ConfigConstants.GITHUB_PROVIDER_ENABLED, stringValue = ConfigConstants.TRUE)
 @Slf4j
 public class GitHubRepositoryCreationService implements InternalSCMRepositoryCreationService {
 
-    private final GitProviderConfig gitProviderConfig;
+    private final GitHubProviderConfig gitHubProviderConfig;
     private final GitHubApiService gitHubApiService;
     private final GitHubTranslationService gitHubTranslationService;
 
     @Inject
     public GitHubRepositoryCreationService(
-            ConfigUtils configUtils,
+            GitProvidersConfig gitProvidersConfig,
             GitHubApiService gitHubApiService,
             GitHubTranslationService gitHubTranslationService) {
-        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        this.gitHubProviderConfig = gitProvidersConfig.github();
         this.gitHubApiService = gitHubApiService;
         this.gitHubTranslationService = gitHubTranslationService;
     }
@@ -51,11 +51,11 @@ public class GitHubRepositoryCreationService implements InternalSCMRepositoryCre
         return InternalSCMCreationResponse.builder()
                 .readonlyUrl(
                         InternalSCMRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitProviderConfig.readOnlyTemplate(),
+                                gitHubProviderConfig.readOnlyTemplate(),
                                 projectPath))
                 .readwriteUrl(
                         InternalSCMRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitProviderConfig.readWriteTemplate(),
+                                gitHubProviderConfig.readWriteTemplate(),
                                 projectPath))
                 .status(project.status())
                 .callback(ReqourCallback.builder().status(ResultStatus.SUCCESS).id(creationRequest.getTaskId()).build())
@@ -71,7 +71,7 @@ public class GitHubRepositoryCreationService implements InternalSCMRepositoryCre
                 .adjustRepositoryName(
                         projectParsed.repository(),
                         projectParsed.organization(),
-                        gitProviderConfig.workspaceName());
+                        gitHubProviderConfig.internalOrganizationName());
         log.info("Computed project path is: {}", projectPath);
         return projectPath;
     }

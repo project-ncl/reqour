@@ -12,6 +12,8 @@ public class WithGitHubProvider extends CommonTestProfile {
 
     @Override
     public Map<String, String> getConfigOverrides() {
-        return Map.of(ConfigConstants.ACTIVE_GIT_PROVIDER, ConfigConstants.GITHUB);
+        return Map.ofEntries(
+                Map.entry(ConfigConstants.GITLAB_PROVIDER_ENABLED, ConfigConstants.FALSE),
+                Map.entry(ConfigConstants.GITHUB_PROVIDER_ENABLED, ConfigConstants.TRUE));
     }
 }

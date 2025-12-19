@@ -63,18 +63,18 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
         String projectPath = "organization/newrepo";
         WireMockUtils.registerGet(
                 wireMock,
-                "/orgs/test-prefix",
+                "/orgs/test-organization",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("organization.json")));
         WireMockUtils.registerGet(
                 wireMock,
-                "/orgs/test-prefix/repos",
+                "/orgs/test-organization/repos",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
         WireMockUtils.registerGet(
                 wireMock,
-                "/repos/test-prefix/organization-existingrepo",
+                "/repos/test-organization/organization-existingrepo",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repository.json")));
         wireMock.register(
-                WireMock.post("/orgs/test-prefix/repos")
+                WireMock.post("/orgs/test-organization/repos")
                         .willReturn(WireMock.ok(Files.readString(GITHUB_OBJECTS_DIR.resolve("new-repo.json")))));
 
         RestAssured.given()
@@ -95,7 +95,9 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 wireMock,
                 CALLBACK_PATH,
                 objectMapper.writeValueAsString(
-                        TestUtils.newlyCreatedSuccess("test-prefix/organization-newrepo", TestDataSupplier.TASK_ID)));
+                        TestUtils.newlyCreatedSuccess(
+                                "test-organization/organization-newrepo",
+                                TestDataSupplier.TASK_ID)));
     }
 
     @Test
@@ -104,15 +106,15 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
         String projectPath = "organization/existingrepo";
         WireMockUtils.registerGet(
                 wireMock,
-                "/orgs/test-prefix",
+                "/orgs/test-organization",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("organization.json")));
         WireMockUtils.registerGet(
                 wireMock,
-                "/orgs/test-prefix/repos",
+                "/orgs/test-organization/repos",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
         WireMockUtils.registerGet(
                 wireMock,
-                "/repos/test-prefix/organization-existingrepo",
+                "/repos/test-organization/organization-existingrepo",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repository.json")));
 
         RestAssured.given()
@@ -134,7 +136,7 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 CALLBACK_PATH,
                 objectMapper.writeValueAsString(
                         TestUtils.alreadyExistsSuccess(
-                                "test-prefix/organization-existingrepo",
+                                "test-organization/organization-existingrepo",
                                 TestDataSupplier.TASK_ID)));
     }
 
@@ -144,9 +146,9 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
         String projectPath = "organization/repository";
         WireMockUtils.registerGet(
                 wireMock,
-                "/orgs/test-prefix/repos",
+                "/orgs/test-organization/repos",
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
-        WireMockUtils.registerFailures(wireMock, "/orgs/test-prefix", WireMock.serviceUnavailable(), 3);
+        WireMockUtils.registerFailures(wireMock, "/orgs/test-organization", WireMock.serviceUnavailable(), 3);
 
         RestAssured.given()
                 .when()
@@ -167,7 +169,7 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 CALLBACK_PATH,
                 objectMapper.writeValueAsString(
                         TestUtils.failed(
-                                "test-prefix/organization-repository",
+                                "test-organization/organization-repository",
                                 TestDataSupplier.TASK_ID)));
     }
 }

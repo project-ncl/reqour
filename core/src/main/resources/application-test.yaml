@@ -9,6 +9,7 @@ reqour:
   git:
     git-providers:
       gitlab:
+        enabled: true
         hostname: localhost
         username: test-user
         workspace: test-workspace
@@ -18,15 +19,14 @@ reqour:
         protected-tags-pattern: '*'
         protected-tags-accepted-patterns:
       github:
+        enabled: false
         hostname: localhost
         username: test-user
-        workspace: test-prefix
-        workspace-id: 1
+        internal-organization: test-organization
         token: I don't even need to be real
-        read-only-template: http://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.workspace}/%s.git
+        read-only-template: http://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.internal-organization}/%s.git
         protected-tags-pattern: '*'
         protected-tags-accepted-patterns:
-      active: gitlab
       fault-tolerance:
         retry:
           max-retries: 2

@@ -20,7 +20,6 @@ import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;
 import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetCondition;
 import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetEnforcement;
@@ -63,7 +62,7 @@ public class TestDataSupplier {
                 .enforcement(GHRulesetEnforcement.ACTIVE)
                 .target(GHRulesetTarget.TAG)
                 .sourceType(GHRulesetSourceType.ORGANIZATION)
-                .source(TestDataSupplier.InternalSCM.WORKSPACE_NAME)
+                .source(InternalSCM.INTERNAL_ORGANIZATION_NAME)
                 .conditions(
                         GHRulesetCondition.builder()
                                 .repositoryName(
@@ -101,6 +100,7 @@ public class TestDataSupplier {
     public static class InternalSCM {
 
         public static final String WORKSPACE_NAME = "test-workspace";
+        public static final String INTERNAL_ORGANIZATION_NAME = "test-organization";
         public static final long WORKSPACE_ID = 1L;
         public static final String DIFFERENT_WORKSPACE_NAME = "different-workspace";
         public static final long DIFFERENT_WORKSPACE_ID = 2L;
@@ -151,59 +151,5 @@ public class TestDataSupplier {
 
             return protectedTag;
         }
-    }
-
-    public static GitProviderConfig dummyGitProviderConfig() {
-        return new GitProviderConfig() {
-            @Override
-            public String username() {
-                return "";
-            }
-
-            @Override
-            public String url() {
-                return "";
-            }
-
-            @Override
-            public String workspaceName() {
-                return "";
-            }
-
-            @Override
-            public long workspaceId() {
-                return 0;
-            }
-
-            @Override
-            public String hostname() {
-                return "";
-            }
-
-            @Override
-            public String readOnlyTemplate() {
-                return "";
-            }
-
-            @Override
-            public String readWriteTemplate() {
-                return "";
-            }
-
-            @Override
-            public String gitUrlInternalTemplate() {
-                return "";
-            }
-
-            @Override
-            public String token() {
-                return "";
-            }
-
-            @Override
-            public TagProtectionConfig tagProtection() {
-                return null;
-            }
-        };
     }
 }

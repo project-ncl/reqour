@@ -23,8 +23,8 @@ reqour:
       github:
         url: https://${reqour.git.git-providers.github.hostname}
         git-url-internal-template: "git@${reqour.git.git-providers.github.hostname}:"
-        read-only-template: https://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.workspace}/%s.git
-        read-write-template: git@${reqour.git.git-providers.github.hostname}:${reqour.git.git-providers.github.workspace}/%s.git
+        read-only-template: https://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.internal-organization}/%s.git
+        read-write-template: git@${reqour.git.git-providers.github.hostname}:${reqour.git.git-providers.github.internal-organization}/%s.git
         token: ${GITHUB_TOKEN}
       fault-tolerance:
         description: 'Fault Tolerance Policy for Git Providers'

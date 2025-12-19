@@ -44,11 +44,11 @@ public class GitHubApiServiceFaultToleranceTest {
     @Test
     void getOrCreateInternalRepository_repositoryDoesNotExist_createsNewRepositoryAfterRetries() throws IOException {
         GHRepository repository = Mockito.mock(GHRepository.class);
-        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
         GHCreateRepositoryBuilder builder = Mockito.mock(GHCreateRepositoryBuilder.class);
         Mockito.when(builder.create()).thenReturn(repository);
         GHOrganization internalOrganization = Mockito.mock(GHOrganization.class);
-        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenThrow(new GitHubApiException("Service unavailable"))
                 .thenReturn(internalOrganization);
         Mockito.when(internalOrganization.getRepository(REPOSITORY_NAME))
@@ -62,18 +62,19 @@ public class GitHubApiServiceFaultToleranceTest {
         GitHubProjectCreationResult result = service.getOrCreateInternalRepository(REPOSITORY_NAME);
 
         assertThat(result.status()).isEqualTo(InternalSCMCreationStatus.SUCCESS_CREATED);
-        assertThat(result.repository().getOwnerName()).isEqualTo(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        assertThat(result.repository().getOwnerName())
+                .isEqualTo(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
     }
 
     @Test
     void getOrCreateInternalRepository_repositoryDoesNotExist_failsToCreateBecauseGitHubIsUnavailable()
             throws IOException {
         GHRepository repository = Mockito.mock(GHRepository.class);
-        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
         GHCreateRepositoryBuilder builder = Mockito.mock(GHCreateRepositoryBuilder.class);
         Mockito.when(builder.create()).thenReturn(repository);
         GHOrganization internalOrganization = Mockito.mock(GHOrganization.class);
-        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenThrow(new GitHubApiException("Service unavailable"))
                 .thenThrow(new GitHubApiException("Service unavailable x2"))
                 .thenThrow(new GitHubApiException("Service unavailable x3"))
@@ -90,13 +91,13 @@ public class GitHubApiServiceFaultToleranceTest {
 
     @Test
     void doesTagProtectionAlreadyExists_validTagProtectionExists_returnsTrueAfterRetries() {
-        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenThrow(new GitHubApiException("Service unavailable"))
                 .thenThrow(new GitHubApiException("Service unavailable x2"))
                 .thenReturn(List.of(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET));
         Mockito.when(
                 gitHubRestClient.getRuleset(
-                        TestDataSupplier.InternalSCM.WORKSPACE_NAME,
+                        TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME,
                         TestDataSupplier.Cloning.TAG_PROTECTION_RULESET.getId()))
                 .thenThrow(new GitHubApiException("Service unavailable"))
                 .thenReturn(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET);

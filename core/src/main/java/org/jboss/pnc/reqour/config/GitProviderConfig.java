@@ -7,7 +7,6 @@ package org.jboss.pnc.reqour.config;
 import java.util.List;
 import java.util.Optional;
 
-import io.smallrye.config.WithName;
 import io.smallrye.config.WithParentName;
 
 /**
@@ -15,16 +14,13 @@ import io.smallrye.config.WithParentName;
  */
 public interface GitProviderConfig {
 
+    boolean enabled();
+
     String url();
 
     String username();
 
     String hostname();
-
-    @WithName("workspace")
-    String workspaceName();
-
-    long workspaceId();
 
     String readOnlyTemplate();
 

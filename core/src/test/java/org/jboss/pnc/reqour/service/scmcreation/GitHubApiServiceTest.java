@@ -43,43 +43,45 @@ class GitHubApiServiceTest {
     @Test
     void getOrCreateInternalRepository_repositoryDoesNotExist_createsNewRepository() throws IOException {
         GHRepository repository = Mockito.mock(GHRepository.class);
-        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
         GHCreateRepositoryBuilder builder = Mockito.mock(GHCreateRepositoryBuilder.class);
         Mockito.when(builder.create()).thenReturn(repository);
         GHOrganization internalOrganization = Mockito.mock(GHOrganization.class);
         Mockito.when(internalOrganization.getRepository(Mockito.anyString())).thenReturn(null);
         Mockito.when(internalOrganization.createRepository(REPOSITORY_NAME)).thenReturn(builder);
-        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenReturn(internalOrganization);
 
         GitHubProjectCreationResult result = service.getOrCreateInternalRepository(REPOSITORY_NAME);
 
         assertThat(result.status()).isEqualTo(InternalSCMCreationStatus.SUCCESS_CREATED);
-        assertThat(result.repository().getOwnerName()).isEqualTo(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        assertThat(result.repository().getOwnerName())
+                .isEqualTo(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
     }
 
     @Test
     void getOrCreateInternalRepository_repositoryAlreadyExists_returnsExistingRepository() throws IOException {
-        GHOrganization internalOrganization = Mockito.mock(GHOrganization.class);
         GHRepository repository = Mockito.mock(GHRepository.class);
-        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
-        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(repository.getOwnerName()).thenReturn(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
+        GHOrganization internalOrganization = Mockito.mock(GHOrganization.class);
+        Mockito.when(gitHub.getOrganization(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenReturn(internalOrganization);
         Mockito.when(internalOrganization.getRepository(REPOSITORY_NAME)).thenReturn(repository);
 
         GitHubProjectCreationResult result = service.getOrCreateInternalRepository(REPOSITORY_NAME);
 
         assertThat(result.status()).isEqualTo(InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS);
-        assertThat(result.repository().getOwnerName()).isEqualTo(TestDataSupplier.InternalSCM.WORKSPACE_NAME);
+        assertThat(result.repository().getOwnerName())
+                .isEqualTo(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME);
     }
 
     @Test
     void doesTagProtectionAlreadyExists_validTagProtectionExists_returnsTrue() {
-        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenReturn(List.of(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET));
         Mockito.when(
                 gitHubRestClient.getRuleset(
-                        TestDataSupplier.InternalSCM.WORKSPACE_NAME,
+                        TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME,
                         TestDataSupplier.Cloning.TAG_PROTECTION_RULESET.getId()))
                 .thenReturn(TestDataSupplier.Cloning.TAG_PROTECTION_RULESET);
 
@@ -88,7 +90,7 @@ class GitHubApiServiceTest {
 
     @Test
     void doesTagProtectionAlreadyExists_validTagProtectionDoesNotExist_returnsFalse() {
-        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.WORKSPACE_NAME))
+        Mockito.when(gitHubRestClient.getAllRulesets(TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME))
                 .thenReturn(Collections.emptyList());
 
         assertThat(service.doesTagProtectionAlreadyExists(REPOSITORY_NAME)).isFalse();
