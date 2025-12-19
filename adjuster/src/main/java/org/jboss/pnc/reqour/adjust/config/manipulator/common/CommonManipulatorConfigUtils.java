@@ -99,6 +99,8 @@ public class CommonManipulatorConfigUtils {
             return Collections.emptyList();
         }
 
+        // Note: squashing whitespaces globally *possibly* has undesired effects on user's input
+        // (since they might not wish to do so, e.g. changing "-Dfoo='bar\tbaz'" to "-Dfoo='bar baz'")
         final String userSpecifiedAlignmentParametersParsed = userSpecifiedAlignmentParametersWithoutLocation
                 .replaceAll("\\s+", " ");
         org.apache.commons.exec.CommandLine parsedAlignmentParameters = org.apache.commons.exec.CommandLine

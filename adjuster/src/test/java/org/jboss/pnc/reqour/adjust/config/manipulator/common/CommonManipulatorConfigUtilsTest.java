@@ -184,12 +184,39 @@ class CommonManipulatorConfigUtilsTest {
     }
 
     @Test
-    void parseUserSpecifiedAlignmentParametersWithNewlineAsDelimiter() {
+    void parseUserSpecifiedAlignmentParametersWithoutLocation_separatedWithNewlines_returnsTwo() {
         String userParams = "-Dversion=1\n-Dtest=1";
+        List<String> expected = List.of("-Dversion=1", "-Dtest=1");
 
         List<String> actual = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParametersWithoutLocation(userParams);
+
         assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void parseUserSpecifiedAlignmentParametersWithoutLocation_separatedWithNewlinesAndExtraTrailingNewline_returnsTwo() {
+        String userParams = "-Dversion=1\n-Dtest=1\n";
+        List<String> expected = List.of("-Dversion=1", "-Dtest=1");
+
+        List<String> actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParametersWithoutLocation(userParams);
+
+        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void parseUserSpecifiedAlignmentParametersWithoutLocation_newlineInUsersParameter_isTranslatedIntoSpace() {
+        String userParams = "-Dfoo='bar\nbaz'";
+        List<String> expected = List.of("-Dfoo=bar baz");
+
+        List<String> actual = CommonManipulatorConfigUtils
+                .parseUserSpecifiedAlignmentParametersWithoutLocation(userParams);
+
+        assertThat(actual.size()).isEqualTo(1);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
