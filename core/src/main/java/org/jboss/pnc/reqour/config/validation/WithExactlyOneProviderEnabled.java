@@ -14,14 +14,13 @@ import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 /**
- * Validation annotation denoting that active git provider should exist (i.e., be configured as one of the git
- * providers).
+ * Validation annotation denoting that exactly one git provider should be enabled.
  */
-@Constraint(validatedBy = ExistingActiveGitProviderValidator.class)
+@Constraint(validatedBy = ExactlyOneGitProviderEnabledValidator.class)
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface WithExistingActiveGitProvider {
+public @interface WithExactlyOneProviderEnabled {
 
     String message() default "Invalid config file: active git provider is not configured";
 

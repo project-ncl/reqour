@@ -27,7 +27,7 @@ class GitHubTranslationServiceTest {
     void externalToInternal_repositoryWithoutGroup_returnsRepositoryInInternalGroupWithUnalignedName() {
         String externalUrl = "https://github.com/repo.git";
 
-        assertThat(service.get().externalToInternal(externalUrl)).isEqualTo("git@localhost:test-prefix/repo.git");
+        assertThat(service.get().externalToInternal(externalUrl)).isEqualTo("git@localhost:test-organization/repo.git");
     }
 
     @Test
@@ -35,14 +35,14 @@ class GitHubTranslationServiceTest {
         String externalUrl = "https://gitlab.com/organization/repo.git";
 
         assertThat(service.get().externalToInternal(externalUrl))
-                .isEqualTo("git@localhost:test-prefix/organization-repo.git");
+                .isEqualTo("git@localhost:test-organization/organization-repo.git");
     }
 
     @Test
     void externalToInternal_repositoryInInternalGroup_returnsRepositoryInInternalGroupWithUnalignedName() {
-        String externalUrl = "https://gitlab.com/test-prefix/repo.git";
+        String externalUrl = "https://gitlab.com/test-organization/repo.git";
 
         assertThat(service.get().externalToInternal(externalUrl))
-                .isEqualTo("git@localhost:test-prefix/repo.git");
+                .isEqualTo("git@localhost:test-organization/repo.git");
     }
 }

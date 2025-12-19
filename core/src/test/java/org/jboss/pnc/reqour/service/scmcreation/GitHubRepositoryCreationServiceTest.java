@@ -36,7 +36,7 @@ public class GitHubRepositoryCreationServiceTest {
         Mockito.when(gitHubApiService.getOrCreateInternalRepository(alignedRepositoryName))
                 .thenReturn(new GitHubProjectCreationResult(null, InternalSCMCreationStatus.SUCCESS_CREATED));
         InternalSCMCreationResponse expectedResponse = TestUtils.newlyCreatedSuccess(
-                TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/" + alignedRepositoryName,
+                TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME + "/" + alignedRepositoryName,
                 TestDataSupplier.TASK_ID);
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(
@@ -55,7 +55,7 @@ public class GitHubRepositoryCreationServiceTest {
         Mockito.when(gitHubApiService.getOrCreateInternalRepository(alignedRepositoryName))
                 .thenReturn(new GitHubProjectCreationResult(null, InternalSCMCreationStatus.SUCCESS_ALREADY_EXISTS));
         InternalSCMCreationResponse expectedResponse = TestUtils.alreadyExistsSuccess(
-                TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/" + alignedRepositoryName,
+                TestDataSupplier.InternalSCM.INTERNAL_ORGANIZATION_NAME + "/" + alignedRepositoryName,
                 TestDataSupplier.TASK_ID);
 
         InternalSCMCreationResponse response = service.createInternalSCMRepository(

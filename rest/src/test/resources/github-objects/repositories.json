@@ -2,10 +2,10 @@
   {
     "id": "123",
     "name": "organization-existingrepo",
-    "full_name": "test-prefix/organization-existingrepo",
+    "full_name": "test-organization/organization-existingrepo",
     "private": false,
     "owner": {
-      "login": "test-prefix",
+      "login": "test-organization",
       "id": 42
     }
   }

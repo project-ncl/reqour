@@ -9,6 +9,7 @@ reqour:
   git:
     git-providers:
       gitlab:
+        enabled: false
         hostname: gitlab.com
         username: dev-user
         workspace: dev-workspace
@@ -19,16 +20,15 @@ reqour:
         url: http://${reqour.git.git-providers.gitlab.hostname}
         read-only-template: http://${reqour.git.git-providers.gitlab.hostname}/${reqour.git.git-providers.gitlab.workspace}/%s.git
       github:
+        enabled: true
         hostname: github.com
         username: dev-user
-        workspace: dev-organization
-        workspace-id: 1
+        internal-organization: dev-organization
         token: 'Change me to github token.'
         protected-tags-pattern: '*'
         protected-tags-accepted-patterns:
         url: http://${reqour.git.git-providers.github.hostname}
-        read-only-template: http://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.workspace}/%s.git
-      active: github
+        read-only-template: http://${reqour.git.git-providers.github.hostname}/${reqour.git.git-providers.github.internal-organization}/%s.git
     acceptable-schemes:
       - https
       - http

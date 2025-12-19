@@ -27,7 +27,10 @@ public class ConfigUtils {
     }
 
     public GitProviderConfig getActiveGitProviderConfig() {
-        return config.gitConfigs().gitProviders().gitProviders().get(getActiveGitProvider().name().toLowerCase());
+        return switch (getActiveGitProvider()) {
+            case GITLAB -> config.gitConfigs().gitProviders().gitlab();
+            case GITHUB -> config.gitConfigs().gitProviders().github();
+        };
     }
 
     public PNCHttpClientConfig getPncHttpClientConfig() {
@@ -35,7 +38,14 @@ public class ConfigUtils {
     }
 
     public GitProvider getActiveGitProvider() {
-        return GitProvider.fromString(config.gitConfigs().gitProviders().activeGitProvider());
+        GitProvidersConfig gitProvidersConfig = config.gitConfigs().gitProviders();
+        if (gitProvidersConfig.gitlab().enabled()) {
+            return GitProvider.GITLAB;
+        }
+        if (gitProvidersConfig.github().enabled()) {
+            return GitProvider.GITHUB;
+        }
+        throw new IllegalArgumentException("No git provider is enabled");
     }
 
     public Optional<String> getPrivateGithubUser() {

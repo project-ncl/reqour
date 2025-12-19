@@ -4,25 +4,19 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import java.util.Map;
-
-import org.jboss.pnc.reqour.config.validation.WithExistingActiveGitProvider;
+import org.jboss.pnc.reqour.config.validation.WithExactlyOneProviderEnabled;
 
 import io.quarkus.runtime.Startup;
 import io.smallrye.config.ConfigMapping;
-import io.smallrye.config.WithName;
-import io.smallrye.config.WithParentName;
 
 @ConfigMapping(prefix = ConfigConstants.GIT_PROVIDERS) // CDI
 @Startup // force eager initialization in order to have validation during startup
-@WithExistingActiveGitProvider
+@WithExactlyOneProviderEnabled
 public interface GitProvidersConfig {
 
-    @WithParentName
-    Map<String, GitProviderConfig> gitProviders();
+    GitLabProviderConfig gitlab();
 
-    @WithName("active")
-    String activeGitProvider();
+    GitHubProviderConfig github();
 
     GitProviderFaultTolerancePolicy faultTolerance();
 }

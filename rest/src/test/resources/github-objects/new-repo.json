@@ -1,9 +1,9 @@
 {
   "id": "125",
   "name": "organization-newrepo",
-  "full_name": "test-prefix/organization-newrepo",
+  "full_name": "test-organization/organization-newrepo",
   "owner": {
-    "login": "test-prefix",
+    "login": "test-organization",
     "id": 42
   }
 }

@@ -10,7 +10,8 @@ public class ConfigConstants {
     public static final String GITHUB = "github";
 
     public static final String INTERNAL_URLS = "reqour.git.internal-urls";
-    public static final String ACTIVE_GIT_PROVIDER = "reqour.git.git-providers.active";
+    public static final String GITLAB_PROVIDER_ENABLED = "reqour.git.git-providers.gitlab.enabled";
+    public static final String GITHUB_PROVIDER_ENABLED = "reqour.git.git-providers.github.enabled";
     public static final String OIDC_CLIENT_ENABLED = "quarkus.oidc-client.enabled";
     public static final String OIDC_CLIENT_SECRET = "quarkus.oidc-client.credentials.secret";
     public static final String APP_NAME = "quarkus.application.name";
@@ -18,4 +19,7 @@ public class ConfigConstants {
     public static final String GIT_PROVIDERS = "reqour.git.git-providers";
     public static final String GIT_PROVIDERS_FAULT_TOLERANCE = "reqour.git.git-providers.fault-tolerance";
     public static final String BIFROST_UPLOADER_URL = "reqour.log.final-log.bifrost-uploader.base-url";
+
+    public static final String TRUE = "true";
+    public static final String FALSE = "false";
 }

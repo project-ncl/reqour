@@ -13,9 +13,10 @@ import jakarta.inject.Inject;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.GitHubProviderConfig;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
+import org.jboss.pnc.reqour.config.GitProvidersConfig;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
 import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
 import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;
@@ -36,20 +37,20 @@ import lombok.extern.slf4j.Slf4j;
  * Thin wrapper around {@link GitHub} for performing GitHub API calls.
  */
 @ApplicationScoped
-@LookupIfProperty(name = ConfigConstants.ACTIVE_GIT_PROVIDER, stringValue = ConfigConstants.GITHUB)
+@LookupIfProperty(name = ConfigConstants.GITHUB_PROVIDER_ENABLED, stringValue = ConfigConstants.TRUE)
 @Slf4j
 public class GitHubApiService {
 
     public static final String ALL_REPOSITORIES_PATTERN = "~ALL";
 
     private final GitHub delegate;
-    private final GitProviderConfig gitProviderConfig;
+    private final GitHubProviderConfig gitHubProviderConfig;
     private final GitHubRestClient gitHubRestClient;
 
     @Inject
-    public GitHubApiService(GitHub delegate, ConfigUtils configUtils, GitHubRestClient gitHubRestClient) {
+    public GitHubApiService(GitHub delegate, GitProvidersConfig gitProvidersConfig, GitHubRestClient gitHubRestClient) {
         this.delegate = delegate;
-        this.gitProviderConfig = configUtils.getActiveGitProviderConfig();
+        this.gitHubProviderConfig = gitProvidersConfig.github();
         this.gitHubRestClient = gitHubRestClient;
     }
 
@@ -79,10 +80,12 @@ public class GitHubApiService {
     @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public GHOrganization getInternalOrganization() {
         try {
-            return delegate.getOrganization(gitProviderConfig.workspaceName());
+            return delegate.getOrganization(gitHubProviderConfig.internalOrganizationName());
         } catch (IOException e) {
             throw new GitHubApiException(
-                    String.format("Cannot find the organization %s at GitHub", gitProviderConfig.workspaceName()),
+                    String.format(
+                            "Cannot find the organization %s at GitHub",
+                            gitHubProviderConfig.internalOrganizationName()),
                     e);
         }
     }
@@ -133,7 +136,7 @@ public class GitHubApiService {
         }
 
         return ruleset.getSourceType().equals(GHRulesetSourceType.ORGANIZATION) &&
-                ruleset.getSource().equals(gitProviderConfig.workspaceName()) &&
+                ruleset.getSource().equals(gitHubProviderConfig.internalOrganizationName()) &&
                 ruleset.getEnforcement().equals(GHRulesetEnforcement.ACTIVE) &&
                 isValidRulesetCondition(ruleset.getConditions(), repositoryName) &&
                 ruleset.getRules().contains(GHRulesetRule.of(GHRulesetRule.GHRulesetRuleType.DELETION)) &&
@@ -141,7 +144,7 @@ public class GitHubApiService {
     }
 
     private boolean isValidRulesetCondition(GHRulesetCondition condition, String repositoryName) {
-        GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitProviderConfig.tagProtection();
+        GitProviderConfig.TagProtectionConfig tagProtectionConfig = gitHubProviderConfig.tagProtection();
         return (condition.getRepositoryName().getInclude().contains(repositoryName)
                 || condition.getRepositoryName().getInclude().contains(ALL_REPOSITORIES_PATTERN))
                 && (tagProtectionConfig.protectedTagsPattern().isEmpty() || condition.getRefName()
@@ -151,11 +154,11 @@ public class GitHubApiService {
 
     @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public List<GHRuleset> getInternalOrganizationRulesets() {
-        return gitHubRestClient.getAllRulesets(gitProviderConfig.workspaceName());
+        return gitHubRestClient.getAllRulesets(gitHubProviderConfig.internalOrganizationName());
     }
 
     @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
     public GHRuleset getRuleset(Integer rulesetId) {
-        return gitHubRestClient.getRuleset(gitProviderConfig.workspaceName(), rulesetId);
+        return gitHubRestClient.getRuleset(gitHubProviderConfig.internalOrganizationName(), rulesetId);
     }
 }
