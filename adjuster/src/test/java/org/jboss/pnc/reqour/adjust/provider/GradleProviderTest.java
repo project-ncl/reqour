@@ -19,8 +19,8 @@ import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -51,7 +51,7 @@ class GradleProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -68,7 +68,7 @@ class GradleProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -88,7 +88,7 @@ class GradleProviderTest {
     @Test
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -106,7 +106,7 @@ class GradleProviderTest {
     @Test
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -126,7 +126,7 @@ class GradleProviderTest {
     @Test
     void prepareCommand_standardPersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("gradle-request.json")),
                 workdir,
                 null,
@@ -140,13 +140,13 @@ class GradleProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().gradleProviderConfig().cliJarPath().toString(),
+                        config.alignment().gradleProviderConfig().cliJarPath().toString(),
                         "--target",
                         workdir.toString(),
                         "--init-script",
-                        config.adjust().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
+                        config.alignment().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
                         "-l",
-                        config.adjust().gradleProviderConfig().defaultGradlePath().toString()));
+                        config.alignment().gradleProviderConfig().defaultGradlePath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -161,7 +161,7 @@ class GradleProviderTest {
     @Test
     void prepareCommand_servicePersistentBuildWithTemporaryPreference_generatedCommandIsCorrect() {
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("gradle-request-2.json")),
                 workdir,
                 null,
@@ -175,13 +175,13 @@ class GradleProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().gradleProviderConfig().cliJarPath().toString(),
+                        config.alignment().gradleProviderConfig().cliJarPath().toString(),
                         "--target",
                         workdir.toString(),
                         "--init-script",
-                        config.adjust().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
+                        config.alignment().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
                         "-l",
-                        config.adjust().gradleProviderConfig().defaultGradlePath().toString()));
+                        config.alignment().gradleProviderConfig().defaultGradlePath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -203,7 +203,7 @@ class GradleProviderTest {
         Files.createDirectory(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
 
         GradleProvider provider = new GradleProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("gradle-request-with-target-directory.json")),
                 workdir,
                 null,
@@ -217,13 +217,13 @@ class GradleProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().gradleProviderConfig().cliJarPath().toString(),
+                        config.alignment().gradleProviderConfig().cliJarPath().toString(),
                         "--target",
                         workdir.resolve("gradle-directory").toString(),
                         "--init-script",
-                        config.adjust().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
+                        config.alignment().gradleProviderConfig().gradleAnalyzerPluginInitFilePath().toString(),
                         "-l",
-                        config.adjust().gradleProviderConfig().defaultGradlePath().toString()));
+                        config.alignment().gradleProviderConfig().defaultGradlePath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(

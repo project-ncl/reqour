@@ -19,15 +19,15 @@ import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
-import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
-import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.AlignmentConfig;
+import org.jboss.pnc.reqour.config.adjuster.GradleProviderConfig;
+import org.jboss.pnc.reqour.config.adjuster.manipulator.GmeConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,7 +43,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
     private final CommonManipulatorResultExtractor adjustResultExtractor;
 
     public GradleProvider(
-            AdjustConfig adjustConfig,
+            AlignmentConfig alignmentConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -53,7 +53,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         super(objectMapper, processExecutor, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
 
-        GradleProviderConfig gradleProviderConfig = adjustConfig.gradleProviderConfig();
+        GradleProviderConfig gradleProviderConfig = alignmentConfig.gradleProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest, "t", "target");
 
@@ -61,9 +61,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
-                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
+                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
+                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(gradleProviderConfig.alignmentParameters())
                 .workdir(
                         userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
@@ -76,7 +76,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+        if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
             validateConfig();
             log.debug("GME config was successfully initialized and validated: {}", config);
         } else {

@@ -17,7 +17,7 @@ import org.jboss.pnc.bifrost.upload.BifrostUploadException;
 import org.jboss.pnc.bifrost.upload.LogMetadata;
 import org.jboss.pnc.bifrost.upload.TagOption;
 import org.jboss.pnc.common.log.MDCUtils;
-import org.jboss.pnc.reqour.config.ReqourConfig;
+import org.jboss.pnc.reqour.config.core.ReqourConfig;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 
 import lombok.extern.slf4j.Slf4j;

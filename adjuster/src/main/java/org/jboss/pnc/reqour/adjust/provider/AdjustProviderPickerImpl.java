@@ -10,11 +10,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
@@ -51,7 +51,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     public AdjustProvider pickAdjustProvider(AdjustRequest adjustRequest) {
         return switch (adjustRequest.getBuildType()) {
             case MVN, MVN_RPM -> new MvnProvider(
-                    config.adjust(),
+                    config.alignment(),
                     adjustRequest,
                     workdir,
                     objectMapper,
@@ -60,7 +60,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     rootGavExtractor,
                     userLogger);
             case GRADLE -> new GradleProvider(
-                    config.adjust(),
+                    config.alignment(),
                     adjustRequest,
                     workdir,
                     objectMapper,
@@ -68,9 +68,9 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     adjustResultExtractor,
                     userLogger);
             case NPM ->
-                new NpmProvider(config.adjust(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
+                new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
-                new SbtProvider(config.adjust(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
+                new SbtProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
         };
     }
 }

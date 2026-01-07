@@ -1,0 +1,34 @@
+/*
+ * Copyright 2024 Red Hat, Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+package org.jboss.pnc.reqour.config.adjuster.manipulator;
+
+import java.nio.file.Path;
+
+import org.jboss.pnc.reqour.config.adjuster.manipulator.common.CommonManipulatorConfig;
+
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.Value;
+import lombok.experimental.SuperBuilder;
+
+/**
+ * Configuration of the project manipulator.
+ */
+@SuperBuilder(toBuilder = true)
+@Value
+@EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
+public class ProjectManipulatorConfig extends CommonManipulatorConfig {
+
+    /**
+     * Location of the Project manipulator jar
+     */
+    Path cliJarPath;
+
+    /**
+     * The path to manipulation results file
+     */
+    Path resultsFilePath;
+}

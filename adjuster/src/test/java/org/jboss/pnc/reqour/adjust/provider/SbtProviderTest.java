@@ -18,8 +18,8 @@ import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -50,7 +50,7 @@ class SbtProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -66,7 +66,7 @@ class SbtProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -85,7 +85,7 @@ class SbtProviderTest {
     @Test
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -102,7 +102,7 @@ class SbtProviderTest {
     @Test
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -121,7 +121,7 @@ class SbtProviderTest {
     @Test
     void prepareCommand_standardTemporaryBuildWithPersistentAlignmentPreference_generatedCommandIsCorrect() {
         SbtProvider provider = new SbtProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("sbt-request.json")),
                 workdir,
                 null,
@@ -130,7 +130,7 @@ class SbtProviderTest {
 
         List<String> command = provider.prepareCommand();
 
-        assertThat(command).containsSequence(List.of(config.adjust().scalaProviderConfig().sbtPath().toString()));
+        assertThat(command).containsSequence(List.of(config.alignment().scalaProviderConfig().sbtPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(

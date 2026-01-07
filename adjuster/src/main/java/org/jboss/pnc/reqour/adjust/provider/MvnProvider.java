@@ -23,10 +23,6 @@ import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
-import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
-import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
@@ -34,6 +30,10 @@ import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.AlignmentConfig;
+import org.jboss.pnc.reqour.config.adjuster.MvnProviderConfig;
+import org.jboss.pnc.reqour.config.adjuster.manipulator.PmeConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -51,7 +51,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     private final RootGavExtractor rootGavExtractor;
 
     public MvnProvider(
-            AdjustConfig adjustConfig,
+            AlignmentConfig alignmentConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -63,7 +63,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
-        MvnProviderConfig mvnProviderConfig = adjustConfig.mvnProviderConfig();
+        MvnProviderConfig mvnProviderConfig = alignmentConfig.mvnProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
@@ -83,9 +83,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userAlignmentParametersWithFile)
-                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
+                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
+                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
                 .workdir(workdir)
                 .subFolderWithAlignmentResultFile(subFolderWithResults)
@@ -100,7 +100,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+        if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
             validateConfig();
             userLogger.info("PME config was successfully initialized and validated: {}", config);
         } else {

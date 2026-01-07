@@ -10,7 +10,7 @@ import java.util.Map;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
-import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 
 import io.quarkus.arc.lookup.LookupIfProperty;
 import io.quarkus.arc.profile.IfBuildProfile;

@@ -11,7 +11,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 
 import org.eclipse.microprofile.rest.client.ext.ClientHeadersFactory;
-import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.utils.ConfigUtils;
 
 @ApplicationScoped
 public class GitHubRestClientHeadersFactory implements ClientHeadersFactory {

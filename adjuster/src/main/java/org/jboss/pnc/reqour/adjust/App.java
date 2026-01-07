@@ -20,7 +20,6 @@ import org.jboss.pnc.bifrost.upload.BifrostUploadException;
 import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.common.log.ProcessStageUtils;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.AdjustmentPushResult;
 import org.jboss.pnc.reqour.adjust.model.CloningResult;
@@ -33,6 +32,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.enums.FinalLogUploader;
 import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
@@ -92,7 +92,7 @@ public class App implements Runnable {
 
     @Override
     public void run() {
-        AdjustRequest adjustRequest = IOUtils.unescapeUserAlignmentParameters(config.adjust().request());
+        AdjustRequest adjustRequest = IOUtils.unescapeUserAlignmentParameters(config.alignment().request());
         AdjustResponse.AdjustResponseBuilder adjustResponseBuilder = AdjustResponse.builder();
 
         try {

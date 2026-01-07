@@ -21,10 +21,10 @@ import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ public class MvnProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -78,7 +78,7 @@ public class MvnProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -99,7 +99,7 @@ public class MvnProviderTest {
     @Test
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -118,7 +118,7 @@ public class MvnProviderTest {
     @Test
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -139,7 +139,7 @@ public class MvnProviderTest {
     @Test
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json")),
                 workdir,
                 null,
@@ -154,9 +154,9 @@ public class MvnProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().mvnProviderConfig().cliJarPath().toString(),
+                        config.alignment().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
-                        config.adjust().mvnProviderConfig().defaultSettingsFilePath().toString()));
+                        config.alignment().mvnProviderConfig().defaultSettingsFilePath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -185,7 +185,7 @@ public class MvnProviderTest {
     @Test
     void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("mvn-request-2.json")),
                 workdir,
                 null,
@@ -200,9 +200,9 @@ public class MvnProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-17-openjdk/bin/java",
                         "-jar",
-                        config.adjust().mvnProviderConfig().cliJarPath().toString(),
+                        config.alignment().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
-                        config.adjust().mvnProviderConfig().temporarySettingsFilePath().toString()));
+                        config.alignment().mvnProviderConfig().temporarySettingsFilePath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -243,7 +243,7 @@ public class MvnProviderTest {
         Files.createFile(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
 
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("mvn-request-with-results-file.json")),
                 workdir,
                 null,
@@ -258,9 +258,9 @@ public class MvnProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().mvnProviderConfig().cliJarPath().toString(),
+                        config.alignment().mvnProviderConfig().cliJarPath().toString(),
                         "-s",
-                        config.adjust().mvnProviderConfig().defaultSettingsFilePath().toString()));
+                        config.alignment().mvnProviderConfig().defaultSettingsFilePath().toString()));
         assertThat(command).containsSequence("--file=directory/pom.xml");
         assertSystemPropertiesContainExactly(
                 command,
@@ -290,7 +290,7 @@ public class MvnProviderTest {
         Mockito.when(processExecutor.execute(Mockito.any())).thenReturn(1);
         AdjustRequest adjustRequest = adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json"));
         MvnProvider provider = new MvnProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustRequest,
                 workdir,
                 null,

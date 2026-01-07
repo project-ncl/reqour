@@ -12,11 +12,11 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
-import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.GitHubProviderConfig;
-import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
-import org.jboss.pnc.reqour.config.GitProvidersConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
+import org.jboss.pnc.reqour.config.core.GitHubProviderConfig;
+import org.jboss.pnc.reqour.config.core.GitProviderConfig;
+import org.jboss.pnc.reqour.config.core.GitProviderFaultTolerancePolicy;
+import org.jboss.pnc.reqour.config.core.GitProvidersConfig;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
 import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
 import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;

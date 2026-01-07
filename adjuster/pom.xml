@@ -25,6 +25,10 @@
         <!-- Inter-module dependencies -->
         <dependency>
             <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
             <artifactId>reqour-core</artifactId>
         </dependency>
 
@@ -36,10 +40,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
