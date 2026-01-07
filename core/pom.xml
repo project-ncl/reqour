@@ -26,19 +26,16 @@
             <groupId>org.jboss.pnc.reqour</groupId>
             <artifactId>reqour-config</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-runtime</artifactId>
+            <scope>test</scope>
+        </dependency>
 
         <!-- Quarkus dependencies -->
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-jackson</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jboss.pnc.logging</groupId>
@@ -54,10 +51,6 @@
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-oidc-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
             <artifactId>quarkus-smallrye-fault-tolerance</artifactId>
         </dependency>
 
@@ -66,10 +59,6 @@
             <groupId>org.jboss.pnc</groupId>
             <artifactId>pnc-api</artifactId>
             <classifier>jakarta</classifier>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pnc</groupId>
-            <artifactId>bifrost-upload-client</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -122,6 +111,10 @@
             <groupId>io.quarkiverse.wiremock</groupId>
             <artifactId>quarkus-wiremock-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-runtime</artifactId>
         </dependency>
     </dependencies>
 

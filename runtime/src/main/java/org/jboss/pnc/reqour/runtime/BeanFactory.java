@@ -6,22 +6,28 @@ package org.jboss.pnc.reqour.runtime;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.gitlab4j.api.GitLabApi;
 import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
+import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
+import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.reqour.config.core.BifrostUploaderConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.jboss.pnc.reqour.config.core.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.core.ReqourConfig;
 import org.jboss.pnc.reqour.config.utils.ConfigUtils;
-import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
-import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClientHeadersFactory;
+import org.jboss.pnc.reqour.runtime.api.github.GitHubRestClient;
+import org.jboss.pnc.reqour.runtime.api.github.GitHubRestClientHeadersFactory;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -34,6 +40,13 @@ import lombok.extern.slf4j.Slf4j;
 @ApplicationScoped
 @Slf4j
 public class BeanFactory {
+
+    @Produces
+    @ApplicationScoped
+    @UserLogger
+    Logger userLogger(@ConfigProperty(name = ConfigConstants.USER_LOGGER_NAME) String userLoggerName) {
+        return LoggerFactory.getLogger(userLoggerName);
+    }
 
     @Produces
     @ApplicationScoped
@@ -114,5 +127,14 @@ public class BeanFactory {
         PNCHttpClient client = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
         client.setTokenSupplier(() -> oidcClient.getTokens().await().indefinitely().getAccessToken());
         return client;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public HeartbeatScheduler heartbeatScheduler(
+            ScheduledExecutorService scheduledExecutor,
+            PNCHttpClient pncHttpClient) {
+        MDCScheduledThreadPoolExecutor mdcExecutor = new MDCScheduledThreadPoolExecutor(scheduledExecutor);
+        return new HeartbeatScheduler(mdcExecutor, pncHttpClient);
     }
 }

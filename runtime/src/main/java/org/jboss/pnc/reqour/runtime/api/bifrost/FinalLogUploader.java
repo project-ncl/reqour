@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.enums;
+package org.jboss.pnc.reqour.runtime.api.bifrost;
 
 import lombok.Getter;
 

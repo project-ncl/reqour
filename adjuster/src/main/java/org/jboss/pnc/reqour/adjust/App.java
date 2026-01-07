@@ -34,9 +34,9 @@ import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
-import org.jboss.pnc.reqour.enums.FinalLogUploader;
-import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.jboss.pnc.reqour.runtime.api.bifrost.BifrostLogUploaderWrapper;
+import org.jboss.pnc.reqour.runtime.api.bifrost.FinalLogUploader;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 

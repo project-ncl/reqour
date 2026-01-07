@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.service.githubrestapi;
+package org.jboss.pnc.reqour.runtime.api.github;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

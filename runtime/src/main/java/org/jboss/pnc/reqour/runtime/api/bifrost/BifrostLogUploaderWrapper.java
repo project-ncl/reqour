@@ -2,7 +2,7 @@
  * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
-package org.jboss.pnc.reqour.runtime;
+package org.jboss.pnc.reqour.runtime.api.bifrost;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,7 +18,6 @@ import org.jboss.pnc.bifrost.upload.LogMetadata;
 import org.jboss.pnc.bifrost.upload.TagOption;
 import org.jboss.pnc.common.log.MDCUtils;
 import org.jboss.pnc.reqour.config.core.ReqourConfig;
-import org.jboss.pnc.reqour.enums.FinalLogUploader;
 
 import lombok.extern.slf4j.Slf4j;
 
