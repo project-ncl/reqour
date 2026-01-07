@@ -36,6 +36,7 @@ import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -233,7 +234,7 @@ class GitCloneServiceTest {
     @Test
     void clone_cloningFromPrivateGithubRepo_throwsGitException() {
         String originUrl = "git@github.com:user/non-existent.git";
-        String testUser = ConfigProvider.getConfig().getValue("reqour.git.private-github-user", String.class);
+        String testUser = ConfigProvider.getConfig().getValue(ConfigConstants.PRIVATE_GITHUB_USER, String.class);
 
         assertThatThrownBy(
                 () -> service.clone(

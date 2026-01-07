@@ -17,15 +17,15 @@ import java.util.List;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
-import org.jboss.pnc.reqour.adjust.config.AdjustConfig;
-import org.jboss.pnc.reqour.adjust.config.SbtProviderConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.SmegConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.smeg.SmegResult;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.AlignmentConfig;
+import org.jboss.pnc.reqour.config.adjuster.SbtProviderConfig;
+import org.jboss.pnc.reqour.config.adjuster.manipulator.SmegConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,7 +41,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
-            AdjustConfig adjustConfig,
+            AlignmentConfig alignmentConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -49,7 +49,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
 
-        SbtProviderConfig sbtProviderConfig = adjustConfig.scalaProviderConfig();
+        SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
@@ -57,10 +57,10 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
-                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, adjustConfig))
+                .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .brewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
                 .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, adjustConfig))
+                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(sbtProviderConfig.alignmentParameters())
                 .workdir(
                         userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
@@ -69,7 +69,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
                 .build();
 
-        if (ConfigProvider.getConfig().getValue("reqour-adjuster.adjust.validate", Boolean.class)) {
+        if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
             validateConfig();
             log.debug("SMEG config was successfully initialized and validated: {}", config);
         } else {

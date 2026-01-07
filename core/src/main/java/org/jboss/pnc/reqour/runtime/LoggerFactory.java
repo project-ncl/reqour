@@ -8,7 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.slf4j.Logger;
 
 @ApplicationScoped

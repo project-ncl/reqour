@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
 import org.jboss.pnc.reqour.common.exceptions.InvalidExternalUrlException;
-import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.utils.ConfigUtils;
 
 import lombok.extern.slf4j.Slf4j;
 

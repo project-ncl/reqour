@@ -7,9 +7,9 @@ package org.jboss.pnc.reqour.service.translation;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import org.jboss.pnc.api.reqour.dto.validation.GitRepositoryURLValidator;
-import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.GitHubProviderConfig;
-import org.jboss.pnc.reqour.config.GitProvidersConfig;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
+import org.jboss.pnc.reqour.config.core.GitHubProviderConfig;
+import org.jboss.pnc.reqour.config.core.GitProvidersConfig;
 import org.jboss.pnc.reqour.service.api.TranslationService;
 
 import io.quarkus.arc.lookup.LookupIfProperty;

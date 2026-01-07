@@ -12,6 +12,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 
 public class WithConfiguredMdc extends WithSuccessfulAlternatives implements QuarkusTestProfile {
 
@@ -27,7 +28,7 @@ public class WithConfiguredMdc extends WithSuccessfulAlternatives implements Qua
     public Map<String, String> getConfigOverrides() {
         try {
             return Map.of(
-                    "reqour-adjuster.mdc",
+                    ConfigConstants.ADJUSTER_MDC,
                     objectMapper.writeValueAsString(MDCs));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);

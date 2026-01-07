@@ -22,9 +22,9 @@ import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
-import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,7 +62,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -78,7 +78,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequestWithUserVersionSuffixOverride_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -104,7 +104,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -121,7 +121,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_standardTemporaryRequestWithUserVersionSuffixOverride_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -148,7 +148,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -165,7 +165,7 @@ class NpmProviderTest {
     @Test
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 TestDataFactory.SERVICE_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -183,7 +183,7 @@ class NpmProviderTest {
     @Test
     void prepareCommand_standardTemporaryBuildWithPersistentPreference_generatedCommandIsCorrect() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 null,
@@ -196,7 +196,7 @@ class NpmProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().npmProviderConfig().cliJarPath().toString()));
+                        config.alignment().npmProviderConfig().cliJarPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -214,7 +214,7 @@ class NpmProviderTest {
     @Test
     void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("npm-request-2.json")),
                 workdir,
                 null,
@@ -227,7 +227,7 @@ class NpmProviderTest {
                 List.of(
                         "/usr/lib/jvm/java-11-openjdk/bin/java",
                         "-jar",
-                        config.adjust().npmProviderConfig().cliJarPath().toString()));
+                        config.alignment().npmProviderConfig().cliJarPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
@@ -245,7 +245,7 @@ class NpmProviderTest {
     @Test
     void obtainManipulatorResult_resultWithBasicName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 objectMapper,
@@ -266,7 +266,7 @@ class NpmProviderTest {
     @Test
     void obtainManipulatorResult_resultWithComplicatedName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
-                config.adjust(),
+                config.alignment(),
                 adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
                 workdir,
                 objectMapper,
