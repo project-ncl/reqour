@@ -31,6 +31,10 @@
             <groupId>org.jboss.pnc.reqour</groupId>
             <artifactId>reqour-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jboss.pnc.reqour</groupId>
+            <artifactId>reqour-runtime</artifactId>
+        </dependency>
 
         <!-- Quarkus dependencies -->
         <dependency>

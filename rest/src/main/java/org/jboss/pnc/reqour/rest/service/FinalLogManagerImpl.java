@@ -10,9 +10,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.constants.MDCHeaderKeys;
-import org.jboss.pnc.reqour.enums.FinalLogUploader;
-import org.jboss.pnc.reqour.runtime.BifrostLogUploaderWrapper;
 import org.jboss.pnc.reqour.runtime.UserLogger;
+import org.jboss.pnc.reqour.runtime.api.bifrost.BifrostLogUploaderWrapper;
+import org.jboss.pnc.reqour.runtime.api.bifrost.FinalLogUploader;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 

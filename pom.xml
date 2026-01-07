@@ -17,6 +17,7 @@
         <module>core</module>
         <module>rest</module>
         <module>config</module>
+        <module>runtime</module>
     </modules>
 
     <name>reqour</name>
@@ -145,6 +146,11 @@
             <dependency>
                 <groupId>org.jboss.pnc.reqour</groupId>
                 <artifactId>reqour-config</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.reqour</groupId>
+                <artifactId>reqour-runtime</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

@@ -16,7 +16,7 @@ import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.exceptions.GitHubApiException;
 import org.jboss.pnc.reqour.model.GitHubProjectCreationResult;
-import org.jboss.pnc.reqour.service.githubrestapi.GitHubRestClient;
+import org.jboss.pnc.reqour.runtime.api.github.GitHubRestClient;
 import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHCreateRepositoryBuilder;
 import org.kohsuke.github.GHOrganization;

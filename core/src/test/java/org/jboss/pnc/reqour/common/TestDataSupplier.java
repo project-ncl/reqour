@@ -20,12 +20,12 @@ import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRuleset;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetCondition;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetEnforcement;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetRule;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetSourceType;
-import org.jboss.pnc.reqour.service.githubrestapi.model.GHRulesetTarget;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRuleset;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetCondition;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetEnforcement;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetRule;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetSourceType;
+import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetTarget;
 import org.jboss.pnc.reqour.service.scmcreation.GitHubApiService;
 
 public class TestDataSupplier {
