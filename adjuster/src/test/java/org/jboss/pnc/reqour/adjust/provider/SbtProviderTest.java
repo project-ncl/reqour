@@ -18,6 +18,7 @@ import jakarta.inject.Inject;
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.adjuster.ReqourAdjusterConfig;
 import org.junit.jupiter.api.AfterAll;
@@ -74,7 +75,7 @@ class SbtProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
-                "-DversionIncrementalSuffix=temporary-redhat",
+                "-DversionIncrementalSuffix=temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -92,7 +93,7 @@ class SbtProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-redhat", "-DrestBrewPullActive=true");
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -110,7 +111,7 @@ class SbtProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-redhat",
+                "-DversionIncrementalSuffix=managedsvc-temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -140,7 +141,12 @@ class SbtProviderTest {
                         MapEntry.entry("restBrewPullActive", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY_PREFER_PERSISTENT"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "versionIncrementalSuffix", List.of("temporary-redhat"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "versionIncrementalSuffix",
+                List.of(
+                        TestDataSupplier.Alignment.TEMPORARY_PREFIX_OF_VERSION_SUFFIX + "-"
+                                + TestDataSupplier.Alignment.PERMANENT_SUFFIX));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
     }
 }

@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
+    private final AlignmentConfig alignmentConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
@@ -48,6 +49,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             ProcessExecutor processExecutor,
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
+        this.alignmentConfig = alignmentConfig;
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -125,7 +127,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-redhat"));
+                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
         }
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils

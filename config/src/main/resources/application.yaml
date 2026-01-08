@@ -38,6 +38,9 @@ reqour:
   adjuster:
     alignment:
       validate: true
+      suffix:
+        permanent: redhat
+        temporary-prefix: temporary
       request: ${ADJUST_REQUEST}
       build-categories:
         STANDARD:

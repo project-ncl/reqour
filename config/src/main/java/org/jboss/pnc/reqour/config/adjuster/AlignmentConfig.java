@@ -15,7 +15,7 @@ import io.smallrye.config.WithName;
  */
 public interface AlignmentConfig {
 
-    boolean validate();
+    SuffixConfiguration suffix();
 
     AdjustRequest request();
 
@@ -32,4 +32,6 @@ public interface AlignmentConfig {
     NpmProviderConfig npmProviderConfig();
 
     Map<String, BuildCategoryConfig> buildCategories();
+
+    boolean validate();
 }

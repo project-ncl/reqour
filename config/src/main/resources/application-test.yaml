@@ -44,6 +44,8 @@ reqour:
   adjuster:
     alignment:
       validate: true
+      suffix:
+        permanent: pnc
       request: >
         {
           "ref": "main",
@@ -80,7 +82,7 @@ reqour:
         alignment-parameters:
           - '-DconfigAlignmentParam=foo'
           - '-DrestURL=https://da.com/rest/v-1'
-          - '-DversionIncrementalSuffix=redhat'
+          - '-DversionIncrementalSuffix=${reqour.adjuster.alignment.suffix.permanent}'
           - '-Doverride=config'
       gradle:
         gradle-analyzer-plugin-init-file-path: '${test.location.providers.gradle}/analyzer-init.gradle'

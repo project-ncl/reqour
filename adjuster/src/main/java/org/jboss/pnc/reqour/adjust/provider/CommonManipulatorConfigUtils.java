@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -28,6 +29,7 @@ import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.adjuster.AlignmentConfig;
 import org.jboss.pnc.reqour.config.adjuster.BuildCategoryConfig;
 import org.jboss.pnc.reqour.config.adjuster.manipulator.ExecutionRootOverrides;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonManipulatorConfigUtils {
 
-    private static final String TEMPORARY_SUFFIX = "temporary";
+    private static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = ConfigProvider.getConfig()
+            .getValue(ConfigConstants.TEMPORARY_PREFIX_OF_VERSION_SUFFIX, String.class);
     public static final String DEFAULT_JAVA_VERSION = "11";
 
     /**
@@ -129,7 +132,8 @@ public class CommonManipulatorConfigUtils {
         BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
 
         if (request.isTempBuild()) {
-            return buildCategoryConfig.prefixOfSuffixVersion().map(s -> s + "-").orElse("") + TEMPORARY_SUFFIX;
+            return buildCategoryConfig.prefixOfSuffixVersion().map(s -> s + "-").orElse("")
+                    + TEMPORARY_PREFIX_OF_VERSION_SUFFIX;
         }
         return buildCategoryConfig.prefixOfSuffixVersion().orElse("");
     }
@@ -138,7 +142,7 @@ public class CommonManipulatorConfigUtils {
      * Strip the temporary suffix from the given prefix of the version suffix.
      */
     public static String stripTemporarySuffix(String prefixOfVersionSuffix) {
-        var suffixWithoutTemporary = prefixOfVersionSuffix.replace(TEMPORARY_SUFFIX, "");
+        var suffixWithoutTemporary = prefixOfVersionSuffix.replace(TEMPORARY_PREFIX_OF_VERSION_SUFFIX, "");
         return (suffixWithoutTemporary.endsWith("-"))
                 ? suffixWithoutTemporary.substring(0, suffixWithoutTemporary.length() - 1)
                 : suffixWithoutTemporary;

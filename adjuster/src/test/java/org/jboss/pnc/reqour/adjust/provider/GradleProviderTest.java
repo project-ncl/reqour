@@ -77,7 +77,7 @@ class GradleProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
-                "-DversionIncrementalSuffix=temporary-redhat",
+                "-DversionIncrementalSuffix=temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -96,7 +96,7 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-redhat", "-DrestBrewPullActive=true");
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -115,7 +115,7 @@ class GradleProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-redhat",
+                "-DversionIncrementalSuffix=managedsvc-temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -195,7 +195,7 @@ class GradleProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("user", "managedsvc-redhat"));
+                List.of("user", "managedsvc-pnc"));
     }
 
     @Test
