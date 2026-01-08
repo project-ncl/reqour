@@ -7,12 +7,12 @@ package org.jboss.pnc.reqour.adjust.profile;
 import java.util.Map;
 
 import org.jboss.pnc.api.constants.MDCHeaderKeys;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
 
 public class WithConfiguredMdc extends WithSuccessfulAlternatives implements QuarkusTestProfile {
 

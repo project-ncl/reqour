@@ -88,7 +88,7 @@ public class MvnProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
-                "-DversionIncrementalSuffix=temporary-redhat",
+                "-DversionIncrementalSuffix=temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -108,7 +108,7 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-redhat", "-DrestBrewPullActive=true");
+                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -128,7 +128,7 @@ public class MvnProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-redhat",
+                "-DversionIncrementalSuffix=managedsvc-temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -174,11 +174,11 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("redhat", "managedsvc-redhat"));
+                List.of("pnc", "managedsvc-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionSuffixAlternatives",
-                List.of("redhat,managedsvc-redhat"));
+                List.of("pnc,managedsvc-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
     }
 
@@ -233,7 +233,7 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("redhat", "temporary-redhat"));
+                List.of("pnc", "temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
     }
 
@@ -278,7 +278,7 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("redhat"));
+                List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
         Files.deleteIfExists(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence

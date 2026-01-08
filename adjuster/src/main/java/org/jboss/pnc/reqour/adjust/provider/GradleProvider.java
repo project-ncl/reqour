@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements AdjustProvider {
 
+    private final AlignmentConfig alignmentConfig;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
 
     public GradleProvider(
@@ -51,6 +52,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             CommonManipulatorResultExtractor adjustResultExtractor,
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
+        this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
 
         GradleProviderConfig gradleProviderConfig = alignmentConfig.gradleProviderConfig();
@@ -139,7 +141,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-redhat"));
+                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
         }
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
@@ -151,7 +153,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_SUFFIX_ALTERNATIVES,
-                            "redhat," + prefixOfSuffixWithoutTemporary + "-redhat"));
+                            alignmentConfig.suffix().permanent() + "," + prefixOfSuffixWithoutTemporary + "-"
+                                    + alignmentConfig.suffix().permanent()));
         }
 
         return alignmentParameters;

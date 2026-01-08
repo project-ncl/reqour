@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {
 
+    private final AlignmentConfig alignmentConfig;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
     private final RootGavExtractor rootGavExtractor;
 
@@ -60,6 +61,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             RootGavExtractor rootGavExtractor,
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
+        this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
@@ -139,7 +141,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-redhat"));
+                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
         }
 
         String prefixOfSuffixWithoutTemporary = CommonManipulatorConfigUtils
@@ -148,7 +150,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_SUFFIX_ALTERNATIVES,
-                            "redhat," + prefixOfSuffixWithoutTemporary + "-redhat"));
+                            alignmentConfig.suffix().permanent() + "," + prefixOfSuffixWithoutTemporary + "-"
+                                    + alignmentConfig.suffix().permanent()));
         }
 
         alignmentParameters.add(

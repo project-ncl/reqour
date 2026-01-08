@@ -20,6 +20,7 @@ import org.jboss.pnc.api.dto.Request;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateRequest;
 import org.jboss.pnc.api.reqour.dto.TranslateResponse;
+import org.jboss.pnc.reqour.config.core.ConfigConstants;
 import org.jboss.pnc.reqour.runtime.api.github.model.GHRuleset;
 import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetCondition;
 import org.jboss.pnc.reqour.runtime.api.github.model.GHRulesetEnforcement;
@@ -36,7 +37,7 @@ public class TestDataSupplier {
 
     public static class Translation {
 
-        private static final String INTERNAL_URL = ConfigProvider.getConfig()
+        private static final String GITLAB_INTERNAL_URL = ConfigProvider.getConfig()
                 .getValue("reqour.git.git-providers.gitlab.git-url-internal-template", String.class);
 
         public static TranslateResponse httpsWithOrganizationAndGitSuffix() {
@@ -50,7 +51,7 @@ public class TestDataSupplier {
         }
 
         public static String getInternalUrlWithOrganization() {
-            return INTERNAL_URL + "project/repo.git";
+            return GITLAB_INTERNAL_URL + "project/repo.git";
         }
     }
 
@@ -151,5 +152,13 @@ public class TestDataSupplier {
 
             return protectedTag;
         }
+    }
+
+    public static class Alignment {
+
+        public static final String PERMANENT_SUFFIX = ConfigProvider.getConfig()
+                .getValue(ConfigConstants.PERMANENT_SUFFIX, String.class);
+        public static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = ConfigProvider.getConfig()
+                .getValue(ConfigConstants.TEMPORARY_PREFIX_OF_VERSION_SUFFIX, String.class);
     }
 }
