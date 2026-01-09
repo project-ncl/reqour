@@ -219,27 +219,19 @@ public static List<String> clone(String url) {
 
 ## Source Code Structure
 
-The source code of the application is split into 3 modules:
+The source code of the application is split into several modules:
 - **rest**
   - containing implementations of endpoint handlers implementing [corresponding endpoint API](https://github.com/project-ncl/pnc-api/tree/11dd47c/src/main/java/org/jboss/pnc/api/reqour/rest)
 - **adjuster**
   - containing code of the adjuster
   - implemented as a CLI app, which is run once the adjuster pod has been successfully created
 - **core**
-  - everything else; typically abstractions used from both, e.g. ATE, PE
-
-## Testing
-
-In order to allow more **fine-grained control** over which tests are being run, **test profiles** defining tags are used. For instance, if you want to run only translation-related tests, run:
-```shell
-mvn test -Dquarkus.test.profile.tags=translation
-```
-
-The list of all available profiles is present [here](https://github.com/project-ncl/reqour/tree/2ff14b2/core/src/test/java/org/jboss/pnc/reqour/common/profile).
-
-In case you want to run all the tests, simply do not specify **quarkus.test.profile.tags** system property at all.
-
-For more information, see [Quarkus testing guide](https://quarkus.io/guides/getting-started-testing#testing_different_profiles).
+  - containing common abstractions used from both previously mentioned modules, e.g. ATE, PE
+- **config**
+  - containing [configuration mappings](https://quarkus.io/guides/config-mappings)
+  - only in this module is defined a single `application.yaml` (`application-dev.yaml` and `application-test.yaml`) for the whole project
+- **runtime**
+  - containing runtime-specific things, e.g. producer methods which initialize beans based on configuration
 
 ## Dockerfiles
 
