@@ -1,0 +1,28 @@
+quarkus:
+  oidc:
+    enabled: false
+  oidc-client:
+    enabled: false
+    credentials:
+      secret: oidc-client-secret
+  otel:
+    enabled: false
+
+reqour:
+  core:
+    git:
+      git-providers:
+        gitlab:
+          url: http://${reqour.core.git.git-providers.gitlab.hostname}:${quarkus.wiremock.devservices.port}
+        github:
+          url: http://${reqour.core.git.git-providers.github.hostname}:${quarkus.wiremock.devservices.port}
+      private-github-user: github-bot
+  rest:
+    app-environment: test
+    reqour-secret-key: test-secret
+    indy-url: https://test.indy.com
+    sasl-jaas-conf: sasl-jaas-config
+    job-definition-file-path: 'src/test/resources/job.yaml'
+
+wiremock:
+  base-url: http://localhost:${quarkus.wiremock.devservices.port}

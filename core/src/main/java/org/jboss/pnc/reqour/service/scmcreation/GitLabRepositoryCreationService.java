@@ -13,9 +13,9 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
-import org.jboss.pnc.reqour.config.core.GitLabProviderConfig;
-import org.jboss.pnc.reqour.config.core.GitProvidersConfig;
+import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.GitLabProviderConfig;
+import org.jboss.pnc.reqour.config.GitProvidersConfig;
 import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 import org.jboss.pnc.reqour.service.api.InternalSCMRepositoryCreationService;
 

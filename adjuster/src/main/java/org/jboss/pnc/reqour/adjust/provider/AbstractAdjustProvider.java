@@ -8,9 +8,10 @@ import java.util.List;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
+import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
-import org.jboss.pnc.reqour.config.adjuster.manipulator.common.CommonManipulatorConfig;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.slf4j.Logger;
 
@@ -61,7 +62,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
 
     /**
      * Prepare the command which invokes the manipulator with all the necessary options parsed from all the config
-     * sources, e.g. {@link AdjustRequest} and {@link org.jboss.pnc.reqour.adjust.config.AdjustConfig}.
+     * sources, e.g. {@link AdjustRequest} and {@link AlignmentConfig}.
      */
     abstract List<String> prepareCommand();
 

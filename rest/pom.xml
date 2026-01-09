@@ -25,10 +25,6 @@
         <!-- Inter-module dependencies -->
         <dependency>
             <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
             <artifactId>reqour-core</artifactId>
         </dependency>
         <dependency>
@@ -36,10 +32,6 @@
             <artifactId>reqour-core</artifactId>
             <type>test-jar</type>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.jboss.pnc.reqour</groupId>
-            <artifactId>reqour-runtime</artifactId>
         </dependency>
 
         <!-- Quarkus dependencies -->
@@ -54,6 +46,10 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-openshift-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-config-yaml</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>

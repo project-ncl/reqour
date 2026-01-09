@@ -17,9 +17,9 @@ import org.apache.commons.text.StringSubstitutor;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
-import org.jboss.pnc.reqour.config.core.ReqourConfig;
-import org.jboss.pnc.reqour.config.rest.ReqourRestConfig;
+import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
+import org.jboss.pnc.reqour.rest.config.ReqourRestConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
@@ -41,10 +41,10 @@ public class JobDefinitionCreator {
     ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
 
     @Inject
-    ReqourConfig reqourCoreConfig;
+    ReqourCoreConfig reqourCoreConfig;
 
     @Inject
-    ReqourConfig coreConfig;
+    ReqourCoreConfig coreConfig;
 
     @Inject
     ReqourRestConfig config;
@@ -61,8 +61,8 @@ public class JobDefinitionCreator {
     public Job getAdjusterJobDefinition(AdjustRequest adjustRequest, String jobName) {
         final Map<String, Object> properties = new HashMap<>();
 
-        final String privateGithubUser = coreConfig.gitConfigs().privateGithubUser().isEmpty() ? ""
-                : coreConfig.gitConfigs().privateGithubUser().get();
+        final String privateGithubUser = coreConfig.git().privateGithubUser().isEmpty() ? ""
+                : coreConfig.git().privateGithubUser().get();
         try {
             properties.put("jobName", jobName);
             properties.put("buildType", adjustRequest.getBuildType());

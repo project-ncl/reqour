@@ -1,0 +1,17 @@
+quarkus:
+  oidc:
+    enabled: false
+  oidc-client:
+    enabled: false
+  otel:
+    enabled: false
+  security:
+    auth:
+      enabled-in-dev-mode: false
+
+reqour:
+  rest:
+    app-environment: devel
+    reqour-secret-key: devel-secret-dummy-key
+    indy-url: https://dev-indy.example.com
+    sasl-jaas-conf: config
