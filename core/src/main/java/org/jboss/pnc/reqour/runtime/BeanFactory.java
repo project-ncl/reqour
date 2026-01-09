@@ -86,9 +86,9 @@ public class BeanFactory {
         BifrostUploaderConfig bifrostUploaderConfig = config.log().finalLog().bifrostUploader();
         return new BifrostLogUploader(
                 bifrostUploaderConfig.baseUrl(),
+                () -> "Bearer " + oidcClient.getTokens().await().indefinitely().getAccessToken(),
                 bifrostUploaderConfig.maxRetries(),
-                bifrostUploaderConfig.retryDelay(),
-                () -> oidcClient.getTokens().await().indefinitely().getAccessToken());
+                bifrostUploaderConfig.retryDelay());
     }
 
     @Produces

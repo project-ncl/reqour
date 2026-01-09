@@ -90,7 +90,7 @@
         <version.pnc-common>3.3.4</version.pnc-common>
         <version.pom-manipulation-common>4.22</version.pom-manipulation-common>
         <version.project-manipulator-npm>1.2.0</version.project-manipulator-npm>
-        <version.bifrost-upload-client>3.0.0</version.bifrost-upload-client>
+        <version.bifrost-upload-client>3.3.0</version.bifrost-upload-client>
         <version.gitlab4j-api>6.2.0</version.gitlab4j-api>
         <version.github-api>1.330</version.github-api>
         <version.assertj-core>3.27.6</version.assertj-core>
