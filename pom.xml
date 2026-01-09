@@ -16,8 +16,6 @@
         <module>adjuster</module>
         <module>core</module>
         <module>rest</module>
-        <module>config</module>
-        <module>runtime</module>
     </modules>
 
     <name>reqour</name>
@@ -142,16 +140,6 @@
                 <version>${project.version}</version>
                 <type>test-jar</type>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.pnc.reqour</groupId>
-                <artifactId>reqour-config</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jboss.pnc.reqour</groupId>
-                <artifactId>reqour-runtime</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.pnc.reqour</groupId>

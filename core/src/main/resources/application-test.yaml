@@ -1,0 +1,49 @@
+quarkus:
+  log:
+    console:
+      json: false
+  oidc-client:
+    enabled: false
+
+reqour:
+  core:
+    git:
+      git-providers:
+        gitlab:
+          enabled: true
+          hostname: localhost
+          username: test-user
+          workspace: test-workspace
+          workspace-id: 1
+          token: I don't even need to be real
+          read-only-template: http://${reqour.core.git.git-providers.gitlab.hostname}/${reqour.core.git.git-providers.gitlab.workspace}/%s.git
+          protected-tags-pattern: '*'
+          protected-tags-accepted-patterns:
+        github:
+          enabled: false
+          hostname: localhost
+          username: test-user
+          internal-organization: test-organization
+          token: I don't even need to be real
+          read-only-template: http://${reqour.core.git.git-providers.github.hostname}/${reqour.core.git.git-providers.github.internal-organization}/%s.git
+          protected-tags-pattern: '*'
+          protected-tags-accepted-patterns:
+        fault-tolerance:
+          retry:
+            max-retries: 2
+            initial-delay: 1
+            initial-delay-unit: seconds
+      acceptable-schemes:
+        - https
+        - http
+        - git
+        - git+ssh
+        - ssh
+      private-github-user: test-bot
+      user:
+        email: test-user@example.com
+        name: ReqourTest
+    log:
+      final-log:
+        bifrost-uploader:
+          base-url: http://localhost:${quarkus.wiremock.devservices.port}

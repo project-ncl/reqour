@@ -21,11 +21,11 @@ import org.gitlab4j.api.models.Project;
 import org.gitlab4j.api.models.ProtectedTag;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.reqour.common.exceptions.GitLabApiRuntimeException;
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
-import org.jboss.pnc.reqour.config.core.GitLabProviderConfig;
-import org.jboss.pnc.reqour.config.core.GitProviderConfig;
-import org.jboss.pnc.reqour.config.core.GitProviderFaultTolerancePolicy;
-import org.jboss.pnc.reqour.config.core.GitProvidersConfig;
+import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.GitLabProviderConfig;
+import org.jboss.pnc.reqour.config.GitProviderConfig;
+import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
+import org.jboss.pnc.reqour.config.GitProvidersConfig;
 import org.jboss.pnc.reqour.model.GitLabProjectCreationResult;
 
 import io.netty.handler.codec.http.HttpResponseStatus;

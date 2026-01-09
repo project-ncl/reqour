@@ -219,7 +219,7 @@ public static List<String> clone(String url) {
 
 ## Source Code Structure
 
-The source code of the application is split into several modules:
+The source code of the application is split into 3 modules:
 - **rest**
   - containing implementations of endpoint handlers implementing [corresponding endpoint API](https://github.com/project-ncl/pnc-api/tree/11dd47c/src/main/java/org/jboss/pnc/api/reqour/rest)
 - **adjuster**
@@ -227,11 +227,6 @@ The source code of the application is split into several modules:
   - implemented as a CLI app, which is run once the adjuster pod has been successfully created
 - **core**
   - containing common abstractions used from both previously mentioned modules, e.g. ATE, PE
-- **config**
-  - containing [configuration mappings](https://quarkus.io/guides/config-mappings)
-  - only in this module is defined a single `application.yaml` (`application-dev.yaml` and `application-test.yaml`) for the whole project
-- **runtime**
-  - containing runtime-specific things, e.g. producer methods which initialize beans based on configuration
 
 ## Dockerfiles
 

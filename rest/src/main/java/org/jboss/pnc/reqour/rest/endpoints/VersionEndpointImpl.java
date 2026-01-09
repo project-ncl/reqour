@@ -12,7 +12,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.pnc.api.dto.ComponentVersion;
 import org.jboss.pnc.api.endpoints.VersionEndpoint;
 import org.jboss.pnc.reqour.BuildInformationConstants;
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 
 @ApplicationScoped
 public class VersionEndpointImpl implements VersionEndpoint {

@@ -114,13 +114,13 @@ class JobDefinitionCreatorTest {
         assertThat(envVars.get(7).getValue()).isEqualTo(objectMapper.writeValueAsString(MDC_MAP));
 
         assertThat(envVars.get(8).getName()).isEqualTo("OIDC_CLIENT_CREDENTIALS_SECRET");
-        assertThat(envVars.get(8).getValue()).isEqualTo("secret-of-sa");
+        assertThat(envVars.get(8).getValue()).isEqualTo("oidc-client-secret");
 
         assertThat(envVars.get(9).getName()).isEqualTo("SASL_JAAS_CONF");
         assertThat(envVars.get(9).getValue()).isEqualTo("sasl-jaas-config");
 
         assertThat(envVars.get(10).getName()).isEqualTo("PRIVATE_GITHUB_USER");
-        assertThat(envVars.get(10).getValue()).isEqualTo("test-bot");
+        assertThat(envVars.get(10).getValue()).isEqualTo("github-bot");
 
         assertThat(
                 adjusterJobDefinition.getSpec()

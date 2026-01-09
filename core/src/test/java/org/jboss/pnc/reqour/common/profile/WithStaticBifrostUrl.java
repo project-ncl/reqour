@@ -6,7 +6,7 @@ package org.jboss.pnc.reqour.common.profile;
 
 import java.util.Map;
 
-import org.jboss.pnc.reqour.config.core.ConfigConstants;
+import org.jboss.pnc.reqour.config.ConfigConstants;
 
 import io.quarkus.test.junit.QuarkusTestProfile;
 
