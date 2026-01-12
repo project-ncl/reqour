@@ -12,6 +12,9 @@ quarkus:
     client-id: sa # overridden in runtime config
     credentials:
       secret: secret-of-sa # overridden in runtime config
+  cors:
+    enabled: true
+    origins: "/.*/"
 
 mp:
   openapi:
