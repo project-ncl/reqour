@@ -1,9 +1,12 @@
 version: 2
 updates:
-  - package-ecosystem: "maven"
-    directory: "/" # pom.xml present in root
+  - package-ecosystem: "maven" # See documentation for possible values
+    directory: "/" # Location of package manifests
     schedule:
-      interval: weekly
-      day: friday
-      time: '08:00' # UTC
-    open-pull-requests-limit: 5
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions" # Also update Github actions
+    directory: "/"
+    schedule:
+      # Check for updates to GitHub Actions every week
+      interval: "weekly"
