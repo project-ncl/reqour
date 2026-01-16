@@ -97,6 +97,8 @@ function check_binaries_are_installed() {
 
 function configure_git() {
   git config --global init.defaultBranch main
+  git config --global user.email "user@redhat.com"
+  git config --global user.name "Name Surname"
 }
 
 function configure_upstream() {
