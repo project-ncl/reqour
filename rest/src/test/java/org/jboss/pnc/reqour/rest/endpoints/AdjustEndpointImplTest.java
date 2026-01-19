@@ -20,6 +20,7 @@ import org.jboss.pnc.api.reqour.dto.AdjustResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.AdjustEndpoint;
 import org.jboss.pnc.common.log.ProcessStageUtils;
+import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 import org.jboss.pnc.reqour.rest.service.FinalLogManager;
@@ -50,7 +51,6 @@ import io.restassured.response.Response;
 @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class AdjustEndpointImplTest {
 
-    private static final String PROCESS_CONTEXT = "my-process-context";
     private static final String EXCEPTION_MESSAGE = "Ooops, something went terribly wrongie";
 
     WireMock wireMock;
@@ -83,7 +83,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), TestDataSupplier.PROCESS_CONTEXT))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
@@ -113,7 +113,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), TestDataSupplier.PROCESS_CONTEXT))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
@@ -156,7 +156,7 @@ class AdjustEndpointImplTest {
 
         Response response = RestAssured.given()
                 .contentType(MediaType.APPLICATION_JSON)
-                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), PROCESS_CONTEXT))
+                .header(new Header(MDCHeaderKeys.PROCESS_CONTEXT.getHeaderName(), TestDataSupplier.PROCESS_CONTEXT))
                 .body(TestUtils.createAdjustRequest())
                 .when()
                 .post();
