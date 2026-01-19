@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.ws.rs.DefaultValue;
+import io.smallrye.config.WithDefault;
 
 /**
  * Configuration of all git-related stuff, e.g. git providers and acceptable schemes.
@@ -29,7 +29,7 @@ public interface GitConfig {
      * For instance, when GitHub@IBM is set as active git provider, requests with GitLab@RedHat as its internal URL
      * should fail.
      */
-    @DefaultValue("true")
+    @WithDefault("true")
     boolean validateInternalUrl();
 
     Committer user();
