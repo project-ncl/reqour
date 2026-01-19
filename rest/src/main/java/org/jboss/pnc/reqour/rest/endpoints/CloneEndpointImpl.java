@@ -18,6 +18,7 @@ import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
 import org.jboss.pnc.reqour.common.callbacksender.CallbackSender;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.task.TaskExecutor;
+import org.jboss.pnc.reqour.common.utils.ValidationUtils;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.api.CloneService;
 import org.slf4j.Logger;
@@ -31,6 +32,7 @@ public class CloneEndpointImpl implements CloneEndpoint {
     private final CloneService service;
     private final TaskExecutor taskExecutor;
     private final CallbackSender callbackSender;
+    private final ValidationUtils validationUtils;
     private final Logger userLogger;
 
     @Inject
@@ -38,10 +40,12 @@ public class CloneEndpointImpl implements CloneEndpoint {
             CloneService service,
             TaskExecutor taskExecutor,
             CallbackSender callbackSender,
+            ValidationUtils validationUtils,
             @UserLogger Logger logger) {
         this.service = service;
         this.taskExecutor = taskExecutor;
         this.callbackSender = callbackSender;
+        this.validationUtils = validationUtils;
         this.userLogger = logger;
     }
 
@@ -49,6 +53,8 @@ public class CloneEndpointImpl implements CloneEndpoint {
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void clone(RepositoryCloneRequest cloneRequest) {
         userLogger.info("Clone request: {}", cloneRequest);
+
+        validationUtils.validateInternalUrlMatchesActiveGitProvider(cloneRequest.getTargetRepoUrl());
 
         taskExecutor.executeAsync(
                 cloneRequest.getCallback(),

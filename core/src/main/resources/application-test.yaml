@@ -39,6 +39,7 @@ reqour:
         - git
         - git+ssh
         - ssh
+      validate-internal-url: false
       private-github-user: test-bot
       user:
         email: test-user@example.com

@@ -48,6 +48,13 @@ public class ConfigUtils {
         throw new IllegalArgumentException("No git provider is enabled");
     }
 
+    public String getActiveGitProvidersHostname() {
+        return switch (getActiveGitProvider()) {
+            case GITLAB -> config.git().gitProviders().gitlab().hostname();
+            case GITHUB -> config.git().gitProviders().github().hostname();
+        };
+    }
+
     public Optional<String> getPrivateGithubUser() {
         return config.git().privateGithubUser();
     }

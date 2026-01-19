@@ -18,6 +18,7 @@ import org.jboss.pnc.api.reqour.dto.ReqourCallback;
 import org.jboss.pnc.api.reqour.rest.AdjustEndpoint;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.common.log.ProcessStageUtils;
+import org.jboss.pnc.reqour.common.utils.ValidationUtils;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 import org.jboss.pnc.reqour.rest.openshift.OpenShiftAdjusterJobController;
 import org.jboss.pnc.reqour.rest.service.FinalLogManager;
@@ -34,6 +35,7 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     private final OpenShiftAdjusterJobController openShiftAdjusterJobController;
     private final PNCHttpClient pncHttpClient;
     private final Logger userLogger;
+    private final ValidationUtils validationUtils;
     private final FinalLogManager finalLogManager;
 
     @Inject
@@ -42,11 +44,13 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
             ManagedExecutor managedExecutor,
             PNCHttpClient pncHttpClient,
             @UserLogger Logger userLogger,
+            ValidationUtils validationUtils,
             FinalLogManager finalLogManager) {
         this.managedExecutor = managedExecutor;
         this.pncHttpClient = pncHttpClient;
         this.openShiftAdjusterJobController = openShiftAdjusterJobController;
         this.userLogger = userLogger;
+        this.validationUtils = validationUtils;
         this.finalLogManager = finalLogManager;
     }
 
@@ -54,6 +58,8 @@ public class AdjustEndpointImpl implements AdjustEndpoint {
     @RolesAllowed({ OidcRoleConstants.PNC_APP_REPOUR_USER, OidcRoleConstants.PNC_USERS_ADMIN })
     public void adjust(AdjustRequest adjustRequest) {
         userLogger.info("Adjust request: {}", adjustRequest);
+
+        validationUtils.validateInternalUrlMatchesActiveGitProvider(adjustRequest.getInternalUrl().getReadwriteUrl());
 
         managedExecutor.runAsync(() -> {
             ProcessStageUtils.logProcessStageBegin(AdjustProcessStage.STARTING_ALIGNMENT_POD.name());
