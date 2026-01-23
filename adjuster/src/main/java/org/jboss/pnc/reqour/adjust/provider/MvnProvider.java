@@ -121,7 +121,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     @Override
     List<String> prepareCommand() {
-        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
+        Path javaLocation = CommonManipulatorConfigUtils
+                .getJavaLocation(userLogger, config.getUserSpecifiedAlignmentParameters());
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
                         List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),

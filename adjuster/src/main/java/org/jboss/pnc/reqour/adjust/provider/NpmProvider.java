@@ -84,7 +84,8 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
     @Override
     List<String> prepareCommand() {
-        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
+        Path javaLocation = CommonManipulatorConfigUtils
+                .getJavaLocation(userLogger, config.getUserSpecifiedAlignmentParameters());
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
                         List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
