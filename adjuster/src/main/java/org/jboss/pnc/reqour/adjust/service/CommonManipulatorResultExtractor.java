@@ -19,10 +19,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.commonjava.maven.ext.common.json.PME;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.mavenmanipulator.common.json.PME;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
