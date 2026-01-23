@@ -25,14 +25,14 @@
 
     <organization>
         <name>Red Hat, Inc.</name>
-        <url>http://www.redhat.com/</url>
+        <url>https://www.redhat.com/</url>
     </organization>
 
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
             <distribution>repo</distribution>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.html</url>
         </license>
     </licenses>
 
@@ -46,7 +46,7 @@
     <developers>
         <developer>
             <organization>RedHat</organization>
-            <organizationUrl>http://www.redhat.com</organizationUrl>
+            <organizationUrl>https://www.redhat.com</organizationUrl>
         </developer>
     </developers>
 
@@ -88,7 +88,7 @@
         <version.quarkus-logging-kafka>3.0.3</version.quarkus-logging-kafka>
         <version.pnc-api>3.2.4</version.pnc-api>
         <version.pnc-common>3.3.4</version.pnc-common>
-        <version.pom-manipulation-common>4.22</version.pom-manipulation-common>
+        <version.pom-manipulation-common>5.1</version.pom-manipulation-common>
         <version.project-manipulator-npm>1.2.0</version.project-manipulator-npm>
         <version.bifrost-upload-client>3.3.0</version.bifrost-upload-client>
         <version.gitlab4j-api>6.2.0</version.gitlab4j-api>
@@ -209,14 +209,10 @@
             </dependency>
             <dependency>
                 <!-- This dependency is used because adjuster has to know PME's internal representation in order to parse the result. -->
-                <groupId>org.commonjava.maven.ext</groupId>
+                <groupId>org.jboss.pnc.maven-manipulator</groupId>
                 <artifactId>pom-manipulation-common</artifactId>
                 <version>${version.pom-manipulation-common}</version>
                 <exclusions>
-                    <exclusion>
-                        <groupId>com.sun</groupId>
-                        <artifactId>tools</artifactId>
-                    </exclusion>
                     <exclusion>
                         <groupId>org.commonjava.maven.galley</groupId>
                         <artifactId>galley-maven</artifactId>
@@ -374,6 +370,7 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
             <plugin>

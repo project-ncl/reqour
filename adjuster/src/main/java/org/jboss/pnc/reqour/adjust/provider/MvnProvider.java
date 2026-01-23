@@ -16,13 +16,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.commonjava.maven.ext.common.json.GAV;
-import org.commonjava.maven.ext.common.json.PME;
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.mavenmanipulator.common.json.GAV;
+import org.jboss.pnc.mavenmanipulator.common.json.PME;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;

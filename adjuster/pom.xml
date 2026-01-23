@@ -57,7 +57,7 @@
         </dependency>
         <dependency>
             <!-- This dependency is used because adjuster has to know PME's internal representation in order to parse the result. -->
-            <groupId>org.commonjava.maven.ext</groupId>
+            <groupId>org.jboss.pnc.maven-manipulator</groupId>
             <artifactId>pom-manipulation-common</artifactId>
         </dependency>
         <dependency>
