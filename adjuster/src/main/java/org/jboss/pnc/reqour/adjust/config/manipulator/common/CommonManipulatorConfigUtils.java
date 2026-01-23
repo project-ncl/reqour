@@ -193,7 +193,10 @@ public class CommonManipulatorConfigUtils {
     }
 
     static Path getJavaOfVersion(String javaVersion) {
-        return Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-openjdk", "bin", "java");
+        return switch (javaVersion) {
+            case "24", "25" -> Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-temurin-jdk", "bin", "java");
+            default -> Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-openjdk", "bin", "java");
+        };
     }
 
     private static BuildCategoryConfig getBuildCategoryConfig(AdjustRequest request, AlignmentConfig alignmentConfig) {
