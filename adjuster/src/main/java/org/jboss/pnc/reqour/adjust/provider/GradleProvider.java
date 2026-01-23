@@ -100,7 +100,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     List<String> prepareCommand() {
-        Path javaLocation = CommonManipulatorConfigUtils.getJavaLocation(config.getUserSpecifiedAlignmentParameters());
+        Path javaLocation = CommonManipulatorConfigUtils
+                .getJavaLocation(userLogger, config.getUserSpecifiedAlignmentParameters());
         List<String> targetAndInit = getTargetAndInit();
 
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(

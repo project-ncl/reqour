@@ -30,6 +30,7 @@ import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -177,11 +178,13 @@ public class CommonManipulatorConfigUtils {
      * Get the location of the java within the container environment. In case user specified none, defaults to java
      * {@value DEFAULT_JAVA_VERSION}.
      */
-    public static Path getJavaLocation(List<String> userSpecifiedAlignmentParameters) {
+    public static Path getJavaLocation(Logger userLogger, List<String> userSpecifiedAlignmentParameters) {
         Optional<String> jvmLocationSystemProperty = userSpecifiedAlignmentParameters.stream()
-                .filter(p -> p.startsWith("-DRepour_Java"))
+                .filter(p -> p.startsWith("-DRepour_Java") || p.startsWith("-DReqour_Java"))
                 .findFirst();
-
+        if (jvmLocationSystemProperty.isPresent() && jvmLocationSystemProperty.get().startsWith("-DRepour_Java")) {
+            userLogger.warn("-DRepour_Java is deprecated; use -DReqour_Java");
+        }
         String javaVersion = jvmLocationSystemProperty.map(s -> s.split("=")[1])
                 .orElse(DEFAULT_JAVA_VERSION);
         log.debug("Parsed java version: {}", javaVersion);

@@ -214,6 +214,10 @@
                 <version>${version.pom-manipulation-common}</version>
                 <exclusions>
                     <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                    <exclusion>
                         <groupId>org.commonjava.maven.galley</groupId>
                         <artifactId>galley-maven</artifactId>
                     </exclusion>
@@ -390,6 +394,7 @@
                         <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
                 </configuration>
             </plugin>
             <plugin>
