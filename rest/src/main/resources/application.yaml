@@ -2,6 +2,9 @@ quarkus:
   http:
     enable-compression: true
     enable-decompression: true
+    cors:
+      enabled: true
+      origins: "/.*/"
   swagger-ui:
     always-include: true
   oidc:
@@ -12,9 +15,6 @@ quarkus:
     client-id: sa # overridden in runtime config
     credentials:
       secret: secret-of-sa # overridden in runtime config
-  cors:
-    enabled: true
-    origins: "/.*/"
 
 mp:
   openapi:
