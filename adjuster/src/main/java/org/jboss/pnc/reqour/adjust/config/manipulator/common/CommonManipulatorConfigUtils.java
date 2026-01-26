@@ -198,6 +198,7 @@ public class CommonManipulatorConfigUtils {
 
     static Path getJavaOfVersion(String javaVersion) {
         return switch (javaVersion) {
+            case "12" -> Path.of("/usr", "lib", "jvm", "adoptopenjdk-" + javaVersion + "-hotspot", "bin", "java");
             case "24", "25" -> Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-temurin-jdk", "bin", "java");
             default -> Path.of("/usr", "lib", "jvm", "java-" + javaVersion + "-openjdk", "bin", "java");
         };
