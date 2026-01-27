@@ -105,7 +105,7 @@
         <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
         <version.maven-compiler-plugin>3.12.1</version.maven-compiler-plugin>
         <version.license-maven-plugin>5.0.0</version.license-maven-plugin>
-        <version.spotless-maven-plugin>3.1.0</version.spotless-maven-plugin>
+        <version.spotless-maven-plugin>3.2.1</version.spotless-maven-plugin>
         <version.central-publishing-maven-plugin>0.10.0</version.central-publishing-maven-plugin>
         <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
         <version.lombok-maven-plugin>1.18.20.0</version.lombok-maven-plugin>
