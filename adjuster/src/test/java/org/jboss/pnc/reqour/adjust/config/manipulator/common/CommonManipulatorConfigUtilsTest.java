@@ -259,7 +259,7 @@ class CommonManipulatorConfigUtilsTest {
 
     @Test
     void getJavaLocation_java24VersionOverrideGiven_overrideIsUsed() {
-        assertThat(CommonManipulatorConfigUtils.getJavaLocation(List.of("-DRepour_Java=24")))
+        assertThat(CommonManipulatorConfigUtils.getJavaLocation(log, List.of("-DRepour_Java=24")))
                 .hasToString("/usr/lib/jvm/java-24-temurin-jdk/bin/java");
     }
 
