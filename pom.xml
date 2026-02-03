@@ -97,7 +97,7 @@
         <version.quarkus-logging-json>3.4.1</version.quarkus-logging-json>
         <version.quarkus-logging-kafka>3.0.3</version.quarkus-logging-kafka>
         <version.pnc-api>3.2.4</version.pnc-api>
-        <version.pnc-common>3.3.4</version.pnc-common>
+        <version.pnc-common>3.4.0</version.pnc-common>
         <version.pom-manipulation-common>5.1</version.pom-manipulation-common>
         <version.project-manipulator-npm>1.2.0</version.project-manipulator-npm>
         <version.bifrost-upload-client>3.3.0</version.bifrost-upload-client>
