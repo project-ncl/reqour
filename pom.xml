@@ -87,7 +87,7 @@
         <version.quarkus-logging-json>3.4.1</version.quarkus-logging-json>
         <version.quarkus-logging-kafka>3.0.3</version.quarkus-logging-kafka>
         <version.pnc-api>3.2.4</version.pnc-api>
-        <version.pnc-common>3.3.4</version.pnc-common>
+        <version.pnc-common>3.4.1-SNAPSHOT</version.pnc-common>
         <version.pom-manipulation-common>5.1</version.pom-manipulation-common>
         <version.project-manipulator-npm>1.2.0</version.project-manipulator-npm>
         <version.bifrost-upload-client>3.3.0</version.bifrost-upload-client>
@@ -115,6 +115,7 @@
         <version.git-commit-id-plugin>4.9.10</version.git-commit-id-plugin>
         <version.maven-replacer-plugin>1.4.1</version.maven-replacer-plugin>
         <version.maven-jar-plugin>3.4.2</version.maven-jar-plugin>
+        <version.quarkus-pnc-client-auth>1.0.0-SNAPSHOT</version.quarkus-pnc-client-auth>
     </properties>
 
     <dependencyManagement>
@@ -170,6 +171,11 @@
                         <artifactId>pnc-api</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+              <groupId>org.jboss.pnc</groupId>
+              <artifactId>quarkus-pnc-client-auth</artifactId>
+              <version>${version.quarkus-pnc-client-auth}</version>
             </dependency>
             <dependency>
                 <groupId>org.projectlombok</groupId>
