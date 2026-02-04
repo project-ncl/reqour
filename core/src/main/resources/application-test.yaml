@@ -5,6 +5,9 @@ quarkus:
   oidc-client:
     enabled: false
 
+  arc:
+    exclude-types: org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuthImpl
+
 reqour:
   core:
     git:

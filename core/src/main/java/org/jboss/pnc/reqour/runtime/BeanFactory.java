@@ -17,6 +17,7 @@ import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
+import org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuth;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
@@ -31,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.quarkus.oidc.client.OidcClient;
 import io.quarkus.rest.client.reactive.QuarkusRestClientBuilder;
 import io.smallrye.common.annotation.Identifier;
 import io.smallrye.faulttolerance.api.Guard;
@@ -82,11 +82,11 @@ public class BeanFactory {
 
     @Produces
     @ApplicationScoped
-    public BifrostLogUploader bifrostLogUploader(ReqourCoreConfig config, OidcClient oidcClient) {
+    public BifrostLogUploader bifrostLogUploader(ReqourCoreConfig config, PNCClientAuth pncClientAuth) {
         BifrostUploaderConfig bifrostUploaderConfig = config.log().finalLog().bifrostUploader();
         return new BifrostLogUploader(
                 bifrostUploaderConfig.baseUrl(),
-                () -> "Bearer " + oidcClient.getTokens().await().indefinitely().getAccessToken(),
+                pncClientAuth::getHttpAuthorizationHeaderValue,
                 bifrostUploaderConfig.maxRetries(),
                 bifrostUploaderConfig.retryDelay());
     }
@@ -123,9 +123,12 @@ public class BeanFactory {
 
     @Produces
     @ApplicationScoped
-    public PNCHttpClient pncHttpClient(ObjectMapper objectMapper, ConfigUtils configUtils, OidcClient oidcClient) {
+    public PNCHttpClient pncHttpClient(
+            ObjectMapper objectMapper,
+            ConfigUtils configUtils,
+            PNCClientAuth pncClientAuth) {
         PNCHttpClient client = new PNCHttpClient(objectMapper, configUtils.getPncHttpClientConfig());
-        client.setTokenSupplier(() -> oidcClient.getTokens().await().indefinitely().getAccessToken());
+        client.setAuthValueSupplier(pncClientAuth::getHttpAuthorizationHeaderValue);
         return client;
     }
 

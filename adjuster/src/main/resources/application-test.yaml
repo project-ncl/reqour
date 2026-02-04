@@ -6,6 +6,9 @@ quarkus:
       "org.jboss.pnc._userlog_":
         level: DEBUG
 
+  arc:
+    exclude-types: org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuthImpl
+
 reqour:
   adjuster:
     alignment:
