@@ -41,6 +41,17 @@ class AdjustmentSystemPropertiesUtilsTest {
     }
 
     @Test
+    void getSystemPropertyValue_namePresentButValueNot_returnsOptionalEmpty() {
+        String name = "key";
+        Stream<String> stream = Stream.of("foo", "key");
+
+        Optional<String> optionalValue = AdjustmentSystemPropertiesUtils
+                .getSystemPropertyValue(name, stream);
+
+        assertThat(optionalValue.isEmpty()).isTrue();
+    }
+
+    @Test
     void getSystemPropertyValue_nameNotPresent_returnsEmpty() {
         String name = "nonexistent";
         String value = "value";

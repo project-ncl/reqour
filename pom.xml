@@ -70,6 +70,16 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <repository>
+            <id>gradle-remote</id>
+            <url>https://repo.gradle.org/gradle/libs-releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <properties>
@@ -137,6 +147,16 @@
                 <artifactId>pnc-api</artifactId>
                 <version>3.2.4</version>
                 <classifier>jakarta</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.gradle-manipulator</groupId>
+                <artifactId>common</artifactId>
+                <version>5.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.gradle</groupId>
+                <artifactId>gradle-core-api</artifactId>
+                <version>6.1.1</version>
             </dependency>
 
             <!-- Test dependencies -->
