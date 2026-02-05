@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 
@@ -17,13 +18,19 @@ import java.util.Map;
 import jakarta.inject.Inject;
 
 import org.assertj.core.data.MapEntry;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.api.reqour.dto.RemovedRepository;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
+import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.common.profile.GradleAdjustProfile;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -39,16 +46,100 @@ class GradleProviderTest {
     @Inject
     AdjustTestUtils adjustTestUtils;
 
+    @Inject
+    CommonManipulatorResultExtractor resultExtractor;
+
     static Path workdir;
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void setUp() {
         workdir = IOUtils.createTempRandomDirForAdjust();
     }
 
-    @AfterAll
-    static void afterAll() throws IOException {
+    @AfterEach
+    void afterEach() throws IOException {
         IOUtils.deleteTempDir(workdir);
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledUserProvidedNoFile_exceptionThrown() {
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+
+        assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(AdjusterException.class)
+                .hasMessageContaining("no user-provided file");
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledUserProvidedOnlyVersioningFile_versioningReadButRemovedRepositoriesEmpty()
+            throws IOException {
+        Files.copy(
+                Path.of(adjustTestUtils.getGradleProviderResourcesLocation())
+                        .resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()),
+                workdir.resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()));
+
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("foo")
+                .executionRootVersion("1.0.42.Final-rebuild-00001")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledUserProvidedBothVersioningAndRemovedRepositoriesFiles_bothFilesRead()
+            throws IOException {
+        Files.copy(
+                Path.of(adjustTestUtils.getGradleProviderResourcesLocation())
+                        .resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()),
+                workdir.resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()));
+        Files.copy(
+                Path.of(adjustTestUtils.getGradleProviderResourcesLocation())
+                        .resolve(CommonManipulatorResultExtractor.DEFAULT_REMOVED_REPOSITORIES_FILENAME),
+                workdir.resolve(CommonManipulatorResultExtractor.DEFAULT_REMOVED_REPOSITORIES_FILENAME));
+
+        GradleProvider provider = new GradleProvider(
+                config.adjust(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("foo")
+                .executionRootVersion("1.0.42.Final-rebuild-00001")
+                .build();
+        List<RemovedRepository> expectedRemovedRepositories = List.of(
+                RemovedRepository.builder()
+                        .id("foo")
+                        .name("foo")
+                        .url("https://example.com")
+                        .releases(true)
+                        .snapshots(true)
+                        .build());
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEqualTo(expectedRemovedRepositories);
     }
 
     @Test
