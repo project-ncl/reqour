@@ -100,6 +100,9 @@
         <version.commons-exec>1.5.0</version.commons-exec>
         <version.commons-text>1.13.1</version.commons-text>
         <version.commons-io>2.19.0</version.commons-io>
+        <version.gradle-manipulator-common>5.1</version.gradle-manipulator-common>
+        <version.gradle-api>8.11.1</version.gradle-api>
+        <version.atlas-identities>1.1.8</version.atlas-identities>
 
         <!-- Plugins versions -->
         <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
@@ -254,6 +257,34 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${version.commons-io}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jboss.pnc.gradle-manipulator</groupId>
+                <artifactId>common</artifactId>
+                <version>${version.gradle-manipulator-common}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.gradleplugins</groupId>
+                <artifactId>gradle-api</artifactId>
+                <version>${version.gradle-api}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>javax.xml.parsers</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.commonjava.atlas</groupId>
+                <artifactId>atlas-identities</artifactId>
+                <version>${version.atlas-identities}</version>
+                <exclusions>
+                    <!-- Exclude the dependency which brings another SLF4J provider -->
+                    <exclusion>
+                        <groupId>ch.qos.logback</groupId>
+                        <artifactId>logback-classic</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!-- Test dependencies -->

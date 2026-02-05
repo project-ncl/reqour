@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,6 +21,16 @@ public class TestDataFactory {
 
     public static AdjustRequest STANDARD_PERSISTENT_REQUEST = AdjustRequest.builder()
             .buildConfigParameters(Map.of(BuildConfigurationParameterKeys.BUILD_CATEGORY, STANDARD_BUILD_CATEGORY))
+            .tempBuild(false)
+            .brewPullActive(true)
+            .build();
+
+    public static AdjustRequest MANIPULATOR_DISABLED_REQUEST = AdjustRequest.builder()
+            .buildConfigParameters(
+                    Map.of(
+                            BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                            "-D" + AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE
+                                    + "=true"))
             .tempBuild(false)
             .brewPullActive(true)
             .build();

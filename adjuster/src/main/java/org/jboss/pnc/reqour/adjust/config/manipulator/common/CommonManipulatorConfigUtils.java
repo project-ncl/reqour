@@ -6,6 +6,7 @@ package org.jboss.pnc.reqour.adjust.config.manipulator.common;
 
 import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS;
 import static org.jboss.pnc.api.constants.BuildConfigurationParameterKeys.BREW_BUILD_NAME;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -28,6 +29,7 @@ import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
+import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.slf4j.Logger;
@@ -193,6 +195,16 @@ public class CommonManipulatorConfigUtils {
         }
 
         return getJavaOfVersion(javaVersion);
+    }
+
+    public static boolean isManipulatorDisabled(CommonManipulatorConfig config) {
+        final String pmeDisabled = AdjustmentSystemPropertiesUtils
+                .getSystemPropertyValue(
+                        MANIPULATION_DISABLE,
+                        config.getUserSpecifiedAlignmentParameters().stream(),
+                        "true")
+                .orElse("false");
+        return "true".equals(pmeDisabled);
     }
 
     static Path getJavaOfVersion(String javaVersion) {

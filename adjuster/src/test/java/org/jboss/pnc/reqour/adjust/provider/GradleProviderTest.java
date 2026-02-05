@@ -48,6 +48,34 @@ class GradleProviderTest {
         IOUtils.deleteTempDir(workdir);
     }
 
+    /*
+     * @Test
+     * void obtainManipulatorResult_gmeIsDisabled_userProvidedResultFileIsRead() throws IOException {
+     * 
+     * // Files.copy(Path.of(adjustTestUtils.getGradleProviderResourcesLocation()).resolve(GradleAlignmentResultFile.
+     * GME_DISABLED.getGmeAlignmentResultFile()),
+     * workdir.resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()));
+     * 
+     * GradleProvider provider = new GradleProvider(
+     * config.alignment(),
+     * TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+     * workdir,
+     * null,
+     * null,
+     * null,
+     * TestDataFactory.userLogger);
+     * VersioningState expectedVersioningState = VersioningState.builder()
+     * .executionRootName("foo")
+     * .executionRootVersion("1.0.42.Final-rebuild-00001")
+     * .build();
+     * 
+     * ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+     * 
+     * // assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+     * // assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+     * }
+     */
+
     @Test
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(

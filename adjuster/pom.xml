@@ -69,6 +69,20 @@
             <artifactId>commons-exec</artifactId>
         </dependency>
 
+            <!-- Dependencies to parse manipulation.json when GME is disabled -->
+        <dependency>
+            <groupId>org.jboss.pnc.gradle-manipulator</groupId>
+            <artifactId>common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>dev.gradleplugins</groupId>
+            <artifactId>gradle-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.commonjava.atlas</groupId>
+            <artifactId>atlas-identities</artifactId>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>org.jboss.pnc.reqour</groupId>

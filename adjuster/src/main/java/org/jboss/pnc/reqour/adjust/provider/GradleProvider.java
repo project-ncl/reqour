@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_DISABLED;
+import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_ENABLED;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
@@ -12,6 +14,7 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.microprofile.config.ConfigProvider;
@@ -19,6 +22,8 @@ import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
+import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
@@ -116,21 +121,41 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
-        VersioningState versioningState = adjustResultExtractor.obtainVersioningState(
-                getPathToAlignmentResultFile(),
-                config.getExecutionRootOverrides());
-        log.debug("Parsed versioning state is: {}", versioningState);
+        final VersioningState versioningState;
+        final List<RemovedRepository> removedRepositories;
 
-        List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
-                config.getWorkdir(),
-                config.getPncDefaultAlignmentParameters());
-        log.debug("Parsed removed repositories are: {}", removedRepositories);
+        if (isGmeDisabled()) {
+            userLogger.info(
+                    "GME disabled, parsing result from user-provided {} file",
+                    GME_DISABLED.getGmeAlignmentResultFile());
+            ManipulationModel userProvidedResultFile = ManipulationIO
+                    .readManipulationModel(config.getWorkdir().toFile());
+            versioningState = VersioningState.builder()
+                    .executionRootName(userProvidedResultFile.getName())
+                    .executionRootVersion(userProvidedResultFile.getVersion())
+                    .build();
+            removedRepositories = Collections.emptyList();
+        } else {
+            versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
+                    GME_ENABLED.getGmeAlignmentResultFile(),
+                    config.getExecutionRootOverrides());
+            log.debug("Parsed versioning state is: {}", versioningState);
+
+            removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
+                    config.getWorkdir(),
+                    config.getPncDefaultAlignmentParameters());
+            log.debug("Parsed removed repositories are: {}", removedRepositories);
+        }
 
         return ManipulatorResult.builder()
                 .versioningState(versioningState)
                 .removedRepositories(
                         removedRepositories)
                 .build();
+    }
+
+    private boolean isGmeDisabled() {
+        return CommonManipulatorConfigUtils.isManipulatorDisabled(config);
     }
 
     @Override

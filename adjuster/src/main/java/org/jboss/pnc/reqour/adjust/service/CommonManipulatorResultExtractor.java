@@ -61,7 +61,7 @@ public class CommonManipulatorResultExtractor {
      * Obtain {@link ManipulatorResult#getVersioningState()}. In case execution root overrides are specified, use them
      * for overrides.
      */
-    public VersioningState obtainVersioningState(
+    public VersioningState obtainVersioningStateFromManipulatorResult(
             Path alignmentResultFilePath,
             ExecutionRootOverrides executionRootOverrides) {
         log.debug("Parsing versioning state from the file: '{}'", alignmentResultFilePath);
