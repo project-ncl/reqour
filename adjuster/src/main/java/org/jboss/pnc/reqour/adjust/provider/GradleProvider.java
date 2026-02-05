@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_DISABLED;
+import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_ENABLED;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
@@ -19,10 +21,13 @@ import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
+import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
@@ -116,11 +121,35 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
-        VersioningState versioningState = adjustResultExtractor.obtainVersioningState(
-                getPathToAlignmentResultFile(),
-                config.getExecutionRootOverrides());
-        log.debug("Parsed versioning state is: {}", versioningState);
+        final VersioningState versioningState;
 
+        if (isGmeDisabled()) {
+            userLogger.info(
+                    "GME disabled, parsing result from user-provided {} file",
+                    GME_DISABLED.getGmeAlignmentResultFile());
+            if (Files.notExists(config.getWorkdir().resolve(GME_DISABLED.getGmeAlignmentResultFile()))) {
+                userLogger.warn(
+                        "No user-provided {} file found, cannot continue",
+                        GME_DISABLED.getGmeAlignmentResultFile());
+                throw new AdjusterException(
+                        String.format(
+                                "GME disabled, but no user-provided file (%s) was found, cannot proceed further",
+                                GME_DISABLED.getGmeAlignmentResultFile()));
+            }
+
+            ManipulationModel userProvidedResultFile = ManipulationIO
+                    .readManipulationModel(config.getWorkdir().toFile());
+            versioningState = VersioningState.builder()
+                    .executionRootName(userProvidedResultFile.getName())
+                    .executionRootVersion(userProvidedResultFile.getVersion())
+                    .build();
+        } else {
+            versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
+                    GME_ENABLED.getGmeAlignmentResultFile(),
+                    config.getExecutionRootOverrides());
+
+        }
+        log.debug("Parsed versioning state is: {}", versioningState);
         List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
                 config.getWorkdir(),
                 config.getPncDefaultAlignmentParameters());
@@ -131,6 +160,10 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .removedRepositories(
                         removedRepositories)
                 .build();
+    }
+
+    private boolean isGmeDisabled() {
+        return CommonManipulatorConfigUtils.isManipulatorDisabled(config);
     }
 
     @Override

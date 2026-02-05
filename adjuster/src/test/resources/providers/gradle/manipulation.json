@@ -1,0 +1,34 @@
+{
+  "group" : "org.example",
+  "name" : "foo",
+  "projectPathName" : "foo",
+  "version" : "1.0.42.Final-rebuild-00001",
+  "originalVersion" : "unspecified",
+  "children" : {
+    "release" : {
+      "group" : "org.example",
+      "name" : "release",
+      "projectPathName" : "release",
+      "version" : "1.0.42.Final-rebuild-00001",
+      "originalVersion" : "1.0.42.Final"
+    },
+    "documentation" : {
+      "group" : "org.example",
+      "name" : "documentation",
+      "projectPathName" : "documentation",
+      "version" : "1.0.42.Final-rebuild-00001",
+      "originalVersion" : "1.0.42.Final",
+      "alignedDependencies" : {
+      }
+    },
+    "child" : {
+      "group" : "org.example",
+      "name" : "foo-child",
+      "projectPathName" : "foo-child",
+      "version" : "1.0.42.Final-rebuild-00001",
+      "originalVersion" : "1.0.42.Final",
+      "alignedDependencies" : {
+      }
+    }
+  }
+}

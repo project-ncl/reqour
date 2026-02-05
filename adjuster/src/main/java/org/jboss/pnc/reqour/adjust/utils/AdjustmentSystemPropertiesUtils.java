@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import lombok.Getter;
+
 /**
  * Utility class for work with adjustment system properties.
  */
@@ -31,13 +33,23 @@ public class AdjustmentSystemPropertiesUtils {
      */
     public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams, String defaultValue) {
         Pattern pattern = Pattern.compile(String.format("^%s[= ].*$|^%s$", name, name));
-        return streams.filter(p -> pattern.matcher(p).find()).findFirst().map(p -> {
-            try {
-                return p.split("=")[1];
-            } catch (ArrayIndexOutOfBoundsException _e) {
-                return defaultValue;
+        Optional<String> first = streams.filter(p -> pattern.matcher(p).find()).findFirst();
+        try {
+            return first.map(s -> s.split("=")[1]);
+        } catch (ArrayIndexOutOfBoundsException _e) {
+            if (defaultValue == null) {
+                return Optional.empty();
             }
-        });
+            return Optional.of(defaultValue);
+        }
+    }
+
+    /**
+     * Analogical to {@link this#getSystemPropertyValue(String, Stream, String)}, but in case the name is not present,
+     * it will return just {@link Optional#empty()}.
+     */
+    public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams) {
+        return getSystemPropertyValue(name, streams, null);
     }
 
     public static Optional<String> getSystemPropertyValue(
@@ -59,6 +71,7 @@ public class AdjustmentSystemPropertiesUtils {
         return joinSystemPropertiesListsIntoStream(lists).toList();
     }
 
+    @Getter
     public enum AdjustmentSystemPropertyName {
 
         REST_MODE("restMode"),

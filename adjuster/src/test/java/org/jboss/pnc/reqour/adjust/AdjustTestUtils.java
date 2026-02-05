@@ -36,6 +36,10 @@ public class AdjustTestUtils {
     @Getter
     String heartbeatPath;
 
+    @ConfigProperty(name = "test.location.providers.gradle")
+    @Getter
+    String gradleProviderResourcesLocation;
+
     @Inject
     ObjectMapper objectMapper;
 
