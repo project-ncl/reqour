@@ -74,7 +74,7 @@ public class CommonManipulatorResultExtractor {
         try {
             PME manipulatorResult = objectMapper.readValue(alignmentResultFilePath.toFile(), PME.class);
             userLogger.info(
-                    "Got PME result data: {}",
+                    "Got manipulator result data: {}",
                     CommonUtils.prettyPrint(manipulatorResult));
             return transformPMEIntoVersioningState(manipulatorResult, executionRootOverrides);
         } catch (IOException e) {

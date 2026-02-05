@@ -110,7 +110,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         try {
             NpmResult manipulatorResult = objectMapper.readValue(resultsFilePath.toFile(), NpmResult.class);
             userLogger.info(
-                    "Got Project Manipulator result data: {}",
+                    "Got NPM Manipulator result data: {}",
                     CommonUtils.prettyPrint(manipulatorResult));
             return VersioningState.builder()
                     .executionRootName(adjustNpmName(manipulatorResult.getName()))
