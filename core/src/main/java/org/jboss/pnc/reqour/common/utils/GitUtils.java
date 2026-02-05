@@ -209,7 +209,7 @@ public class GitUtils {
     }
 
     public static List<String> fetchTags(String remote, boolean shallow) {
-        List<String> command = new ArrayList<>(List.of("git", "fetch", remote, "--tags", "-q"));
+        List<String> command = new ArrayList<>(List.of("git", "fetch", remote, "--tags"));
         if (shallow) {
             command.add("--depth=1");
         }
