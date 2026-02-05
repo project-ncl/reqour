@@ -30,20 +30,22 @@ class CommonManipulatorResultExtractorTest {
     private final Path ALIGNMENT_RESULT_FILE = MANIPULATOR_RESULT_EXTRACTOR_TEST_DIR.resolve("alignmentResult.json");
 
     @Test
-    void obtainVersioningState_noOverridesProvided_parsesResultWithoutOverrides() {
+    void obtainVersioningState_FromManipulatorResult_noOverridesProvided_parsesResultWithoutOverrides() {
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.42.rh-7")
                 .build();
 
         VersioningState actualVersioningState = manipulatorResultExtractor
-                .obtainVersioningState(ALIGNMENT_RESULT_FILE, ExecutionRootOverrides.noOverrides());
+                .obtainVersioningStateFromManipulatorResult(
+                        ALIGNMENT_RESULT_FILE,
+                        ExecutionRootOverrides.noOverrides());
 
         assertThat(actualVersioningState).isEqualTo(expectedVersioningState);
     }
 
     @Test
-    void obtainVersioningState_overridesProvided_parsesResultAndUsesOverrides() {
+    void obtainVersioningState_FromManipulatorResult_overridesProvided_parsesResultAndUsesOverrides() {
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("org.foo.bar:baz")
                 .executionRootVersion("1.0.42.rh-7")
@@ -51,13 +53,13 @@ class CommonManipulatorResultExtractorTest {
         ExecutionRootOverrides rootOverrides = new ExecutionRootOverrides("org.foo.bar", "baz");
 
         VersioningState actualVersioningState = manipulatorResultExtractor
-                .obtainVersioningState(ALIGNMENT_RESULT_FILE, rootOverrides);
+                .obtainVersioningStateFromManipulatorResult(ALIGNMENT_RESULT_FILE, rootOverrides);
 
         assertThat(actualVersioningState).isEqualTo(expectedVersioningState);
     }
 
     @Test
-    void obtainVersioningState_onlyGroupIdOverrideProvided_parsesResultAndUsesOverrides() {
+    void obtainVersioningState_FromManipulatorResult_onlyGroupIdOverrideProvided_parsesResultAndUsesOverrides() {
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("org.foo.bar:null")
                 .executionRootVersion("1.0.42.rh-7")
@@ -65,7 +67,7 @@ class CommonManipulatorResultExtractorTest {
         ExecutionRootOverrides rootOverrides = new ExecutionRootOverrides("org.foo.bar", null);
 
         VersioningState actualVersioningState = manipulatorResultExtractor
-                .obtainVersioningState(ALIGNMENT_RESULT_FILE, rootOverrides);
+                .obtainVersioningStateFromManipulatorResult(ALIGNMENT_RESULT_FILE, rootOverrides);
 
         assertThat(actualVersioningState).isEqualTo(expectedVersioningState);
     }

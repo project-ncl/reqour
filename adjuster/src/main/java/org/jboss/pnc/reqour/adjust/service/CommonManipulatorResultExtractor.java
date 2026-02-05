@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public class CommonManipulatorResultExtractor {
 
     final static String REMOVED_REPOSITORIES_KEY = "-DrepoRemovalBackup";
+    public final static String DEFAULT_REMOVED_REPOSITORIES_FILENAME = "repositories-backup.xml";
 
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -61,7 +62,7 @@ public class CommonManipulatorResultExtractor {
      * Obtain {@link ManipulatorResult#getVersioningState()}. In case execution root overrides are specified, use them
      * for overrides.
      */
-    public VersioningState obtainVersioningState(
+    public VersioningState obtainVersioningStateFromManipulatorResult(
             Path alignmentResultFilePath,
             ExecutionRootOverrides executionRootOverrides) {
         log.debug("Parsing versioning state from the file: '{}'", alignmentResultFilePath);
@@ -114,18 +115,22 @@ public class CommonManipulatorResultExtractor {
         log.debug("Obtaining removed repositories, manipulator parameters: {}", manipulatorParameters);
 
         Optional<String> repositoriesBackupFilename = AdjustmentSystemPropertiesUtils
-                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters.stream(), "");
+                .getSystemPropertyValue(REMOVED_REPOSITORIES_KEY, manipulatorParameters.stream());
 
+        final Path repositoriesBackupFile;
         if (repositoriesBackupFilename.isEmpty()) {
-            log.warn(
-                    "No value for key '{}' found, returning empty list as list of removed repositories.",
-                    REMOVED_REPOSITORIES_KEY);
-            return Collections.emptyList();
+            userLogger.warn(
+                    "No value for key '{}' found, will use the default filename for removed repositories list: {}",
+                    REMOVED_REPOSITORIES_KEY,
+                    DEFAULT_REMOVED_REPOSITORIES_FILENAME);
+            repositoriesBackupFile = workdir.resolve(DEFAULT_REMOVED_REPOSITORIES_FILENAME);
+        } else {
+            userLogger.info("Parsing removed repositories from {}", repositoriesBackupFilename.get());
+            repositoriesBackupFile = workdir.resolve(repositoriesBackupFilename.get());
         }
 
-        Path repositoriesBackupFile = workdir.resolve(repositoriesBackupFilename.get());
         if (Files.notExists(repositoriesBackupFile)) {
-            log.warn(
+            userLogger.warn(
                     "File '{}' which should contain removed repositories does not exist. Hence, returning an empty list.",
                     repositoriesBackupFile);
             return Collections.emptyList();
