@@ -158,6 +158,11 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .build();
     }
 
+    @Override
+    public boolean failOnNoAlignmentChanges() {
+        return !isGmeDisabled();
+    }
+
     private boolean isGmeDisabled() {
         return CommonManipulatorConfigUtils.isManipulatorDisabled(config);
     }
