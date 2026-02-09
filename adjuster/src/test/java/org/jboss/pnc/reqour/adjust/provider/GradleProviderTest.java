@@ -101,6 +101,45 @@ class GradleProviderTest {
     }
 
     @Test
+    void obtainManipulatorResult_gmeEnabledUserProvidedOnlyVersioningFile_versioningReadButRemovedRepositoriesEmpty()
+            throws IOException {
+
+        Path build = Path.of(workdir.toString(), "build");
+        Files.createDirectory(build);
+        Files.writeString(
+                Path.of(
+                        workdir.toString(),
+                        GradleAlignmentResultFile.GME_ENABLED.getGmeAlignmentResultFile().toString()),
+                """
+                          {
+                          "executionRoot" : {
+                            "groupId" : "com.github.fge",
+                            "artifactId" : "btf",
+                            "version" : "1.2.0.redhat-00020",
+                            "originalGAV" : "com.github.fge:btf:1.2"
+                          }
+                        }""");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.github.fge:btf")
+                .executionRootVersion("1.2.0.redhat-00020")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
     void obtainManipulatorResult_gmeDisabledUserProvidedBothVersioningAndRemovedRepositoriesFiles_bothFilesRead()
             throws IOException {
         Files.copy(
