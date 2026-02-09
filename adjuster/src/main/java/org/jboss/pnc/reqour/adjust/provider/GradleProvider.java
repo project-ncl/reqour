@@ -141,7 +141,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                     .build();
         } else {
             versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
-                    GME_ENABLED.getGmeAlignmentResultFile(),
+                    config.getWorkdir().resolve(GME_ENABLED.getGmeAlignmentResultFile()),
                     config.getExecutionRootOverrides());
 
         }
