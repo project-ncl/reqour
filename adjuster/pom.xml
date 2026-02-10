@@ -74,10 +74,6 @@
             <groupId>org.jboss.pnc.gradle-manipulator</groupId>
             <artifactId>common</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.gradle</groupId>
-            <artifactId>gradle-core-api</artifactId>
-        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
