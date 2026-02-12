@@ -11,10 +11,13 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_SUFFIX_ALTERNATIVES;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -28,9 +31,11 @@ import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
+import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
@@ -145,9 +150,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                     .build();
         } else {
             versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
-                    config.getWorkdir().resolve(GME_ENABLED.getGmeAlignmentResultFile()),
+                    getPathToGeneratedAlignmentResultFile(),
                     config.getExecutionRootOverrides());
-
         }
         log.debug("Parsed versioning state is: {}", versioningState);
         List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
@@ -219,9 +223,42 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         return Files.exists(config.getWorkdir().resolve("gradlew"));
     }
 
-    private Path getPathToAlignmentResultFile() {
+    private Path getPathToGeneratedAlignmentResultFile() {
+        Path standardLocation = config.getWorkdir().resolve(GME_ENABLED.getGmeAlignmentResultFile());
+        if (Files.exists(standardLocation)) {
+            return CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
+                    standardLocation);
+        }
+
+        Optional<Path> nonStandardLocation = tryToFindAlignmentResultFile(config.getWorkdir());
+        if (nonStandardLocation.isEmpty()) {
+            // alignment results file not found neither at standard nor non-standard location
+            throw new ResourceNotFoundException("No file with alignment results found");
+        }
+
+        userLogger.warn("Alignment results file found in non-standard location {}", nonStandardLocation.get());
         return CommonManipulatorResultExtractor.getAlignmentResultsFilePath(
-                config.getWorkdir().resolve("build/alignmentReport.json"),
-                config.getWorkdir().resolve("manipulation.json"));
+                nonStandardLocation.get());
+    }
+
+    private Optional<Path> tryToFindAlignmentResultFile(Path workingDirectory) {
+        try (Stream<Path> fds = Files.walk(workingDirectory, 1)) {
+            return fds
+                    .filter(Files::isDirectory)
+                    .peek(
+                            potentialBuildDir -> log.info(
+                                    "Searching for {} in directory {}",
+                                    GradleAlignmentResultFile.Constants.ALIGNMENT_REPORT_JSON,
+                                    potentialBuildDir))
+                    .map(
+                            potentialBuildDir -> potentialBuildDir
+                                    .resolve(GradleAlignmentResultFile.Constants.ALIGNMENT_REPORT_JSON))
+                    .filter(Files::exists)
+                    .findFirst();
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Exception occurred when traversing directory structure during alignment results file search",
+                    e);
+        }
     }
 }
