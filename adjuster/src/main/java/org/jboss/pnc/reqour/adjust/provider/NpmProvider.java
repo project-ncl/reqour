@@ -19,10 +19,10 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
-import org.jboss.pnc.projectmanipulator.npm.NpmResult;
+import org.jboss.pnc.npmmanipulator.impl.NpmResult;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
-import org.jboss.pnc.reqour.adjust.config.manipulator.ProjectManipulatorConfig;
+import org.jboss.pnc.reqour.adjust.config.manipulator.NpmManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * Provider for {@link org.jboss.pnc.api.enums.BuildType#NPM} builds.
  */
 @Slf4j
-public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig> implements AdjustProvider {
+public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> implements AdjustProvider {
 
     private static final String RESULTS_FILENAME = "results";
 
@@ -57,7 +57,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
-        config = ProjectManipulatorConfig.builder()
+        config = NpmManipulatorConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
@@ -72,9 +72,9 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
         if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
             validateConfig();
-            userLogger.info("Project manipulator config was successfully initialized and validated: {}", config);
+            userLogger.info("NPM manipulator config was successfully initialized and validated: {}", config);
         } else {
-            userLogger.info("Project manipulator config was successfully initialized: {}", config);
+            userLogger.info("NPM manipulator config was successfully initialized: {}", config);
         }
     }
 
@@ -103,7 +103,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
 
         return ManipulatorResult.builder()
                 .versioningState(versioningState)
-                .removedRepositories(Collections.emptyList()) // no support of repos removal by project manipulator
+                .removedRepositories(Collections.emptyList()) // no support of repos removal by NPM manipulator
                 .build();
     }
 
@@ -119,7 +119,7 @@ public class NpmProvider extends AbstractAdjustProvider<ProjectManipulatorConfig
                     .executionRootVersion(manipulatorResult.getVersion())
                     .build();
         } catch (IOException e) {
-            throw new RuntimeException("Cannot deserialize the manipulator result from Project Manipulator", e);
+            throw new RuntimeException("Cannot deserialize the manipulator result from the manipulator", e);
         }
     }
 

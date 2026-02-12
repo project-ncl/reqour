@@ -14,16 +14,16 @@ import lombok.Value;
 import lombok.experimental.SuperBuilder;
 
 /**
- * Configuration of the project manipulator.
+ * Configuration of the NPM manipulator.
  */
 @SuperBuilder(toBuilder = true)
 @Value
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ProjectManipulatorConfig extends CommonManipulatorConfig {
+public class NpmManipulatorConfig extends CommonManipulatorConfig {
 
     /**
-     * Location of the Project manipulator jar
+     * Location of the manipulator's jar
      */
     Path cliJarPath;
 

@@ -37,7 +37,7 @@ reqour:
         alignment-parameters:
           - '-Dfoo=bar'
       npm:
-        cli-jar-path: '/tmp/current/project-manipulator-cli.jar'
+        cli-jar-path: '/tmp/current/npm-manipulator-cli.jar'
         alignment-parameters:
           - '-Dfoo=bar'
     mdc: '{}'
