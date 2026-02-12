@@ -27,6 +27,7 @@ import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
+import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -137,6 +138,74 @@ class GradleProviderTest {
 
         assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
         assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeEnabledAlignmentResultAtNonStandardLocation_alignmentResultsFileFound()
+            throws IOException {
+
+        Path target = Path.of(workdir.toString(), "target");
+        Files.createDirectory(target);
+        Files.writeString(
+                target.resolve(GradleAlignmentResultFile.Constants.ALIGNMENT_REPORT_JSON),
+                """
+                          {
+                          "executionRoot" : {
+                            "groupId" : "com.github.fge",
+                            "artifactId" : "btf",
+                            "version" : "1.2.0.redhat-00020",
+                            "originalGAV" : "com.github.fge:btf:1.2"
+                          }
+                        }""");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.github.fge:btf")
+                .executionRootVersion("1.2.0.redhat-00020")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeEnabledAlignmentResultNotFound_resourceNotFoundThrown()
+            throws IOException {
+
+        Path weirdBuildDir = Path.of(workdir.toString(), "foo", "bar", "baz");
+        Files.createDirectories(weirdBuildDir);
+        Files.writeString(
+                weirdBuildDir.resolve(GradleAlignmentResultFile.Constants.ALIGNMENT_REPORT_JSON),
+                """
+                          {
+                          "executionRoot" : {
+                            "groupId" : "com.github.fge",
+                            "artifactId" : "btf",
+                            "version" : "1.2.0.redhat-00020",
+                            "originalGAV" : "com.github.fge:btf:1.2"
+                          }
+                        }""");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger);
+
+        assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("No file with alignment results found");
     }
 
     @Test
