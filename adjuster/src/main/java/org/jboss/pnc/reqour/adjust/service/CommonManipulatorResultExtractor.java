@@ -26,6 +26,7 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
+import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
@@ -202,6 +203,6 @@ public class CommonManipulatorResultExtractor {
             }
         }
 
-        throw new RuntimeException("No file with alignment results found");
+        throw new ResourceNotFoundException("No file with alignment results found");
     }
 }
