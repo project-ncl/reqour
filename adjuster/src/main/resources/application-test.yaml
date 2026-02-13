@@ -58,7 +58,7 @@ reqour-adjuster:
       alignment-parameters:
         - '-Doverride=config'
     npm:
-      cli-jar-path: '${test.location.providers.npm}/project-manipulator-cli.jar'
+      cli-jar-path: '${test.location.providers.npm}/npm-manipulator-cli.jar'
       alignment-parameters:
         - '-Doverride=config'
         - '-DversionIncrementalSuffix=config'
