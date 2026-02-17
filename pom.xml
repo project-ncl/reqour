@@ -103,7 +103,7 @@
         <version.gradle-manipulator-common>5.2.1</version.gradle-manipulator-common>
 
         <!-- Plugins versions -->
-        <version.maven-surefire-plugin>3.2.5</version.maven-surefire-plugin>
+        <version.maven-surefire-plugin>3.5.4</version.maven-surefire-plugin>
         <version.maven-compiler-plugin>3.12.1</version.maven-compiler-plugin>
         <version.license-maven-plugin>5.0.0</version.license-maven-plugin>
         <version.spotless-maven-plugin>3.2.1</version.spotless-maven-plugin>
