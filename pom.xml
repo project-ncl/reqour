@@ -110,7 +110,7 @@
         <version.central-publishing-maven-plugin>0.10.0</version.central-publishing-maven-plugin>
         <version.maven-source-plugin>3.3.1</version.maven-source-plugin>
         <version.lombok-maven-plugin>1.18.20.0</version.lombok-maven-plugin>
-        <version.maven-javadoc-plugin>3.11.2</version.maven-javadoc-plugin>
+        <version.maven-javadoc-plugin>3.12.0</version.maven-javadoc-plugin>
         <version.maven-gpg-plugin>3.2.8</version.maven-gpg-plugin>
         <version.jandex-maven-plugin>3.5.3</version.jandex-maven-plugin>
         <version.git-commit-id-plugin>4.9.10</version.git-commit-id-plugin>
