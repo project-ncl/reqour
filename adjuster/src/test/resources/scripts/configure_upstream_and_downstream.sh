@@ -96,9 +96,10 @@ function check_binaries_are_installed() {
 }
 
 function configure_git() {
-  git config --global init.defaultBranch main
-  git config --global user.email "user@redhat.com"
-  git config --global user.name "Name Surname"
+  # Only set global values if not set already
+  [ -z "$(git config --global init.defaultBranch)" ] && git config --global init.defaultBranch main
+  [ -z "$(git config --global user.email)" ] && git config --global user.email "user@redhat.com"
+  [ -z "$(git config --global user.name)" ] && git config --global user.name "Name Surname"
 }
 
 function configure_upstream() {
