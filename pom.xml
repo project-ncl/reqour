@@ -78,14 +78,14 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-        <quarkus.platform.version>3.30.8</quarkus.platform.version>
+        <quarkus.platform.version>3.31.3</quarkus.platform.version>
         <rootPath>${basedir}</rootPath>
         <tagSuffix />
 
         <!-- Dependencies versions -->
         <version.lombok>1.18.42</version.lombok>
         <version.quarkus-logging-json>3.4.1</version.quarkus-logging-json>
-        <version.quarkus-logging-kafka>3.0.3</version.quarkus-logging-kafka>
+        <version.quarkus-logging-kafka>3.0.4-SNAPSHOT</version.quarkus-logging-kafka>
         <version.pnc-api>3.4.3</version.pnc-api>
         <version.pnc-common>3.4.0</version.pnc-common>
         <version.pom-manipulation-common>5.1</version.pom-manipulation-common>
