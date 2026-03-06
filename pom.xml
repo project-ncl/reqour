@@ -94,7 +94,7 @@
         <version.bifrost-upload-client>3.3.0</version.bifrost-upload-client>
         <version.gitlab4j-api>6.2.0</version.gitlab4j-api>
         <version.github-api>1.330</version.github-api>
-        <version.assertj-core>3.27.6</version.assertj-core>
+        <version.assertj-core>3.27.7</version.assertj-core>
         <version.jgit>7.5.0.202512021534-r</version.jgit>
         <version.wiremock>1.5.3</version.wiremock>
         <version.commons-cli>1.11.0</version.commons-cli>
