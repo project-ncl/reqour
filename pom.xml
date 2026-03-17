@@ -84,7 +84,7 @@
         <tagSuffix />
 
         <!-- Dependencies versions -->
-        <version.lombok>1.18.42</version.lombok>
+        <version.lombok>1.18.44</version.lombok>
         <version.quarkus-logging-json>3.4.1</version.quarkus-logging-json>
         <version.quarkus-logging-kafka>3.0.4-SNAPSHOT</version.quarkus-logging-kafka>
         <version.pnc-api>3.4.3</version.pnc-api>
