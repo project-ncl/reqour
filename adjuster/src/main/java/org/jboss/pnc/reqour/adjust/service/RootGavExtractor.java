@@ -12,8 +12,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 
-import org.jboss.pnc.api.dto.GA;
-import org.jboss.pnc.api.dto.GAV;
+import org.jboss.pnc.mavenmanipulator.common.json.GAV;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -40,12 +39,13 @@ public class RootGavExtractor {
 
         if (!pom.exists()) {
             log.warn("File {} doesn't exist", pom);
-            return GAV.builder().ga(GA.builder().artifactId(null).groupId(null).build()).version(null).build();
+
+            return new GAV();
         }
 
-        String groupId = null;
-        String artifactId = null;
-        String version = null;
+        String groupId;
+        String artifactId;
+        String version;
 
         try {
             groupId = getValueFromDotPath(pom, "project.groupId");
@@ -73,14 +73,11 @@ public class RootGavExtractor {
                     version);
             throw new RuntimeException("Parsing of pom.xml failed to get the required GAV");
         }
-        return GAV.builder()
-                .ga(
-                        GA.builder()
-                                .groupId(groupId)
-                                .artifactId(artifactId)
-                                .build())
-                .version(version)
-                .build();
+        GAV gav = new GAV();
+        gav.setGroupId(groupId);
+        gav.setArtifactId(artifactId);
+        gav.setVersion(version);
+        return gav;
     }
 
     public static String getValueFromDotPath(File xmlFile, String dotPath) throws Exception {
