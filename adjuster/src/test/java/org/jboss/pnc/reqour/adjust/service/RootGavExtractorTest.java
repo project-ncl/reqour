@@ -10,8 +10,7 @@ import java.nio.file.Path;
 
 import jakarta.inject.Inject;
 
-import org.jboss.pnc.api.dto.GA;
-import org.jboss.pnc.api.dto.GAV;
+import org.jboss.pnc.mavenmanipulator.common.json.GAV;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -27,10 +26,10 @@ class RootGavExtractorTest {
     @Test
     void extractGav_noHierarchy_extractsCorrectly() {
         Path workdir = GAV_EXTRACTOR_TEST_DIR.resolve("no-hierarchy");
-        GAV expectedGav = GAV.builder()
-                .ga(GA.builder().groupId("com.example").artifactId("foo").build())
-                .version("1.0.0.rh-42")
-                .build();
+        GAV expectedGav = new GAV();
+        expectedGav.setGroupId("com.example");
+        expectedGav.setArtifactId("foo");
+        expectedGav.setVersion("1.0.0.rh-42");
 
         GAV gav = rootGavExtractor.extractGav(workdir);
 
@@ -40,10 +39,10 @@ class RootGavExtractorTest {
     @Test
     void extractGav_withHierarchy_extractsCorrectly() {
         Path workdir = GAV_EXTRACTOR_TEST_DIR.resolve("with-hierarchy/child");
-        GAV expectedGav = GAV.builder()
-                .ga(GA.builder().groupId("com.example").artifactId("child").build())
-                .version("1.0.0.rh-314")
-                .build();
+        GAV expectedGav = new GAV();
+        expectedGav.setGroupId("com.example");
+        expectedGav.setArtifactId("child");
+        expectedGav.setVersion("1.0.0.rh-314");
 
         GAV gav = rootGavExtractor.extractGav(workdir);
 
@@ -53,10 +52,10 @@ class RootGavExtractorTest {
     @Test
     void extractGav_withParentOnlyGroupIdVersion() {
         Path workdir = GAV_EXTRACTOR_TEST_DIR.resolve("with-parent-only-groupid-version");
-        GAV expectedGav = GAV.builder()
-                .ga(GA.builder().groupId("com.example").artifactId("bar").build())
-                .version("1.0.0.rh-69")
-                .build();
+        GAV expectedGav = new GAV();
+        expectedGav.setGroupId("com.example");
+        expectedGav.setArtifactId("bar");
+        expectedGav.setVersion("1.0.0.rh-69");
 
         GAV gav = rootGavExtractor.extractGav(workdir);
 
