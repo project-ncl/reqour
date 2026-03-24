@@ -96,7 +96,7 @@
         <version.github-api>1.330</version.github-api>
         <version.assertj-core>3.27.7</version.assertj-core>
         <version.jgit>7.6.0.202603022253-r</version.jgit>
-        <version.wiremock>1.5.3</version.wiremock>
+        <version.wiremock>1.6.1</version.wiremock>
         <version.commons-cli>1.11.0</version.commons-cli>
         <version.commons-exec>1.6.0</version.commons-exec>
         <version.commons-text>1.15.0</version.commons-text>
