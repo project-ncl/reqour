@@ -62,15 +62,16 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
 
         // TODO: undo these commits: https://github.com/project-ncl/reqour/pull/272/commits
 
-        throw new WebApplicationException("Temporarily unavailable.", Response.Status.SERVICE_UNAVAILABLE);
-        // taskExecutor.executeAsync(
-        // creationRequest.getCallback(),
-        // creationRequest,
-        // service::createInternalSCMRepository,
-        // this::handleError,
-        // callbackSender::sendInternalSCMRepositoryCreationCallback);
-        //
-        // throw new WebApplicationException(Response.Status.ACCEPTED);
+        taskExecutor.executeAsync(
+                creationRequest.getCallback(),
+                creationRequest,
+                (request) -> {
+                    throw new RuntimeException("Internal SCM repository creation request failed");
+                },
+                this::handleError,
+                callbackSender::sendInternalSCMRepositoryCreationCallback);
+
+        throw new WebApplicationException(Response.Status.ACCEPTED);
     }
 
     private InternalSCMCreationResponse handleError(InternalSCMCreationRequest creationRequest, Throwable t) {
