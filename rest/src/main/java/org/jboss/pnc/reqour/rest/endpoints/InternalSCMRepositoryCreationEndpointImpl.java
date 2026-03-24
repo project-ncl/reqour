@@ -63,15 +63,14 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
         // TODO: undo these commits: https://github.com/project-ncl/reqour/pull/272/commits
 
         throw new WebApplicationException("Temporarily unavailable.", Response.Status.SERVICE_UNAVAILABLE);
-        
-        //        taskExecutor.executeAsync(
-        //                creationRequest.getCallback(),
-        //                creationRequest,
-        //                service::createInternalSCMRepository,
-        //                this::handleError,
-        //                callbackSender::sendInternalSCMRepositoryCreationCallback);
-
-        //        throw new WebApplicationException(Response.Status.ACCEPTED);
+        // taskExecutor.executeAsync(
+        // creationRequest.getCallback(),
+        // creationRequest,
+        // service::createInternalSCMRepository,
+        // this::handleError,
+        // callbackSender::sendInternalSCMRepositoryCreationCallback);
+        //
+        // throw new WebApplicationException(Response.Status.ACCEPTED);
     }
 
     private InternalSCMCreationResponse handleError(InternalSCMCreationRequest creationRequest, Throwable t) {
@@ -98,13 +97,11 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
         }
         return InternalSCMCreationResponse.builder()
                 .readonlyUrl(
-                        InternalSCMRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitProviderConfig.readOnlyTemplate(),
-                                projectPath))
+                        InternalSCMRepositoryCreationService
+                                .completeTemplateWithProjectPath(gitProviderConfig.readOnlyTemplate(), projectPath))
                 .readwriteUrl(
-                        InternalSCMRepositoryCreationService.completeTemplateWithProjectPath(
-                                gitProviderConfig.readWriteTemplate(),
-                                projectPath))
+                        InternalSCMRepositoryCreationService
+                                .completeTemplateWithProjectPath(gitProviderConfig.readWriteTemplate(), projectPath))
                 .status(InternalSCMCreationStatus.FAILED)
                 .callback(ReqourCallback.builder().status(status).id(creationRequest.getTaskId()).build())
                 .build();
