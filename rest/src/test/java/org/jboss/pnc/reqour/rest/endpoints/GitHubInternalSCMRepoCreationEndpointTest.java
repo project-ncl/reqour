@@ -155,8 +155,8 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
         WireMockUtils.registerFailures(wireMock, "/orgs/test-organization", WireMock.serviceUnavailable(), 3);
 
-        String errorReason = "Repository creation failed: Cannot create the repository 'organization-repository' in the organization 'test-organization' with ID 42";
-        String errorProposal = "There is an git provider error, please contact PNC team at #forum-pnc-users";
+        String errorReason = "Repository creation failed: Cannot create the repository 'organization-repository' in the organization 'test-organization'";
+        String errorProposal = "There is a git provider error, please contact PNC team at #forum-pnc-users";
 
         RestAssured.given()
                 .when()

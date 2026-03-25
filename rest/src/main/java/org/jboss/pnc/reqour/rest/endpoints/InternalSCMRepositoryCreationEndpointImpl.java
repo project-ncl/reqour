@@ -4,6 +4,8 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import java.util.Objects;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
@@ -11,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import org.jboss.pnc.api.dto.ExceptionResolution;
 import org.jboss.pnc.api.enums.InternalSCMCreationStatus;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.InternalSCMCreationRequest;
@@ -77,17 +80,29 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     private InternalSCMCreationResponse handleError(InternalSCMCreationRequest creationRequest, Throwable t) {
         t = t.getCause();
 
-        ResultStatus status;
+        final ResultStatus status;
+        final String errorProposal;
         if (t instanceof GitLabApiRuntimeException || t instanceof GitHubApiException) {
             status = ResultStatus.FAILED;
+            errorProposal = "There is a git provider error, please contact PNC team at #forum-pnc-users";
             log.warn("Async SCM repository creation task ended with git provider exception", t);
         } else if (t instanceof InvalidProjectPathException) {
             status = ResultStatus.FAILED;
+            errorProposal = "Check the project path";
             log.warn("SCM repository creation request has invalid project path", t);
         } else {
             status = ResultStatus.SYSTEM_ERROR;
+            errorProposal = "There is an internal system error, please contact PNC team at #forum-pnc-users";
             log.error("Async SCM repository creation task ended with unexpected exception", t);
         }
+
+        final String errorReason = String.format(
+                "Repository creation failed: %s",
+                Objects.requireNonNullElseGet(t.getMessage(), t::toString));
+        final ExceptionResolution exceptionResolution = ExceptionResolution.builder()
+                .reason(errorReason)
+                .proposal(errorProposal)
+                .build();
 
         String projectPath;
         try {
@@ -104,7 +119,12 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
                         InternalSCMRepositoryCreationService
                                 .completeTemplateWithProjectPath(gitProviderConfig.readWriteTemplate(), projectPath))
                 .status(InternalSCMCreationStatus.FAILED)
-                .callback(ReqourCallback.builder().status(status).id(creationRequest.getTaskId()).build())
+                .callback(
+                        ReqourCallback.builder()
+                                .status(status)
+                                .id(creationRequest.getTaskId())
+                                .exceptionResolution(exceptionResolution)
+                                .build())
                 .build();
     }
 }
