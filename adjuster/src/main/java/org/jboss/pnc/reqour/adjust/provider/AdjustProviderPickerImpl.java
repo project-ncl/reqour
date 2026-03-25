@@ -11,6 +11,7 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
@@ -71,6 +72,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                 new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
                 new SbtProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
+            case RPM -> throw new AdjusterException("Alignment for RPM builds is not supported yet");
         };
     }
 }
