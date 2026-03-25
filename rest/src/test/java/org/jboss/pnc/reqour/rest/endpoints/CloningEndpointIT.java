@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.jboss.pnc.api.dto.ErrorResponse;
+import org.jboss.pnc.api.dto.ExceptionResolution;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.rest.CloneEndpoint;
@@ -95,7 +96,8 @@ class CloningEndpointIT {
                         CloneTestUtils.SOURCE_REPO_URL,
                         CloneTestUtils.EMPTY_DEST_REPO_URL,
                         ResultStatus.SUCCESS,
-                        TestDataSupplier.TASK_ID));
+                        TestDataSupplier.TASK_ID,
+                        null));
 
         RestAssured.given()
                 .when()
@@ -119,12 +121,18 @@ class CloningEndpointIT {
     void clone_nonExistentRepoUrl_sendsCallbackWithConflictStatus()
             throws InterruptedException, JsonProcessingException {
         String nonExistentRepoUrl = "git@github.com:user/non-existent.git";
+        String errorReason = String.format(
+                "Repository clone failed: Cannot mirror-clone the repository from '%s'. If the Github repository is a private repository, you need to add the Github user 'github-bot' with read-permissions to '%s'.",
+                nonExistentRepoUrl,
+                nonExistentRepoUrl);
+        String errorProposal = "There is a git error, please check repository configuration, or contact PNC team at #forum-pnc-users";
         String expectedBody = objectMapper.writeValueAsString(
                 TestUtils.createRepositoryCloneResponse(
                         nonExistentRepoUrl,
                         CloneTestUtils.EMPTY_DEST_REPO_URL,
                         ResultStatus.FAILED,
-                        TestDataSupplier.TASK_ID));
+                        TestDataSupplier.TASK_ID,
+                        ExceptionResolution.builder().reason(errorReason).proposal(errorProposal).build()));
 
         RestAssured.given()
                 .when()
@@ -170,7 +178,8 @@ class CloningEndpointIT {
                         CloneTestUtils.SOURCE_REPO_URL,
                         CloneTestUtils.EMPTY_DEST_REPO_URL,
                         ResultStatus.SUCCESS,
-                        TestDataSupplier.TASK_ID));
+                        TestDataSupplier.TASK_ID,
+                        null));
 
         RestAssured.given()
                 .when()

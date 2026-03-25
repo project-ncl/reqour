@@ -4,12 +4,15 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import java.util.Objects;
+
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import org.jboss.pnc.api.dto.ExceptionResolution;
 import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
@@ -69,20 +72,36 @@ public class CloneEndpointImpl implements CloneEndpoint {
     private RepositoryCloneResponse handleError(RepositoryCloneRequest request, Throwable t) {
         t = t.getCause();
 
-        ResultStatus status;
+        final ResultStatus status;
+        final String errorProposal;
         if (t instanceof GitException) {
             status = ResultStatus.FAILED;
             log.warn("Async cloning task ended with git-related exception, probably conflicting with repo state", t);
+            errorProposal = "There is a git error, please check repository configuration, or contact PNC team at #forum-pnc-users";
         } else {
             status = ResultStatus.SYSTEM_ERROR;
+            errorProposal = "There is an internal system error, please contact PNC team at #forum-pnc-users";
             log.error("Async cloning task ended with unexpected exception", t);
         }
+
+        final String errorReason = String.format(
+                "Repository clone failed: %s",
+                Objects.requireNonNullElseGet(t.getMessage(), t::toString));
+        final ExceptionResolution exceptionResolution = ExceptionResolution.builder()
+                .reason(errorReason)
+                .proposal(errorProposal)
+                .build();
 
         return RepositoryCloneResponse.builder()
                 .originRepoUrl(request.getOriginRepoUrl())
                 .targetRepoUrl(request.getTargetRepoUrl())
                 .ref(request.getRef())
-                .callback(ReqourCallback.builder().status(status).id(request.getTaskId()).build())
+                .callback(
+                        ReqourCallback.builder()
+                                .status(status)
+                                .id(request.getTaskId())
+                                .exceptionResolution(exceptionResolution)
+                                .build())
                 .build();
     }
 }

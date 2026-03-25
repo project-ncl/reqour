@@ -111,9 +111,10 @@ public class GitHubApiService {
         } catch (IOException e) {
             throw new GitHubApiException(
                     String.format(
-                            "Cannot create the repository '%s' in the organization '%s'",
+                            "Cannot create the repository '%s' in the organization '%s' with ID %s",
                             repositoryName,
-                            internalOrganization),
+                            internalOrganization.getLogin(),
+                            internalOrganization.getId()),
                     e);
         }
     }

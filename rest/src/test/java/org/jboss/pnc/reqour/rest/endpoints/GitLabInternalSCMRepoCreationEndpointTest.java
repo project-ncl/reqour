@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.gitlab4j.api.GitLabApiException;
 import org.gitlab4j.api.utils.UrlEncoder;
+import org.jboss.pnc.api.dto.ExceptionResolution;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
@@ -367,10 +368,16 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     void createInternalSCMRepository_invalidRequestWithTooDeepHierarchy_sendsFailInCallback()
             throws JsonProcessingException, InterruptedException {
         String projectPath = "group/subgroup/project";
+
+        String errorReason = String.format(
+                "Repository creation failed: Invalid project path given: '%s'. Expecting at most 1 '/'.",
+                projectPath);
+        String errorProposal = "Check the project path";
         String expectedBody = objectMapper.writeValueAsString(
                 TestUtils.failed(
                         TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/" + projectPath,
-                        TestDataSupplier.TASK_ID));
+                        TestDataSupplier.TASK_ID,
+                        ExceptionResolution.builder().reason(errorReason).proposal(errorProposal).build()));
 
         RestAssured.given()
                 .when()

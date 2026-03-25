@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.MediaType;
 
+import org.jboss.pnc.api.dto.ExceptionResolution;
 import org.jboss.pnc.api.reqour.rest.InternalSCMRepositoryCreationEndpoint;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
@@ -154,6 +155,9 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 Files.readString(GITHUB_OBJECTS_DIR.resolve("repositories.json")));
         WireMockUtils.registerFailures(wireMock, "/orgs/test-organization", WireMock.serviceUnavailable(), 3);
 
+        String errorReason = "Repository creation failed: Cannot create the repository 'organization-repository' in the organization 'test-organization' with ID 42";
+        String errorProposal = "There is an git provider error, please contact PNC team at #forum-pnc-users";
+
         RestAssured.given()
                 .when()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -174,6 +178,7 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
                 objectMapper.writeValueAsString(
                         TestUtils.failed(
                                 "test-organization/organization-repository",
-                                TestDataSupplier.TASK_ID)));
+                                TestDataSupplier.TASK_ID,
+                                ExceptionResolution.builder().reason(errorReason).proposal(errorProposal).build())));
     }
 }
