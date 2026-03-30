@@ -20,7 +20,6 @@ import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.TestUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -57,7 +56,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_newProjectWithoutSubgroup_createsNewProject()
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
@@ -123,7 +121,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_alreadyExistingProjectWithoutSubgroup_successWithAlreadyExists()
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
@@ -159,7 +156,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_newProjectWithSubgroupSameToWorkspace_createsNewProject()
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.WORKSPACE_NAME + "/"
@@ -225,7 +221,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_alreadyExistingProjectWithSubgroupDifferentFromWorkspace_successWithAlreadyExists()
             throws InterruptedException, JsonProcessingException {
         String projectPath = TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME + "/"
@@ -273,7 +268,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_newProjectWithSubgroupDifferentFromWorkspace_createsNewProjectAndSubgroup()
             throws JsonProcessingException, InterruptedException {
         String projectPath = TestDataSupplier.InternalSCM.DIFFERENT_WORKSPACE_NAME + "/"
@@ -364,7 +358,6 @@ public class GitLabInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_invalidRequestWithTooDeepHierarchy_sendsFailInCallback()
             throws JsonProcessingException, InterruptedException {
         String projectPath = "group/subgroup/project";

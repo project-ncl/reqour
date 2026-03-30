@@ -63,14 +63,10 @@ public class InternalSCMRepositoryCreationEndpointImpl implements InternalSCMRep
     public void createInternalSCMRepository(InternalSCMCreationRequest creationRequest) {
         userLogger.info("Internal SCM repository creation request: {}", creationRequest);
 
-        // TODO: undo these commits: https://github.com/project-ncl/reqour/pull/272/commits
-
         taskExecutor.executeAsync(
                 creationRequest.getCallback(),
                 creationRequest,
-                (request) -> {
-                    throw new RuntimeException("Internal SCM repository creation request failed");
-                },
+                service::createInternalSCMRepository,
                 this::handleError,
                 callbackSender::sendInternalSCMRepositoryCreationCallback);
 
