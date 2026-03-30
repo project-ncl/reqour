@@ -21,7 +21,6 @@ import org.jboss.pnc.reqour.common.TestUtils;
 import org.jboss.pnc.reqour.common.profile.WithGitHubProvider;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -60,7 +59,6 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_repositoryDoesNotExist_newRepositoryCreated()
             throws InterruptedException, IOException {
         String projectPath = "organization/newrepo";
@@ -104,7 +102,6 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_repositoryAlreadyExists_successWithAlreadyExists()
             throws InterruptedException, IOException {
         String projectPath = "organization/existingrepo";
@@ -145,7 +142,6 @@ public class GitHubInternalSCMRepoCreationEndpointTest {
     }
 
     @Test
-    @Disabled("NCL-9275 temporarily disabled")
     void createInternalSCMRepository_githubUnavailable_failsToCreateRepository()
             throws InterruptedException, IOException {
         String projectPath = "organization/repository";
