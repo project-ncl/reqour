@@ -34,4 +34,9 @@ public class PNCClientAuthMock implements PNCClientAuth {
     public LDAPCredentials getLDAPCredentials() throws IOException {
         return new LDAPCredentials("user", "password");
     }
+
+    @Override
+    public ClientAuthType getConfiguredType() {
+        return ClientAuthType.OIDC;
+    }
 }
