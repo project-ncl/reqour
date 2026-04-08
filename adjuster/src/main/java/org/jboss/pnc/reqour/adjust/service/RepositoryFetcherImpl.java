@@ -85,7 +85,10 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             isRefInternal = true;
         }
 
+        // *Only* after the repository has been successfully cloned
+        // setup git username and email -- which is required later for pushing
         gitCommands.configureCommitter(workdir);
+
         // Get upstream commit before transforming into fat repository (since that potentially creates a new commit)
         String upstreamCommitId = gitCommands.revParse(workdir);
         userLogger.info("Current Commit ID of repo is: {}", upstreamCommitId);

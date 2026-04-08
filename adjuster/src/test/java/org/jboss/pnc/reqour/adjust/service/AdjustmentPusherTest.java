@@ -52,6 +52,7 @@ class AdjustmentPusherTest {
         Files.createDirectory(SOURCE_REPO_PATH);
         CloneTestUtils.cloneSourceRepoFromGithub();
         RepoInitializer.createGitRepositories(upstreamDir, ADJUST_DIR);
+        gitCommands.configureCommitter(ADJUST_DIR);
     }
 
     @AfterEach

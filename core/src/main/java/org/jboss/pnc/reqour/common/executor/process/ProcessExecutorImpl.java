@@ -4,36 +4,33 @@
  */
 package org.jboss.pnc.reqour.common.executor.process;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.eclipse.microprofile.context.ManagedExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
+import io.smallrye.common.process.ProcessBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 @ApplicationScoped
 @Slf4j
 public class ProcessExecutorImpl implements ProcessExecutor {
 
-    private final ManagedExecutor executor;
     private final Logger userLogger;
+    private final static int MAX_LINE_LENGTH = 8192;
 
     @Inject
-    public ProcessExecutorImpl(ManagedExecutor executor, @UserLogger Logger userLogger) {
-        this.executor = executor;
+    public ProcessExecutorImpl(@UserLogger Logger userLogger) {
         this.userLogger = userLogger;
     }
 
@@ -47,35 +44,37 @@ public class ProcessExecutorImpl implements ProcessExecutor {
             throw new IllegalArgumentException(processContext.getWorkingDirectory() + " is not a directory");
         }
 
-        ProcessBuilder processBuilder = new ProcessBuilder(processContext.getCommand())
-                .directory(processContext.getWorkingDirectory().toFile());
-        processBuilder.environment().putAll(processContext.getExtraEnvVariables());
+        final var holder = new ExitCodeHolder();
+        final List<String> commandArgs = processContext.getCommand().subList(1, processContext.getCommand().size());
+        final var processBuilder = ProcessBuilder.newBuilder(processContext.getCommand().getFirst())
+                .arguments(commandArgs)
+                .directory(processContext.getWorkingDirectory())
+                .environment(Optional.ofNullable(processContext.getExtraEnvVariables()).orElse(Collections.emptyMap()))
+                .exitCodeChecker(x -> {
+                    holder.setExitCode(x);
+                    // process is allowed to exit with any status code, it's being checked at higher levels
+                    // e.g. whether specific processes are allowed to exit with non-zero status codes
+                    return true;
+                });
 
-        try {
-            String loggedProcessContext = logProcessContext(
-                    processContext.getCommand(),
-                    processContext.getWorkingDirectory(),
-                    processContext.getExtraEnvVariables());
-            userLogger.info("Executing {}", loggedProcessContext);
-            Process processStart = processBuilder.start();
-            CompletableFuture<Void> stdoutConsumerProcess = createOutputConsumerProcess(
-                    processStart.inputReader(),
-                    processContext.getStdoutConsumer());
-            CompletableFuture<Void> stderrConsumerProcess = createOutputConsumerProcess(
-                    processStart.errorReader(),
-                    processContext.getStderrConsumer());
+        String loggedProcessContext = logProcessContext(
+                processContext.getCommand(),
+                processContext.getWorkingDirectory(),
+                processContext.getExtraEnvVariables());
+        userLogger.info("Executing {}", loggedProcessContext);
 
-            int exitCode = processStart.waitFor();
-            stdoutConsumerProcess.join();
-            stderrConsumerProcess.join();
-            log.debug(
-                    "Command with process context {} terminated with the exit code: {}",
-                    loggedProcessContext,
-                    exitCode);
-            return exitCode;
-        } catch (InterruptedException | IOException e) {
-            throw new RuntimeException(e);
-        }
+        // Configure consumers for stdout and stderr
+        processBuilder.output().consumeLinesWith(MAX_LINE_LENGTH, processContext.getStdoutConsumer()::accept);
+        processBuilder.error().consumeLinesWith(MAX_LINE_LENGTH, processContext.getStderrConsumer()::accept);
+
+        // Run with configured consumers
+        processBuilder.run();
+        int exitCode = holder.getExitCode();
+        log.debug(
+                "Command with process context {} terminated with the exit code: {}",
+                loggedProcessContext,
+                exitCode);
+        return exitCode;
     }
 
     @Override
@@ -88,19 +87,6 @@ public class ProcessExecutorImpl implements ProcessExecutor {
 
         execute(processContext);
         return sb.toString();
-    }
-
-    private CompletableFuture<Void> createOutputConsumerProcess(BufferedReader reader, Consumer<String> consumer) {
-        return executor.runAsync(() -> {
-            String line;
-            try (reader) {
-                while ((line = reader.readLine()) != null) {
-                    consumer.accept(line);
-                }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
     }
 
     static String logProcessContext(
