@@ -160,7 +160,7 @@ public class GitCommands {
         executeGitCommand(
                 GitUtils.init(bare),
                 processContextBuilder,
-                "Unable to make this directory as Git repository");
+                "Unable to turn the directory into a Git repository");
     }
 
     public boolean doesBranchExistAtRemote(String branch, ProcessContext.Builder processContextBuilder) {
