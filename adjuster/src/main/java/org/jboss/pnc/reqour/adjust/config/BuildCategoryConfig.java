@@ -6,6 +6,8 @@ package org.jboss.pnc.reqour.adjust.config;
 
 import java.util.Optional;
 
+import io.smallrye.config.WithDefault;
+
 /**
  * Configuration for {@link org.jboss.pnc.api.constants.BuildConfigurationParameterKeys#BUILD_CATEGORY}.
  */
@@ -18,4 +20,7 @@ public interface BuildCategoryConfig {
     String temporaryPreferPersistentMode();
 
     Optional<String> prefixOfSuffixVersion();
+
+    @WithDefault("false")
+    boolean useByDefault();
 }

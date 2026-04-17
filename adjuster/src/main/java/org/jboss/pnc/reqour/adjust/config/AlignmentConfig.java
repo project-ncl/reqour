@@ -4,9 +4,8 @@
  */
 package org.jboss.pnc.reqour.adjust.config;
 
-import java.util.Map;
-
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.adjust.config.validation.WithExactlyOneDefaultBuildCategory;
 
 import io.smallrye.config.WithName;
 
@@ -31,7 +30,8 @@ public interface AlignmentConfig {
     @WithName("npm")
     NpmProviderConfig npmProviderConfig();
 
-    Map<String, BuildCategoryConfig> buildCategories();
+    @WithExactlyOneDefaultBuildCategory
+    BuildCategoriesConfig buildCategoriesConfig();
 
     boolean validate();
 }

@@ -25,6 +25,7 @@ import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.BuildCategoryConfig;
+import org.jboss.pnc.reqour.adjust.config.validation.WithExactlyOneDefaultBuildCategory;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
@@ -217,14 +218,30 @@ public class CommonManipulatorConfigUtils {
 
     private static BuildCategoryConfig getBuildCategoryConfig(AdjustRequest request, AlignmentConfig alignmentConfig) {
         String buildCategory = request.getBuildConfigParameters()
-                .getOrDefault(BuildConfigurationParameterKeys.BUILD_CATEGORY, "STANDARD");
-        BuildCategoryConfig buildCategoryConfig = alignmentConfig.buildCategories().get(buildCategory);
+                .getOrDefault(BuildConfigurationParameterKeys.BUILD_CATEGORY, getDefaultBuildCategory(alignmentConfig));
+        BuildCategoryConfig buildCategoryConfig = alignmentConfig.buildCategoriesConfig()
+                .buildCategories()
+                .get(buildCategory);
 
         if (buildCategoryConfig == null) {
             throw new AdjusterException(new IllegalArgumentException("Unknown build category specified"));
         }
 
         return buildCategoryConfig;
+    }
+
+    /**
+     * Note: exception cannot be thrown since exactly one matching build category is guaranteed thanks to the
+     * {@link WithExactlyOneDefaultBuildCategory}.
+     */
+    private static String getDefaultBuildCategory(AlignmentConfig alignmentConfig) {
+        for (var buildCategory : alignmentConfig.buildCategoriesConfig().buildCategories().entrySet()) {
+            if (buildCategory.getValue().useByDefault()) {
+                return buildCategory.getKey();
+            }
+        }
+        throw new RuntimeException(
+                "Invalid configuration file: expecting exactly one build category to be used by default");
     }
 
     /**

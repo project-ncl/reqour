@@ -40,4 +40,10 @@ reqour:
         cli-jar-path: '/tmp/current/npm-manipulator-cli.jar'
         alignment-parameters:
           - '-Dfoo=bar'
+      build-categories:
+        STANDARD:
+          persistent-mode: PERSISTENT
+          temporary-mode: TEMPORARY
+          temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+          use-by-default: true
     mdc: '{}'

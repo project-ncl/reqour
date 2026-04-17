@@ -15,8 +15,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.LogRecord;
 
+import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
@@ -35,6 +38,9 @@ import lombok.extern.slf4j.Slf4j;
         initArgs = @ResourceArg(name = LogCollectingTestResource.LEVEL, value = "FINE"))
 @Slf4j
 class CommonManipulatorConfigUtilsTest {
+
+    @Inject
+    ReqourAdjusterConfig config;
 
     @Test
     void parseUserSpecifiedAlignmentParameters_noLocation_returnsParsedAlignmentParametersWithDefaultLocation() {
@@ -274,5 +280,23 @@ class CommonManipulatorConfigUtilsTest {
         assertThatThrownBy(() -> CommonManipulatorConfigUtils.getJavaLocation(log, List.of("-DRepour_Java=invalid")))
                 .isInstanceOf(AdjusterException.class)
                 .hasMessage("Invalid Java version 'invalid' provided.");
+    }
+
+    @Test
+    void computeRestMode_noBuildCategorySpecifiedInRequest_defaultIsUsed() {
+        assertThat(CommonManipulatorConfigUtils.computeRestMode(AdjustRequest.builder().build(), config.alignment()))
+                .isEqualTo("STANDARD");
+    }
+
+    @Test
+    void computeRestMode_buildCategorySpecifiedInRequest_usedFromRequest() {
+        assertThat(
+                CommonManipulatorConfigUtils.computeRestMode(
+                        AdjustRequest.builder()
+                                .buildConfigParameters(
+                                        Map.of(BuildConfigurationParameterKeys.BUILD_CATEGORY, "SERVICE"))
+                                .build(),
+                        config.alignment()))
+                .isEqualTo("SERVICE");
     }
 }

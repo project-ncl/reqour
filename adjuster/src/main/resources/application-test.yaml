@@ -68,6 +68,16 @@ reqour:
         alignment-parameters:
           - '-Doverride=config'
           - '-DversionIncrementalSuffix=config'
+      build-categories:
+        STANDARD:
+          persistent-mode: PERSISTENT
+          temporary-mode: TEMPORARY
+          temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+          use-by-default: true
+        SERVICE:
+          persistent-mode: SERVICE
+          temporary-mode: SERVICE_TEMPORARY
+          temporary-prefer-persistent-mode: SERVICE_TEMPORARY_PREFER_PERSISTENT
     maven-executable: './mvnw'
     mdc: '{}'
 
