@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   call-maven-mend-ci:
-    uses: project-ncl/shared-github-actions/.github/workflows/maven-mend-ci.yml@f29f5f54fa71a38e77b3c96c7a6adceac9df361b # main
+    uses: project-ncl/shared-github-actions/.github/workflows/maven-mend-ci.yml@a150789342947828f661cc079ac3f5ec325dacdd # main
     with:
       SCA: true
       SAST: true
