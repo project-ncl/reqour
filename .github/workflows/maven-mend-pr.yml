@@ -1,8 +1,8 @@
-name: Mend CLI scan for Maven [PR]
+name: Mend CLI scan for Maven PR
 
 on:
   workflow_run:
-    workflows: ["Java Maven build [PR]"]
+    workflows: ["Java Maven build PR"]
     types: [completed]
 
 permissions:
