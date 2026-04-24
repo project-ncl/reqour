@@ -46,6 +46,7 @@ public class CommonManipulatorConfigUtils {
     private static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = ConfigProvider.getConfig()
             .getValue(ConfigConstants.TEMPORARY_PREFIX_OF_VERSION_SUFFIX, String.class);
     public static final String DEFAULT_JAVA_VERSION = "11";
+    private static final String DEFAULT_BUILD_CATEGORY = "STANDARD";
 
     /**
      * Extract {@link BuildConfigurationParameterKeys#ALIGNMENT_PARAMETERS} from the {@link AdjustRequest}.
@@ -217,7 +218,7 @@ public class CommonManipulatorConfigUtils {
 
     private static BuildCategoryConfig getBuildCategoryConfig(AdjustRequest request, AlignmentConfig alignmentConfig) {
         String buildCategory = request.getBuildConfigParameters()
-                .getOrDefault(BuildConfigurationParameterKeys.BUILD_CATEGORY, "STANDARD");
+                .getOrDefault(BuildConfigurationParameterKeys.BUILD_CATEGORY, DEFAULT_BUILD_CATEGORY);
         BuildCategoryConfig buildCategoryConfig = alignmentConfig.buildCategories().get(buildCategory);
 
         if (buildCategoryConfig == null) {

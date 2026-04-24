@@ -6,21 +6,16 @@ package org.jboss.pnc.reqour.adjust;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.common.log.ProcessStageUtils;
 import org.jboss.pnc.reqour.enums.AdjustProcessStage;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.StringValuePattern;
 
@@ -29,9 +24,6 @@ import lombok.Getter;
 @ApplicationScoped
 public class AdjustTestUtils {
 
-    @ConfigProperty(name = "test.location.requests.dir")
-    Path requestsLocation;
-
     @ConfigProperty(name = "test.heartbeat.path")
     @Getter
     String heartbeatPath;
@@ -39,17 +31,6 @@ public class AdjustTestUtils {
     @ConfigProperty(name = "test.location.providers.gradle")
     @Getter
     String gradleProviderResourcesLocation;
-
-    @Inject
-    ObjectMapper objectMapper;
-
-    public AdjustRequest getAdjustRequest(Path requestInputFile) {
-        try {
-            return objectMapper.readValue(requestsLocation.resolve(requestInputFile).toFile(), AdjustRequest.class);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * Asserts whether the system property in the given command has exactly expected values in the concrete order. The

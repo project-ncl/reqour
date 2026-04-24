@@ -68,14 +68,22 @@ reqour:
         alignment-parameters:
           - '-Doverride=config'
           - '-DversionIncrementalSuffix=config'
+      build-categories:
+        STANDARD:
+          persistent-mode: PERSISTENT
+          temporary-mode: TEMPORARY
+          temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+        TEST:
+          persistent-mode: TEST
+          temporary-mode: TEST_TEMPORARY
+          temporary-prefer-persistent-mode: TEST_TEMPORARY_PREFER_PERSISTENT
+          prefix-of-suffix-version: test
     maven-executable: './mvnw'
     mdc: '{}'
 
 test:
   location:
     test-resources: 'src/test/resources'
-    requests:
-      dir: '${test.location.test-resources}/requests'
     providers:
       dir: '${test.location.test-resources}/providers'
       mvn: '${test.location.providers.dir}/mvn'

@@ -8,8 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -18,6 +20,12 @@ import java.util.Map;
 import jakarta.inject.Inject;
 
 import org.assertj.core.data.MapEntry;
+import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.BuildType;
+import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.RemovedRepository;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
@@ -288,14 +296,14 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
                 null,
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-pnc", "-DrestBrewPullActive=true");
+                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -306,15 +314,15 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
                 null,
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
-                "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-pnc",
+                "-DrestMode=TEST_TEMPORARY",
+                "-DversionIncrementalSuffix=test-temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -324,9 +332,30 @@ class GradleProviderTest {
 
     @Test
     void prepareCommand_standardPersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("master")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("https://github.com/project/repo")
+                .buildConfigParameters(Map.of(BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS, "-Doverride=user"))
+                .tempBuild(false)
+                .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                .taskId(TASK_ID)
+                .buildType(BuildType.GRADLE)
+                .pncDefaultAlignmentParameters("-Doverride=default")
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("gradle-request.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,
@@ -353,15 +382,45 @@ class GradleProviderTest {
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("restBrewPullActive", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "restMode",
+                List.of("PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
     }
 
     @Test
-    void prepareCommand_servicePersistentBuildWithTemporaryPreference_generatedCommandIsCorrect() {
+    void prepareCommand_testPersistentBuildWithTemporaryPreference_generatedCommandIsCorrect() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("master")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("https://github.com/project/repo")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Doverride=user -DversionIncrementalSuffix=user",
+                                BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                TestDataFactory.TEST_BUILD_CATEGORY))
+                .tempBuild(false)
+                .alignmentPreference(AlignmentPreference.PREFER_TEMPORARY)
+                .taskId(TASK_ID)
+                .buildType(BuildType.GRADLE)
+                .pncDefaultAlignmentParameters("-Doverride=default")
+                .brewPullActive(true)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("gradle-request-2.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,
@@ -389,21 +448,46 @@ class GradleProviderTest {
                         MapEntry.entry("restBrewPullActive", 1),
                         MapEntry.entry("versionIncrementalSuffix", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("SERVICE"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("user", "managedsvc-pnc"));
+                List.of("user", "test-pnc"));
     }
 
     @Test
     void prepareCommand_standardBuildWithTargetOption_targetOptionAdded() throws IOException {
         Files.createDirectory(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
 
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("master")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("https://github.com/project/repo")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Doverride=user -t=gradle-directory"))
+                .tempBuild(false)
+                .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                .taskId(TASK_ID)
+                .buildType(BuildType.GRADLE)
+                .pncDefaultAlignmentParameters("-Doverride=default")
+                .brewPullActive(false)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("gradle-request-with-target-directory.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,

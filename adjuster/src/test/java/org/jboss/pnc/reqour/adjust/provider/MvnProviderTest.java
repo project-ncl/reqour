@@ -8,8 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -18,7 +20,12 @@ import java.util.Map;
 import jakarta.inject.Inject;
 
 import org.assertj.core.data.MapEntry;
+import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
@@ -100,7 +107,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
                 null,
@@ -108,7 +115,7 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-pnc", "-DrestBrewPullActive=true");
+                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -119,7 +126,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
                 null,
@@ -127,8 +134,8 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
-                "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-pnc",
+                "-DrestMode=TEST_TEMPORARY",
+                "-DversionIncrementalSuffix=test-temporary-pnc",
                 "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
@@ -140,7 +147,7 @@ public class MvnProviderTest {
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json")),
+                exampleAdjustRequest(),
                 workdir,
                 null,
                 null,
@@ -170,23 +177,49 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "configAlignmentParam", List.of("foo"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restURL", List.of("https://da.com/rest/v-1"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("SERVICE"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("pnc", "managedsvc-pnc"));
+                List.of("pnc", "test-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionSuffixAlternatives",
-                List.of("pnc,managedsvc-pnc"));
+                List.of("pnc,test-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
     }
 
     @Test
     void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("git@gitlab.com:repo/project.git")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-DuserSpecifiedAlignmentParam=foo -DRepour_Java=17 -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user"))
+                .tempBuild(true)
+                .alignmentPreference(AlignmentPreference.PREFER_TEMPORARY)
+                .taskId(TASK_ID)
+                .buildType(BuildType.MVN)
+                .pncDefaultAlignmentParameters(
+                        "-DdefaultAlignmentParam=foo -DsameKeyInDefaultAndUserParams=default -Doverride=default")
+                .brewPullActive(false)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("mvn-request-2.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,
@@ -242,9 +275,33 @@ public class MvnProviderTest {
         Files.createDirectory(workdir.resolve("directory")); // pom file checked for existence
         Files.createFile(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
 
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("git@gitlab.com:repo/project.git")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "--file=directory/pom.xml"))
+                .tempBuild(false)
+                .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                .taskId(TASK_ID)
+                .buildType(BuildType.MVN)
+                .pncDefaultAlignmentParameters("-Doverride=default")
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("mvn-request-with-results-file.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,
@@ -288,7 +345,7 @@ public class MvnProviderTest {
     @Test
     void adjust_manipulatorReturnsNonZeroExitCode_adjusterExceptionIsThrown() {
         Mockito.when(processExecutor.execute(Mockito.any())).thenReturn(1);
-        AdjustRequest adjustRequest = adjustTestUtils.getAdjustRequest(Path.of("mvn-request.json"));
+        AdjustRequest adjustRequest = exampleAdjustRequest();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
                 adjustRequest,
@@ -301,5 +358,35 @@ public class MvnProviderTest {
 
         assertThatThrownBy(() -> provider.adjust(adjustRequest)).isInstanceOf(AdjusterException.class)
                 .hasMessage("Manipulator subprocess ended with non-zero exit code");
+    }
+
+    private static AdjustRequest exampleAdjustRequest() {
+        return AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("git@gitlab.com:repo/project.git")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Doverride=user",
+                                BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                TestDataFactory.TEST_BUILD_CATEGORY))
+                .tempBuild(false)
+                .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                .taskId(TASK_ID)
+                .buildType(BuildType.MVN)
+                .pncDefaultAlignmentParameters("-Doverride=default")
+                .brewPullActive(true)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
     }
 }
