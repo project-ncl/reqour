@@ -12,4 +12,4 @@ concurrency:
 
 jobs:
   build:
-    uses: project-ncl/shared-github-actions/.github/workflows/maven-pr-build.yml@31dd704d2c891ac8dd8b45aaae06f347ec2bc4b4 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/maven-pr-build.yml@21150ba868d8999b267c786123bf7a2410a05fc5 # main
