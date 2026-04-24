@@ -15,8 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.LogRecord;
 
+import jakarta.inject.Inject;
+
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
+import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
+import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
@@ -35,6 +40,9 @@ import lombok.extern.slf4j.Slf4j;
         initArgs = @ResourceArg(name = LogCollectingTestResource.LEVEL, value = "FINE"))
 @Slf4j
 class CommonManipulatorConfigUtilsTest {
+
+    @Inject
+    ReqourAdjusterConfig config;
 
     @Test
     void parseUserSpecifiedAlignmentParameters_noLocation_returnsParsedAlignmentParametersWithDefaultLocation() {
@@ -274,5 +282,40 @@ class CommonManipulatorConfigUtilsTest {
         assertThatThrownBy(() -> CommonManipulatorConfigUtils.getJavaLocation(log, List.of("-DRepour_Java=invalid")))
                 .isInstanceOf(AdjusterException.class)
                 .hasMessage("Invalid Java version 'invalid' provided.");
+    }
+
+    @Test
+    void computeRestMode_noChangesProvided_defaultBuildCategoryWithPersistentModeUsed() {
+        assertThat(
+                CommonManipulatorConfigUtils.computeRestMode(
+                        AdjustRequest.builder().buildConfigParameters(Collections.emptyMap()).build(),
+                        config.alignment()))
+                .isEqualTo("PERSISTENT");
+    }
+
+    @Test
+    void computeRestMode_temporaryBuild_defaultBuildCategoryWithTemporaryModeUsed() {
+        assertThat(
+                CommonManipulatorConfigUtils.computeRestMode(
+                        AdjustRequest.builder().buildConfigParameters(Collections.emptyMap()).tempBuild(true).build(),
+                        config.alignment()))
+                .isEqualTo("TEMPORARY");
+    }
+
+    @Test
+    void computeRestMode_explicitBuildCategory_explicitBuildCategoryWithAppropriateModeUsed() {
+        assertThat(
+                CommonManipulatorConfigUtils
+                        .computeRestMode(
+                                AdjustRequest.builder()
+                                        .buildConfigParameters(
+                                                Map.of(
+                                                        BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                                        TestDataFactory.TEST_BUILD_CATEGORY))
+                                        .tempBuild(true)
+                                        .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                                        .build(),
+                                config.alignment()))
+                .isEqualTo("TEST_TEMPORARY_PREFER_PERSISTENT");
     }
 }

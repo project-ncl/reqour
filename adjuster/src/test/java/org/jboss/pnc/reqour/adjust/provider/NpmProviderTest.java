@@ -8,8 +8,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.STANDARD_BUILD_CATEGORY;
+import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +20,11 @@ import jakarta.inject.Inject;
 
 import org.assertj.core.data.MapEntry;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
+import org.jboss.pnc.api.dto.Request;
+import org.jboss.pnc.api.enums.AlignmentPreference;
+import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
+import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
@@ -149,13 +155,13 @@ class NpmProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_PERSISTENT_REQUEST,
+                TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=SERVICE", "-DversionIncrementalSuffix=managedsvc-config");
+                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-config");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -166,14 +172,14 @@ class NpmProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                TestDataFactory.SERVICE_TEMPORARY_REQUEST,
+                TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
-                "-DrestMode=SERVICE_TEMPORARY",
-                "-DversionIncrementalSuffix=managedsvc-temporary-config");
+                "-DrestMode=TEST_TEMPORARY",
+                "-DversionIncrementalSuffix=test-temporary-config");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -184,7 +190,7 @@ class NpmProviderTest {
     void prepareCommand_standardTemporaryBuildWithPersistentPreference_generatedCommandIsCorrect() {
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
+                exampleAdjustRequest(),
                 workdir,
                 null,
                 null,
@@ -211,11 +217,64 @@ class NpmProviderTest {
                 List.of("default", "user", "config", "temporary-user"));
     }
 
+    private static AdjustRequest exampleAdjustRequest() {
+        return AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("https://github.com/repo/project")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-Doverride=user -DversionIncrementalSuffix=user"))
+                .tempBuild(true)
+                .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
+                .taskId(TASK_ID)
+                .buildType(BuildType.NPM)
+                .pncDefaultAlignmentParameters("-Doverride=default -DversionIncrementalSuffix=default")
+                .brewPullActive(true)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
+    }
+
     @Test
     void prepareCommand_standardTemporaryBuildWithTemporaryPreference_generatedCommandIsCorrect() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .sync(true)
+                .originRepoUrl("https://github.com/repo/project")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-DversionIncrementalSuffix="))
+                .tempBuild(true)
+                .alignmentPreference(AlignmentPreference.PREFER_TEMPORARY)
+                .taskId(TASK_ID)
+                .buildType(BuildType.NPM)
+                .pncDefaultAlignmentParameters("-DversionIncrementalSuffix=default")
+                .brewPullActive(true)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("npm-request-2.json")),
+                adjustRequest,
                 workdir,
                 null,
                 null,
@@ -246,7 +305,7 @@ class NpmProviderTest {
     void obtainManipulatorResult_resultWithBasicName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
+                exampleAdjustRequest(),
                 workdir,
                 objectMapper,
                 null,
@@ -267,7 +326,7 @@ class NpmProviderTest {
     void obtainManipulatorResult_resultWithComplicatedName_correctlyParsesResult() {
         NpmProvider provider = new NpmProvider(
                 config.alignment(),
-                adjustTestUtils.getAdjustRequest(Path.of("npm-request.json")),
+                exampleAdjustRequest(),
                 workdir,
                 objectMapper,
                 null,
