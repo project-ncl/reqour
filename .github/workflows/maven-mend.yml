@@ -18,7 +18,7 @@ jobs:
   build:
     uses: project-ncl/shared-github-actions/.github/workflows/maven-ci.yml@429a1085131890ddf95456ac2a7a8b0866dd78ad # main
     with:
-      upload_artifacts: false
+      upload_artifacts: true
 
   call-maven-mend-ci:
     needs: build
