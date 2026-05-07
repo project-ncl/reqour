@@ -118,7 +118,7 @@
         <version.git-commit-id-plugin>4.9.10</version.git-commit-id-plugin>
         <version.maven-replacer-plugin>1.4.1</version.maven-replacer-plugin>
         <version.maven-jar-plugin>3.5.0</version.maven-jar-plugin>
-        <version.quarkus-pnc-client-auth>1.0.0-SNAPSHOT</version.quarkus-pnc-client-auth>
+        <version.quarkus-pnc-client-auth>1.0.0</version.quarkus-pnc-client-auth>
    </properties>
 
     <dependencyManagement>
