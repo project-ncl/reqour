@@ -26,6 +26,7 @@ public class ConfigConstants {
             + ".git.git-providers.gitlab.git-url-internal-template";
     public static final String PRIVATE_GITHUB_USER = REQOUR_CORE_CONFIG + ".git.private-github-user";
     public static final String INTERNAL_URL_VALIDATION = REQOUR_CORE_CONFIG + ".git.validate-internal-url";
+    public static final String ENVS_CONFIG = REQOUR_CORE_CONFIG + ".envs";
     //endregion
 
     //region Reqour Adjuster config

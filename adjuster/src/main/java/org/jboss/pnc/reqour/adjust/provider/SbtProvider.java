@@ -27,6 +27,8 @@ import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,10 +42,12 @@ import lombok.extern.slf4j.Slf4j;
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
     private final AlignmentConfig alignmentConfig;
+    private final ReqourCoreConfig coreConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
             AlignmentConfig alignmentConfig,
+            ReqourCoreConfig coreConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -51,6 +55,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
         this.alignmentConfig = alignmentConfig;
+        this.coreConfig = coreConfig;
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -91,6 +96,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
+                        List.of(String.format("%s=%s", EnvironmentConfig.HOME_ENV_VARIABLE, coreConfig.envs().home())), // NCL-9710
                         List.of(config.getSbtPath().toString()),
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),

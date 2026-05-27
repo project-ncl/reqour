@@ -19,4 +19,6 @@ public interface ReqourCoreConfig {
     LogConfig log();
 
     PNCHttpClientConfig pncHttpClientConfig();
+
+    EnvironmentConfig envs();
 }
