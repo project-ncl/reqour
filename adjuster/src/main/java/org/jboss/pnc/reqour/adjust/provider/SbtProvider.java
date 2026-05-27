@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -96,13 +97,17 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
         return AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoList(
                 List.of(
-                        List.of(String.format("%s=%s", EnvironmentConfig.HOME_ENV_VARIABLE, coreConfig.envs().home())), // NCL-9710
                         List.of(config.getSbtPath().toString()),
                         config.getPncDefaultAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         computeAlignmentParametersOverrides(),
                         List.of("manipulate", "writeReport")));
+    }
+
+    @Override
+    protected Map<String, String> prepareExtraEnvs() {
+        return Map.ofEntries(Map.entry(EnvironmentConfig.HOME_ENV_VARIABLE, coreConfig.envs().home())); // NCL-9710
     }
 
     @Override
