@@ -176,10 +176,10 @@ class SbtProviderTest {
                 TestDataFactory.userLogger);
 
         List<String> command = provider.prepareCommand();
+        Map<String, String> envs = provider.prepareExtraEnvs();
 
         assertThat(command).containsSequence(
                 List.of(
-                        EnvironmentConfig.HOME_ENV_VARIABLE + "=" + WithHomeVariableSet.HOME_VALUE,
                         config.alignment().scalaProviderConfig().sbtPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
@@ -197,5 +197,8 @@ class SbtProviderTest {
                         TestDataSupplier.Alignment.TEMPORARY_PREFIX_OF_VERSION_SUFFIX + "-"
                                 + TestDataSupplier.Alignment.PERMANENT_SUFFIX));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+
+        assertThat(envs).isNotEmpty();
+        assertThat(envs).containsEntry(EnvironmentConfig.HOME_ENV_VARIABLE, WithHomeVariableSet.HOME_VALUE);
     }
 }

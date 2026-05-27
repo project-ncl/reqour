@@ -4,7 +4,9 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
@@ -47,10 +49,13 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
 
     private void callAdjust() {
         List<String> preparedCommand = prepareCommand();
+        Map<String, String> extraEnvs = prepareExtraEnvs();
+
         userLogger.info("Prepared command to be executed is: {}", preparedCommand);
         int manipulatorExitCode = processExecutor.execute(
                 ProcessContext.withWorkdirAndConsumers(config.getWorkdir(), userLogger::info, userLogger::warn)
                         .command(preparedCommand)
+                        .extraEnvVariables(extraEnvs)
                         .build());
         if (manipulatorExitCode == 0) {
             userLogger.info("Manipulator subprocess ended successfully!");
@@ -58,6 +63,10 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
             userLogger.warn("Manipulator subprocess ended with failure!");
             throw new AdjusterException("Manipulator subprocess ended with non-zero exit code");
         }
+    }
+
+    protected Map<String, String> prepareExtraEnvs() {
+        return Collections.emptyMap();
     }
 
     /**
