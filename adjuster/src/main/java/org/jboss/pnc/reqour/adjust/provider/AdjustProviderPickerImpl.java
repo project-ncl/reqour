@@ -16,6 +16,7 @@ import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
@@ -25,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AdjustProviderPickerImpl implements AdjustProviderPicker {
 
     private final ReqourAdjusterConfig config;
+    private final ReqourCoreConfig coreConfig;
     private final ObjectMapper objectMapper;
     private final ProcessExecutor processExecutor;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
@@ -35,12 +37,14 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     @Inject
     public AdjustProviderPickerImpl(
             ReqourAdjusterConfig config,
+            ReqourCoreConfig coreConfig,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
             @UserLogger Logger userLogger) {
         this.config = config;
+        this.coreConfig = coreConfig;
         this.objectMapper = objectMapper;
         this.processExecutor = processExecutor;
         this.adjustResultExtractor = adjustResultExtractor;
@@ -71,7 +75,14 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
             case NPM ->
                 new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
-                new SbtProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
+                new SbtProvider(
+                        config.alignment(),
+                        coreConfig,
+                        adjustRequest,
+                        workdir,
+                        objectMapper,
+                        processExecutor,
+                        userLogger);
             case RPM -> throw new AdjusterException("Alignment for RPM builds is not supported yet");
         };
     }

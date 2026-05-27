@@ -27,19 +27,27 @@ import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
+import org.jboss.pnc.reqour.adjust.profile.WithHomeVariableSet;
 import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.TestProfile;
 
 @QuarkusTest
+@TestProfile(WithHomeVariableSet.class)
 class SbtProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -60,6 +68,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
+                null,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -76,6 +85,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
+                null,
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -95,6 +105,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
+                null,
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -112,6 +123,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
+                null,
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -156,6 +168,7 @@ class SbtProviderTest {
                 .build();
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -164,7 +177,10 @@ class SbtProviderTest {
 
         List<String> command = provider.prepareCommand();
 
-        assertThat(command).containsSequence(List.of(config.alignment().scalaProviderConfig().sbtPath().toString()));
+        assertThat(command).containsSequence(
+                List.of(
+                        EnvironmentConfig.HOME_ENV_VARIABLE + "=" + WithHomeVariableSet.HOME_VALUE,
+                        config.alignment().scalaProviderConfig().sbtPath().toString()));
         assertSystemPropertiesContainExactly(
                 command,
                 Map.ofEntries(
