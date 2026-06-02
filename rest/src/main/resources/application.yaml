@@ -1,4 +1,6 @@
 quarkus:
+  application:
+    name: reqour
   http:
     auth:
       # required for LDAP: build-time property
