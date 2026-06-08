@@ -31,9 +31,6 @@ public class ConfigConstants {
 
     //region Reqour Adjuster config
     public static final String REQOUR_ADJUSTER_CONFIG = "reqour.adjuster";
-    public static final String PERMANENT_SUFFIX = REQOUR_ADJUSTER_CONFIG + ".alignment.suffix.permanent";
-    public static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = REQOUR_ADJUSTER_CONFIG
-            + ".alignment.suffix.temporary-prefix";
     public static final String VALIDATE_ALIGNMENT_CONFIG = REQOUR_ADJUSTER_CONFIG + ".alignment.validate";
     public static final String ADJUSTER_MDC = REQOUR_ADJUSTER_CONFIG + ".mdc";
     //endregion

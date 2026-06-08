@@ -86,8 +86,10 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userAlignmentParametersWithFile)
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
-                .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
+                .versionIncrementalSuffix(
+                        CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
+                .versionSuffixAlternatives(
+                        CommonManipulatorConfigUtils.computeVersionSuffixAlternatives(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
                 .workdir(workdir)
                 .subFolderWithAlignmentResultFile(subFolderWithResults)
@@ -138,21 +140,17 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
         alignmentParameters
                 .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        if (!config.getPrefixOfVersionSuffix().isBlank()) {
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
-        }
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                        VERSION_INCREMENTAL_SUFFIX,
+                        config.getVersionIncrementalSuffix()));
 
-        String prefixOfSuffixWithoutTemporary = CommonManipulatorConfigUtils
-                .stripTemporarySuffix(config.getPrefixOfVersionSuffix());
-        if (config.isPreferPersistentEnabled() && !prefixOfSuffixWithoutTemporary.isBlank()) {
+        final String versionSuffixAlternatives = config.getVersionSuffixAlternatives();
+        if (config.isPreferPersistentEnabled() && !versionSuffixAlternatives.isBlank()) {
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_SUFFIX_ALTERNATIVES,
-                            alignmentConfig.suffix().permanent() + "," + prefixOfSuffixWithoutTemporary + "-"
-                                    + alignmentConfig.suffix().permanent()));
+                            versionSuffixAlternatives));
         }
 
         alignmentParameters.add(

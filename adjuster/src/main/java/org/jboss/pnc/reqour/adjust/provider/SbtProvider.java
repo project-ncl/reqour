@@ -42,7 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
-    private final AlignmentConfig alignmentConfig;
     private final ReqourCoreConfig coreConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
@@ -55,7 +54,6 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             ProcessExecutor processExecutor,
             Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
-        this.alignmentConfig = alignmentConfig;
         this.coreConfig = coreConfig;
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
@@ -68,8 +66,8 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .brewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
-                .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
+                .versionIncrementalSuffix(
+                        CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(sbtProviderConfig.alignmentParameters())
                 .workdir(
                         userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
@@ -135,12 +133,10 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
         alignmentParameters
                 .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        if (!config.getPrefixOfVersionSuffix().isBlank()) {
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
-        }
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                        VERSION_INCREMENTAL_SUFFIX,
+                        config.getVersionIncrementalSuffix()));
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));

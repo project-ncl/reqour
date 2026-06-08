@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -62,8 +61,8 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
-                .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
+                .versionIncrementalSuffix(
+                        CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(npmProviderConfig.alignmentParameters())
                 .workdir(workdir)
                 .resultsFilePath(getResultsFile(workdir))
@@ -136,20 +135,11 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
 
         alignmentParameters
                 .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        if (!config.getPrefixOfVersionSuffix().isBlank()) {
-            Optional<String> originalSuffix = AdjustmentSystemPropertiesUtils.getSystemPropertyValue(
-                    VERSION_INCREMENTAL_SUFFIX,
-                    AdjustmentSystemPropertiesUtils.joinSystemPropertiesListsIntoStream(
-                            List.of(
-                                    config.getUserSpecifiedAlignmentParameters(),
-                                    config.getAlignmentConfigParameters(),
-                                    config.getPncDefaultAlignmentParameters())));
-            String newSuffix = originalSuffix.map(s -> s.isEmpty() ? s : "-" + s).orElse("");
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + newSuffix));
-        }
+
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                        VERSION_INCREMENTAL_SUFFIX,
+                        config.getVersionIncrementalSuffix()));
 
         return alignmentParameters;
     }

@@ -28,7 +28,6 @@ import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.profile.WithHomeVariableSet;
-import org.jboss.pnc.reqour.common.TestDataSupplier;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
@@ -74,7 +73,8 @@ class SbtProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger);
-        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DrestBrewPullActive=true");
+        List<String> expectedOverrides = List
+                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -193,9 +193,7 @@ class SbtProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of(
-                        TestDataSupplier.Alignment.TEMPORARY_PREFIX_OF_VERSION_SUFFIX + "-"
-                                + TestDataSupplier.Alignment.PERMANENT_SUFFIX));
+                List.of("temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
         assertThat(envs).isNotEmpty();

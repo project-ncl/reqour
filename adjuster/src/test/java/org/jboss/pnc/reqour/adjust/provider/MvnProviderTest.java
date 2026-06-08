@@ -75,7 +75,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger);
-        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DrestBrewPullActive=true");
+        List<String> expectedOverrides = List
+                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -171,7 +172,7 @@ public class MvnProviderTest {
                         MapEntry.entry("configAlignmentParam", 1),
                         MapEntry.entry("restURL", 1),
                         MapEntry.entry("restMode", 1),
-                        MapEntry.entry("versionIncrementalSuffix", 2),
+                        MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("versionSuffixAlternatives", 1),
                         MapEntry.entry("restBrewPullActive", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
@@ -181,7 +182,7 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("pnc", "test-pnc"));
+                List.of("test-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionSuffixAlternatives",
@@ -203,7 +204,7 @@ public class MvnProviderTest {
                 .buildConfigParameters(
                         Map.of(
                                 BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                "-DuserSpecifiedAlignmentParam=foo -DRepour_Java=17 -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user"))
+                                "-DuserSpecifiedAlignmentParam=foo -DRepour_Java=17 -DsameKeyInDefaultAndUserParams=user -DrestURL=https://user-specified.com/da/v1 -Doverride=user -DversionIncrementalSuffix=user"))
                 .tempBuild(true)
                 .alignmentPreference(AlignmentPreference.PREFER_TEMPORARY)
                 .taskId(TASK_ID)
@@ -266,7 +267,7 @@ public class MvnProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("pnc", "temporary-pnc"));
+                List.of("user", "temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
     }
 

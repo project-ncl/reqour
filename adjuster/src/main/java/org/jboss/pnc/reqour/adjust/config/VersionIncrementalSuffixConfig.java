@@ -4,12 +4,9 @@
  */
 package org.jboss.pnc.reqour.adjust.config;
 
-/**
- * Alignment suffix configuration.
- */
-public interface SuffixConfiguration {
+public interface VersionIncrementalSuffixConfig {
 
     String permanent();
 
-    String temporaryPrefix();
+    String temporary();
 }

@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.adjust.config;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -17,5 +18,7 @@ public interface BuildCategoryConfig {
 
     String temporaryPreferPersistentMode();
 
-    Optional<String> prefixOfSuffixVersion();
+    VersionIncrementalSuffixConfig versionIncrementalSuffix();
+
+    Optional<List<String>> versionSuffixAlternatives();
 }

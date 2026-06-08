@@ -53,4 +53,11 @@ public class GmeConfig extends CommonManipulatorConfig {
      * Overrides for the root GAV provided by user
      */
     ExecutionRootOverrides executionRootOverrides;
+
+    /**
+     * Comma-separated list of version suffix alternatives, see <a href=
+     * "https://project-ncl.github.io/gradle-manipulator/guide/project-version-manip.html#version-suffix-alternatives">GME
+     * Docs</a>.
+     */
+    String versionSuffixAlternatives;
 }
