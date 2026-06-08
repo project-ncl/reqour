@@ -1,9 +1,6 @@
 reqour:
   adjuster:
     alignment:
-      suffix:
-        permanent: redhat
-        temporary-prefix: temporary
       validate: true
       request: ${ADJUST_REQUEST}
     maven-executable: mvn

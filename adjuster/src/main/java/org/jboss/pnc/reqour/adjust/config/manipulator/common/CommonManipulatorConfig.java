@@ -43,9 +43,9 @@ public class CommonManipulatorConfig {
     String restMode;
 
     /**
-     * Prefix of the build suffix version, e.g. 'redhat-'.
+     * Version incremental suffix (used by manipulators, e.g. PME), e.g., '-ibm'.
      */
-    String prefixOfVersionSuffix;
+    String versionIncrementalSuffix;
 
     /**
      * Working directory, in which should the manipulator run.

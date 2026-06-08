@@ -19,19 +19,18 @@ import java.util.regex.Pattern;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.constants.BuildConfigurationParameterKeys;
 import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.BuildCategoryConfig;
+import org.jboss.pnc.reqour.adjust.config.VersionIncrementalSuffixConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
 import org.jboss.pnc.reqour.adjust.model.LocationAndRemainingAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
-import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.slf4j.Logger;
 
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +42,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CommonManipulatorConfigUtils {
 
-    private static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = ConfigProvider.getConfig()
-            .getValue(ConfigConstants.TEMPORARY_PREFIX_OF_VERSION_SUFFIX, String.class);
     public static final String DEFAULT_JAVA_VERSION = "11";
     private static final String DEFAULT_BUILD_CATEGORY = "STANDARD";
 
@@ -132,24 +129,31 @@ public class CommonManipulatorConfigUtils {
         return new ExecutionRootOverrides(brewBuildMatcher.group("groupId"), brewBuildMatcher.group("artifactId"));
     }
 
-    public static String computePrefixOfVersionSuffix(AdjustRequest request, AlignmentConfig alignmentConfig) {
+    /**
+     * Compute version alignment suffix, which is provided into manipulators (PME, Gradle Manipulator, ...)
+     * as the '-DversionIncrementalSuffix' argument.
+     */
+    public static String computeVersionIncrementalSuffix(AdjustRequest request, AlignmentConfig alignmentConfig) {
         BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
 
-        if (request.isTempBuild()) {
-            return buildCategoryConfig.prefixOfSuffixVersion().map(s -> s + "-").orElse("")
-                    + TEMPORARY_PREFIX_OF_VERSION_SUFFIX;
-        }
-        return buildCategoryConfig.prefixOfSuffixVersion().orElse("");
+        final VersionIncrementalSuffixConfig versionIncrementalSuffixConfig = buildCategoryConfig
+                .versionIncrementalSuffix();
+        return (request.isTempBuild()) ? versionIncrementalSuffixConfig.temporary()
+                : versionIncrementalSuffixConfig.permanent();
     }
 
     /**
-     * Strip the temporary suffix from the given prefix of the version suffix.
+     * Compute version suffix alternatives, which is provided into manipulators (PME, Gradle Manipulator) as the
+     * '-DversionSuffixAlternatives' argument, see e.g.
+     * <a href=
+     * "https://project-ncl.github.io/pom-manipulation-ext/guide/project-version-manip.html#alternate-suffix-handling">PME
+     * Docs</a>.<br/>
+     * Computes e.g. non-optional list of values ["pnc", "test-pnc"] to "pnc,test-pnc".
      */
-    public static String stripTemporarySuffix(String prefixOfVersionSuffix) {
-        var suffixWithoutTemporary = prefixOfVersionSuffix.replace(TEMPORARY_PREFIX_OF_VERSION_SUFFIX, "");
-        return (suffixWithoutTemporary.endsWith("-"))
-                ? suffixWithoutTemporary.substring(0, suffixWithoutTemporary.length() - 1)
-                : suffixWithoutTemporary;
+    public static String computeVersionSuffixAlternatives(AdjustRequest request, AlignmentConfig alignmentConfig) {
+        BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
+
+        return String.join(",", buildCategoryConfig.versionSuffixAlternatives().orElse(Collections.emptyList()));
     }
 
     /**

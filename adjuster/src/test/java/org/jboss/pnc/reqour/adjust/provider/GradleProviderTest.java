@@ -265,7 +265,8 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger);
-        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DrestBrewPullActive=true");
+        List<String> expectedOverrides = List
+                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -380,12 +381,14 @@ class GradleProviderTest {
                 Map.ofEntries(
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
+                        MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("restBrewPullActive", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "restMode",
                 List.of("PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "versionIncrementalSuffix", List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
     }
 
@@ -512,9 +515,11 @@ class GradleProviderTest {
                 Map.ofEntries(
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
+                        MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("restBrewPullActive", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "versionIncrementalSuffix", List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
         Files.deleteIfExists(workdir.resolve("gradle-directory")); // gradle target directory checked for existence

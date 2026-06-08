@@ -74,7 +74,7 @@ class NpmProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger);
-        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT");
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -100,7 +100,7 @@ class NpmProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger);
-        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT");
+        List<String> expectedOverrides = List.of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -117,7 +117,7 @@ class NpmProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary-config");
+                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary-pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -144,7 +144,7 @@ class NpmProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary");
+                .of("-DrestMode=TEMPORARY", "-DversionIncrementalSuffix=temporary-pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -161,7 +161,7 @@ class NpmProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-config");
+                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -179,7 +179,7 @@ class NpmProviderTest {
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
-                "-DversionIncrementalSuffix=test-temporary-config");
+                "-DversionIncrementalSuffix=test-temporary-pnc");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -208,13 +208,13 @@ class NpmProviderTest {
                 Map.ofEntries(
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
-                        MapEntry.entry("versionIncrementalSuffix", 4)));
+                        MapEntry.entry("versionIncrementalSuffix", 3)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY_PREFER_PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("default", "user", "config", "temporary-user"));
+                List.of("default", "user", "temporary-pnc"));
     }
 
     private static AdjustRequest exampleAdjustRequest() {
@@ -292,13 +292,13 @@ class NpmProviderTest {
                 Map.ofEntries(
                         MapEntry.entry("override", 1),
                         MapEntry.entry("restMode", 1),
-                        MapEntry.entry("versionIncrementalSuffix", 4)));
+                        MapEntry.entry("versionIncrementalSuffix", 3)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("default", "", "config", "temporary"));
+                List.of("default", "", "temporary-pnc"));
     }
 
     @Test

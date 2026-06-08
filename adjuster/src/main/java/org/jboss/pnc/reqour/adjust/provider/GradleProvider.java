@@ -75,8 +75,10 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
-                .prefixOfVersionSuffix(
-                        CommonManipulatorConfigUtils.computePrefixOfVersionSuffix(adjustRequest, alignmentConfig))
+                .versionIncrementalSuffix(
+                        CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
+                .versionSuffixAlternatives(
+                        CommonManipulatorConfigUtils.computeVersionSuffixAlternatives(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(gradleProviderConfig.alignmentParameters())
                 .workdir(
                         userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
@@ -181,24 +183,20 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
         alignmentParameters
                 .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_MODE, config.getRestMode()));
-        if (!config.getPrefixOfVersionSuffix().isBlank()) {
-            alignmentParameters.add(
-                    AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
-                            VERSION_INCREMENTAL_SUFFIX,
-                            config.getPrefixOfVersionSuffix() + "-" + alignmentConfig.suffix().permanent()));
-        }
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                        VERSION_INCREMENTAL_SUFFIX,
+                        config.getVersionIncrementalSuffix()));
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
 
-        String prefixOfSuffixWithoutTemporary = CommonManipulatorConfigUtils
-                .stripTemporarySuffix(config.getPrefixOfVersionSuffix());
-        if (config.isPreferPersistentEnabled() && !prefixOfSuffixWithoutTemporary.isBlank()) {
+        final String versionSuffixAlternatives = config.getVersionSuffixAlternatives();
+        if (config.isPreferPersistentEnabled() && !versionSuffixAlternatives.isBlank()) {
             alignmentParameters.add(
                     AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                             VERSION_SUFFIX_ALTERNATIVES,
-                            alignmentConfig.suffix().permanent() + "," + prefixOfSuffixWithoutTemporary + "-"
-                                    + alignmentConfig.suffix().permanent()));
+                            versionSuffixAlternatives));
         }
 
         return alignmentParameters;

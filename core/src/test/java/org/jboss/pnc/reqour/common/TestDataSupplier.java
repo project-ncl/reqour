@@ -154,12 +154,4 @@ public class TestDataSupplier {
             return protectedTag;
         }
     }
-
-    public static class Alignment {
-
-        public static final String PERMANENT_SUFFIX = ConfigProvider.getConfig()
-                .getValue(ConfigConstants.PERMANENT_SUFFIX, String.class);
-        public static final String TEMPORARY_PREFIX_OF_VERSION_SUFFIX = ConfigProvider.getConfig()
-                .getValue(ConfigConstants.TEMPORARY_PREFIX_OF_VERSION_SUFFIX, String.class);
-    }
 }

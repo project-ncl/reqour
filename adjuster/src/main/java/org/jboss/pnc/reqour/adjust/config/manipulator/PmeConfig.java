@@ -53,4 +53,11 @@ public class PmeConfig extends CommonManipulatorConfig {
      * Overrides for the root GAV provided by user
      */
     ExecutionRootOverrides executionRootOverrides;
+
+    /**
+     * Comma-separated list of version suffix alternatives, see <a href=
+     * "https://project-ncl.github.io/pom-manipulation-ext/guide/project-version-manip.html#alternate-suffix-handling">PME
+     * Docs</a>.
+     */
+    String versionSuffixAlternatives;
 }

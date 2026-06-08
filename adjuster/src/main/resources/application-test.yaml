@@ -12,8 +12,6 @@ quarkus:
 reqour:
   adjuster:
     alignment:
-      suffix:
-        permanent: pnc
       validate: true
       request: >
         {
@@ -51,7 +49,6 @@ reqour:
         alignment-parameters:
           - '-DconfigAlignmentParam=foo'
           - '-DrestURL=https://da.com/rest/v-1'
-          - '-DversionIncrementalSuffix=${reqour.adjuster.alignment.suffix.permanent}'
           - '-Doverride=config'
       gradle:
         gradle-analyzer-plugin-init-file-path: '${test.location.providers.gradle}/analyzer-init.gradle'
@@ -67,17 +64,22 @@ reqour:
         cli-jar-path: '${test.location.providers.npm}/npm-manipulator-cli.jar'
         alignment-parameters:
           - '-Doverride=config'
-          - '-DversionIncrementalSuffix=config'
       build-categories:
         STANDARD:
           persistent-mode: PERSISTENT
           temporary-mode: TEMPORARY
           temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+          version-incremental-suffix:
+            permanent: pnc
+            temporary: temporary-pnc
         TEST:
           persistent-mode: TEST
           temporary-mode: TEST_TEMPORARY
           temporary-prefer-persistent-mode: TEST_TEMPORARY_PREFER_PERSISTENT
-          prefix-of-suffix-version: test
+          version-incremental-suffix:
+            permanent: test-pnc
+            temporary: test-temporary-pnc
+          version-suffix-alternatives: pnc,test-pnc
     maven-executable: './mvnw'
     mdc: '{}'
 

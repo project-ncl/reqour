@@ -15,8 +15,6 @@ import io.smallrye.config.WithName;
  */
 public interface AlignmentConfig {
 
-    SuffixConfiguration suffix();
-
     AdjustRequest request();
 
     @WithName("mvn")

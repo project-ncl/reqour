@@ -45,4 +45,7 @@ reqour:
           persistent-mode: PERSISTENT
           temporary-mode: TEMPORARY
           temporary-prefer-persistent-mode: TEMPORARY_PREFER_PERSISTENT
+          version-incremental-suffix:
+            permanent: dev
+            temporary: temporary-dev
     mdc: '{}'
