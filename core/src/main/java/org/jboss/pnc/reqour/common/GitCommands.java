@@ -71,11 +71,15 @@ public class GitCommands {
         return IOUtils.splitByNewLine(processExecutor.stdout(processContextBuilder));
     }
 
-    public void add(String filename, ProcessContext.Builder processContextBuilder) {
+    public void add(String filename, boolean force, ProcessContext.Builder processContextBuilder) {
         executeGitCommand(
-                GitUtils.add(filename),
+                GitUtils.add(filename, force),
                 processContextBuilder,
                 String.format("Cannot add file '%s'", filename));
+    }
+
+    public void add(String filename, ProcessContext.Builder processContextBuilder) {
+        add(filename, false, processContextBuilder);
     }
 
     public void addAll(ProcessContext.Builder processContextBuilder) {

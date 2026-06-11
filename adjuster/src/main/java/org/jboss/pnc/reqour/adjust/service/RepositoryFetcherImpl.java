@@ -244,7 +244,8 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             }
 
             // 3) Add the submodule to the main repository index
-            gitCommands.add(submoduleLocation, processContextBuilder);
+            // [NCL-9675] force a submodule to be added even though it's present in the .gitignore
+            gitCommands.add(submoduleLocation, true, processContextBuilder);
         }
 
         // 4) Delete the .gitmodules file

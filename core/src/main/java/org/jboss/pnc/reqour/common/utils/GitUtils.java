@@ -21,8 +21,15 @@ public class GitUtils {
     public static final String DEFAULT_REMOTE_NAME = "origin";
     public static final String FETCH_HEAD = "FETCH_HEAD";
 
-    public static List<String> add(String filename) {
-        return List.of("git", "add", filename);
+    public static List<String> add(String filename, boolean force) {
+        List<String> command = new ArrayList<>(List.of("git", "add"));
+        if (force) {
+            command.add("--force");
+        }
+        command.add(filename);
+        command.add("--");
+
+        return command;
     }
 
     public static List<String> addAll() {
