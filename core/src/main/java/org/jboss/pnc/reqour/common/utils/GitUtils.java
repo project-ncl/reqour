@@ -26,8 +26,8 @@ public class GitUtils {
         if (force) {
             command.add("--force");
         }
-        command.add(filename);
         command.add("--");
+        command.add(filename);
 
         return command;
     }
@@ -46,13 +46,12 @@ public class GitUtils {
             command.add("--force");
         }
         command.add(ref);
-        command.add("--");
 
         return command;
     }
 
     public static List<String> clone(String url) {
-        return List.of("git", "clone", "--", url, ".");
+        return List.of("git", "clone", url, ".");
     }
 
     /**
@@ -64,7 +63,7 @@ public class GitUtils {
      * @return
      */
     public static List<String> cloneMirror(String url) {
-        return List.of("git", "clone", "--mirror", "--", url, "./.git");
+        return List.of("git", "clone", "--mirror", url, "./.git");
     }
 
     public static List<String> commit(String commitMessage) {
@@ -138,13 +137,12 @@ public class GitUtils {
         }
         command.add(remote);
         command.add(ref);
-        command.add("--");
 
         return command;
     }
 
     public static List<String> pushAll(String remote) {
-        return List.of("git", "push", "--all", remote, "--");
+        return List.of("git", "push", "--all", remote);
     }
 
     public static List<String> pushTags(String remote, List<String> tags) {
@@ -158,7 +156,7 @@ public class GitUtils {
     }
 
     public static List<String> pushAllTags(String remote) {
-        return List.of("git", "push", "--tags", remote, "--");
+        return List.of("git", "push", "--tags", remote);
     }
 
     public static List<String> pushRefWithTags(String ref, String remote, List<String> tags) {
@@ -172,7 +170,7 @@ public class GitUtils {
     }
 
     public static List<String> addRemote(String remote, String url) {
-        return List.of("git", "remote", "add", remote, url, "--");
+        return List.of("git", "remote", "add", remote, url);
     }
 
     public static List<String> renameRemote(String oldRemote, String newRemote) {
@@ -184,10 +182,13 @@ public class GitUtils {
     }
 
     public static List<String> remove(String filename, boolean cached) {
-        List<String> command = new ArrayList<>(List.of("git", "rm", filename));
+        List<String> command = new ArrayList<>(List.of("git", "rm"));
         if (cached) {
             command.add("--cached");
         }
+        command.add("--");
+        command.add(filename);
+
         return command;
     }
 

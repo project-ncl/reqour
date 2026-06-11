@@ -213,7 +213,7 @@ Even though there already exist some support for git from Java, e.g. [jgit](http
 Concrete git commands are generated in [GitUtils class](https://github.com/project-ncl/reqour/blob/6f8bea6/core/src/main/java/org/jboss/pnc/reqour/common/utils/GitUtils.java), e.g.:
 ```java
 public static List<String> clone(String url) {
-    return List.of("git", "clone", "--", url, ".");
+    return List.of("git", "clone", url, ".");
 }
 ```
 
