@@ -80,6 +80,9 @@ reqour:
             permanent: test-pnc
             temporary: test-temporary-pnc
           version-suffix-alternatives: pnc,test-pnc
+          additional-alignment-parameters:
+            - '-DadditionalAlignmentParam=foo'
+
     maven-executable: './mvnw'
     mdc: '{}'
 

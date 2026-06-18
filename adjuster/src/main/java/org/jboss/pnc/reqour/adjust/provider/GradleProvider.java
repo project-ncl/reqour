@@ -80,6 +80,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .versionSuffixAlternatives(
                         CommonManipulatorConfigUtils.computeVersionSuffixAlternatives(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(gradleProviderConfig.alignmentParameters())
+                .additionalAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalAlignmentParameters(adjustRequest, alignmentConfig))
                 .workdir(
                         userSpecifiedAlignmentParameters.getLocation().isEmpty() ? workdir
                                 : workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get()))
@@ -198,6 +201,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                             VERSION_SUFFIX_ALTERNATIVES,
                             versionSuffixAlternatives));
         }
+
+        alignmentParameters.addAll(config.getAdditionalAlignmentParameters());
 
         return alignmentParameters;
     }
