@@ -142,6 +142,14 @@ public class CommonManipulatorConfigUtils {
                 : versionIncrementalSuffixConfig.permanent();
     }
 
+    public static List<String> computeAdditionalAlignmentParameters(
+            AdjustRequest request,
+            AlignmentConfig alignmentConfig) {
+        BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
+
+        return buildCategoryConfig.additionalAlignmentParameters().orElse(Collections.emptyList());
+    }
+
     /**
      * Compute version suffix alternatives, which is provided into manipulators (PME, Gradle Manipulator) as the
      * '-DversionSuffixAlternatives' argument, see e.g.

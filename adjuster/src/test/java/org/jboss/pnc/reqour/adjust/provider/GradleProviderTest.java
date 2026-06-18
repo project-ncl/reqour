@@ -304,7 +304,11 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger);
         List<String> expectedOverrides = List
-                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-pnc", "-DrestBrewPullActive=true");
+                .of(
+                        "-DrestMode=TEST",
+                        "-DversionIncrementalSuffix=test-pnc",
+                        "-DrestBrewPullActive=true",
+                        "-DadditionalAlignmentParam=foo");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -324,7 +328,8 @@ class GradleProviderTest {
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DadditionalAlignmentParam=foo");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -449,7 +454,8 @@ class GradleProviderTest {
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("restBrewPullActive", 1),
-                        MapEntry.entry("versionIncrementalSuffix", 2)));
+                        MapEntry.entry("versionIncrementalSuffix", 2),
+                        MapEntry.entry("additionalAlignmentParam", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
@@ -457,6 +463,7 @@ class GradleProviderTest {
                 command,
                 "versionIncrementalSuffix",
                 List.of("user", "test-pnc"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "additionalAlignmentParam", List.of("foo"));
     }
 
     @Test

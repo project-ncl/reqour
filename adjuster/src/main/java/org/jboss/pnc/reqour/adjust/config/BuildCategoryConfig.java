@@ -21,4 +21,9 @@ public interface BuildCategoryConfig {
     VersionIncrementalSuffixConfig versionIncrementalSuffix();
 
     Optional<List<String>> versionSuffixAlternatives();
+
+    /**
+     * List of additional parameters which are sent to a manipulator.
+     */
+    Optional<List<String>> additionalAlignmentParameters();
 }
