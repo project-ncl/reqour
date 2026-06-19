@@ -31,6 +31,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     protected final ObjectMapper objectMapper;
     protected final ProcessExecutor processExecutor;
     protected final Logger userLogger;
+    private List<String> preparedCommand;
 
     public AbstractAdjustProvider(ObjectMapper objectMapper, ProcessExecutor processExecutor, Logger userLogger) {
         this.objectMapper = objectMapper;
@@ -48,7 +49,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     }
 
     private void callAdjust() {
-        List<String> preparedCommand = prepareCommand();
+        List<String> preparedCommand = getPreparedCommand();
         Map<String, String> extraEnvs = prepareExtraEnvs();
 
         userLogger.info("Prepared command to be executed is: {}", preparedCommand);
@@ -69,9 +70,17 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         return Collections.emptyMap();
     }
 
+    protected List<String> getPreparedCommand() {
+        if (preparedCommand == null) {
+            preparedCommand = prepareCommand();
+        }
+        return preparedCommand;
+    }
+
     /**
      * Prepare the command which invokes the manipulator with all the necessary options parsed from all the config
-     * sources, e.g. {@link AdjustRequest} and {@link AlignmentConfig}.
+     * sources, e.g. {@link AdjustRequest} and {@link AlignmentConfig}.<br/>
+     * This is NOT supposed to be used from client code. Rather use {@link this#getPreparedCommand()}.
      */
     abstract List<String> prepareCommand();
 

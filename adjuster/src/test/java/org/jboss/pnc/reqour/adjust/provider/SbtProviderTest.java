@@ -175,7 +175,7 @@ class SbtProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
         Map<String, String> envs = provider.prepareExtraEnvs();
 
         assertThat(command).containsSequence(

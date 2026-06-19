@@ -161,7 +161,7 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
 
         assertThat(command).containsSequence(
                 List.of(
@@ -235,7 +235,7 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
 
         assertThat(command).containsSequence(
                 List.of(
@@ -317,7 +317,7 @@ public class MvnProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
 
         assertThat(command).containsSequence(
                 List.of(
