@@ -196,7 +196,7 @@ class NpmProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
 
         assertThat(command).containsSequence(
                 List.of(
@@ -280,7 +280,7 @@ class NpmProviderTest {
                 null,
                 TestDataFactory.userLogger);
 
-        List<String> command = provider.prepareCommand();
+        List<String> command = provider.getPreparedCommand();
 
         assertThat(command).containsSequence(
                 List.of(

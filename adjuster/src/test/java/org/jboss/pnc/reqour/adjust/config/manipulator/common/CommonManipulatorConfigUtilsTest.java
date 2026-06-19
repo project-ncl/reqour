@@ -6,6 +6,9 @@ package org.jboss.pnc.reqour.adjust.config.manipulator.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -317,5 +320,24 @@ class CommonManipulatorConfigUtilsTest {
                                         .build(),
                                 config.alignment()))
                 .isEqualTo("TEST_TEMPORARY_PREFER_PERSISTENT");
+    }
+
+    @Test
+    void isManipulatorDisabled_disableManipulatorOptionPresent_returnsTrue() {
+        assertTrue(
+                CommonManipulatorConfigUtils.isManipulatorDisabled(
+                        List.of(
+                                "java",
+                                "-jar",
+                                "manipulator.jar",
+                                "-Dfoo=bar",
+                                createAdjustmentSystemProperty(MANIPULATION_DISABLE, "true"))));
+    }
+
+    @Test
+    void isManipulatorDisabled_disableManipulatorOptionNotPresent_returnsFalse() {
+        assertFalse(
+                CommonManipulatorConfigUtils
+                        .isManipulatorDisabled(List.of("java", "-jar", "manipulator.jar", "-Dfoo=bar")));
     }
 }

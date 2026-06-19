@@ -210,14 +210,20 @@ public class CommonManipulatorConfigUtils {
         return getJavaOfVersion(javaVersion);
     }
 
-    public static boolean isManipulatorDisabled(CommonManipulatorConfig config) {
-        final String pmeDisabled = AdjustmentSystemPropertiesUtils
+    /**
+     * Decide whether manipulator is being disabled or not.
+     *
+     * @param manipulatorCommand manipulator command
+     * @return true if manipulation is being disabled, false otherwise
+     */
+    public static boolean isManipulatorDisabled(List<String> manipulatorCommand) {
+        final String manipulatorDisabled = AdjustmentSystemPropertiesUtils
                 .getSystemPropertyValue(
                         MANIPULATION_DISABLE,
-                        config.getUserSpecifiedAlignmentParameters().stream(),
+                        manipulatorCommand.stream(),
                         "true")
                 .orElse("false");
-        return "true".equals(pmeDisabled);
+        return "true".equals(manipulatorDisabled);
     }
 
     static Path getJavaOfVersion(String javaVersion) {

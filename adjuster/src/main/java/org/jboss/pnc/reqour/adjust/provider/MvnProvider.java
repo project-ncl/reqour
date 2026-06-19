@@ -199,7 +199,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     }
 
     private boolean isPmeDisabled() {
-        return CommonManipulatorConfigUtils.isManipulatorDisabled(config);
+        return CommonManipulatorConfigUtils.isManipulatorDisabled(getPreparedCommand());
     }
 
     private void createAdjustResultsFile() {
