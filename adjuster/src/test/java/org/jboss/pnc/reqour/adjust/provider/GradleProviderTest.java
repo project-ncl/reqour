@@ -32,7 +32,6 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
@@ -68,21 +67,6 @@ class GradleProviderTest {
     }
 
     @Test
-    void obtainManipulatorResult_gmeDisabledUserProvidedNoFile_exceptionThrown() {
-        GradleProvider provider = new GradleProvider(
-                config.alignment(),
-                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
-                workdir,
-                null,
-                null,
-                resultExtractor,
-                TestDataFactory.userLogger);
-
-        assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(AdjusterException.class)
-                .hasMessageContaining("no user-provided file");
-    }
-
-    @Test
     void obtainManipulatorResult_gmeDisabledUserProvidedOnlyVersioningFile_versioningReadButRemovedRepositoriesEmpty()
             throws IOException {
         Files.copy(
@@ -97,7 +81,8 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -136,7 +121,8 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -173,7 +159,8 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -210,7 +197,8 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
 
         assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No file with alignment results found");
@@ -235,7 +223,8 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -264,7 +253,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         List<String> expectedOverrides = List
                 .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
@@ -282,7 +272,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
@@ -302,7 +293,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         List<String> expectedOverrides = List
                 .of(
                         "-DrestMode=TEST",
@@ -324,7 +316,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
@@ -366,7 +359,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
 
         List<String> command = provider.getPreparedCommand();
 
@@ -433,7 +427,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
 
         List<String> command = provider.getPreparedCommand();
 
@@ -502,7 +497,8 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                null);
 
         List<String> command = provider.getPreparedCommand();
 

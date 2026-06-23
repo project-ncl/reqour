@@ -15,6 +15,7 @@ import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
+import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -33,6 +34,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     private final RootGavExtractor rootGavExtractor;
     private final Path workdir = CommonUtils.getAdjustDir();
     private final Logger userLogger;
+    private final GradleCommands gradleCommands;
 
     @Inject
     public AdjustProviderPickerImpl(
@@ -42,7 +44,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
-            @UserLogger Logger userLogger) {
+            @UserLogger Logger userLogger,
+            GradleCommands gradleCommands) {
         this.config = config;
         this.coreConfig = coreConfig;
         this.objectMapper = objectMapper;
@@ -50,6 +53,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
         this.userLogger = userLogger;
+        this.gradleCommands = gradleCommands;
     }
 
     @Override
@@ -71,7 +75,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     objectMapper,
                     processExecutor,
                     adjustResultExtractor,
-                    userLogger);
+                    userLogger,
+                    gradleCommands);
             case NPM ->
                 new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
