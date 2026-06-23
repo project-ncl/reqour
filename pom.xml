@@ -86,7 +86,7 @@
         <!-- Dependencies versions -->
         <version.lombok>1.18.46</version.lombok>
         <version.quarkus-logging-json>3.5.0</version.quarkus-logging-json>
-        <version.quarkus-logging-kafka>3.0.4</version.quarkus-logging-kafka>
+        <version.quarkus-logging-kafka>3.0.5</version.quarkus-logging-kafka>
         <version.pnc-api>3.5.0</version.pnc-api>
         <version.pnc-common>3.5.0</version.pnc-common>
         <version.pom-manipulation-common>5.3</version.pom-manipulation-common>
