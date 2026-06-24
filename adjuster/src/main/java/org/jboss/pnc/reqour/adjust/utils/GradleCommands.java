@@ -54,8 +54,9 @@ public class GradleCommands {
      */
     public String getVersion(Path rootDir) {
         final String version = getProperty(rootDir, "version");
-        if (UNSPECIFIED_VERSION.equals(version)) {
-            throw new AdjusterException("No version for Gradle project couldn't be found");
+        if (UNSPECIFIED_VERSION.equals(version) || version.isBlank()) {
+            throw new AdjusterException(
+                    "No version for Gradle project couldn't be found. Computed value was: '" + version + "'");
         }
         return version;
     }
@@ -71,17 +72,21 @@ public class GradleCommands {
                                 Map.entry(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE, coreConfig.envs().javaHome()),
                                 Map.entry(EnvironmentConfig.PATH_ENV_VARIABLE, coreConfig.envs().path())));
 
-        // Find out whether Gradle can be run through 'gradle' executable
-        String gradleExecutable = "gradle";
+        // Find out whether Gradle can be run through the Gradle wrapper
+        String gradleExecutable = "./gradlew";
         int exitCode = processExecutor
-                .execute(processContextBuilder.command(List.of("sh", "-c", gradleExecutable + " --version")).build());
+                .execute(
+                        processContextBuilder
+                                .command(List.of("sh", "-c", String.format("%s --version", gradleExecutable)))
+                                .build());
         if (exitCode != 0) {
-            log.warn("Gradle cannot be run through '{}' executable. Trying out the gradle wrapper.", gradleExecutable);
+            log.warn("Gradle cannot be run through '{}' executable. Trying out the OS gradle now.", gradleExecutable);
+            gradleExecutable = "gradle";
 
-            // If not successful, try also the Gradle wrapper
-            gradleExecutable = "./gradlew";
+            // If not successful, try also the OS-installed Gradle
             exitCode = processExecutor.execute(
-                    processContextBuilder.command(List.of("sh", "-c", gradleExecutable + " --version")).build());
+                    processContextBuilder.command(List.of("sh", "-c", String.format("%s --version", gradleExecutable)))
+                            .build());
             if (exitCode != 0) {
                 throw new AdjusterException("No gradle executable found");
             }
