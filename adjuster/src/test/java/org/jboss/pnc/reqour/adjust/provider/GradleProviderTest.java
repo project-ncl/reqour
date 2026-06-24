@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
@@ -299,8 +300,7 @@ class GradleProviderTest {
                 .of(
                         "-DrestMode=TEST",
                         "-DversionIncrementalSuffix=test-pnc",
-                        "-DrestBrewPullActive=true",
-                        "-DadditionalAlignmentParam=foo");
+                        "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -321,8 +321,7 @@ class GradleProviderTest {
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false",
-                "-DadditionalAlignmentParam=foo");
+                "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -450,7 +449,7 @@ class GradleProviderTest {
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("restBrewPullActive", 1),
                         MapEntry.entry("versionIncrementalSuffix", 2),
-                        MapEntry.entry("additionalAlignmentParam", 1)));
+                        MapEntry.entry("additionalAlignmentParam", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
@@ -458,7 +457,10 @@ class GradleProviderTest {
                 command,
                 "versionIncrementalSuffix",
                 List.of("user", "test-pnc"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "additionalAlignmentParam", List.of("foo"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "additionalAlignmentParam",
+                List.of("overridable", "non-overridable"));
     }
 
     @Test
@@ -526,5 +528,47 @@ class GradleProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
         Files.deleteIfExists(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
+    }
+
+    @Test
+    void prepareCommand_overridesPrecedence_isSortedCorrectly() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .originRepoUrl("git@gitlab.com:repo/project.git")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                TEST_BUILD_CATEGORY,
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-DadditionalAlignmentParam=user"))
+                .taskId(TASK_ID)
+                .buildType(BuildType.GRADLE)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                adjustRequest,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                null);
+
+        List<String> command = provider.getPreparedCommand();
+
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "additionalAlignmentParam",
+                List.of("overridable", "user", "non-overridable"));
     }
 }

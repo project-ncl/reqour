@@ -63,7 +63,12 @@ public class PmeConfig extends CommonManipulatorConfig {
     String versionSuffixAlternatives;
 
     /**
-     * List of additional alignment parameters, which are sent to PME.
+     * List of additional alignment parameters, which are sent to PME (and can be possibly overridden by a user).
      */
-    List<String> additionalAlignmentParameters;
+    List<String> additionalOverridableAlignmentParameters;
+
+    /**
+     * List of additional alignment parameters, which are sent to PME (and cannot be overridden by a user).
+     */
+    List<String> additionalNonOverridableAlignmentParameters;
 }
