@@ -91,9 +91,12 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .versionSuffixAlternatives(
                         CommonManipulatorConfigUtils.computeVersionSuffixAlternatives(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(mvnProviderConfig.alignmentParameters())
-                .additionalAlignmentParameters(
+                .additionalOverridableAlignmentParameters(
                         CommonManipulatorConfigUtils
-                                .computeAdditionalAlignmentParameters(adjustRequest, alignmentConfig))
+                                .computeAdditionalOverridableAlignmentParameters(adjustRequest, alignmentConfig))
+                .additionalNonOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalNonOverridableAlignmentParameters(adjustRequest, alignmentConfig))
                 .workdir(workdir)
                 .subFolderWithAlignmentResultFile(subFolderWithResults)
                 .cliJarPath(mvnProviderConfig.cliJarPath())
@@ -132,9 +135,13 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                         List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
                         getPmeSettingsParameter(),
                         config.getPncDefaultAlignmentParameters(),
+                        // overridable alignment params are placed before users params, so that they can override it if needed
+                        config.getAdditionalOverridableAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
-                        computeAlignmentParametersOverrides()));
+                        computeAlignmentParametersOverrides(),
+                        // non-overridable parameters are placed at the very end of manipulation command, so that a user cannot override them
+                        config.getAdditionalNonOverridableAlignmentParameters()));
     }
 
     @Override
@@ -159,8 +166,6 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
-
-        alignmentParameters.addAll(config.getAdditionalAlignmentParameters());
 
         return alignmentParameters;
     }

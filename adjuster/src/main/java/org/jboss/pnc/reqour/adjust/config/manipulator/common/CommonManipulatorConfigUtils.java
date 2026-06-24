@@ -142,12 +142,20 @@ public class CommonManipulatorConfigUtils {
                 : versionIncrementalSuffixConfig.permanent();
     }
 
-    public static List<String> computeAdditionalAlignmentParameters(
+    public static List<String> computeAdditionalOverridableAlignmentParameters(
             AdjustRequest request,
             AlignmentConfig alignmentConfig) {
         BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
 
-        return buildCategoryConfig.additionalAlignmentParameters().orElse(Collections.emptyList());
+        return buildCategoryConfig.additionalOverridableAlignmentParameters().orElse(Collections.emptyList());
+    }
+
+    public static List<String> computeAdditionalNonOverridableAlignmentParameters(
+            AdjustRequest request,
+            AlignmentConfig alignmentConfig) {
+        BuildCategoryConfig buildCategoryConfig = getBuildCategoryConfig(request, alignmentConfig);
+
+        return buildCategoryConfig.additionalNonOverridableAlignmentParameters().orElse(Collections.emptyList());
     }
 
     /**

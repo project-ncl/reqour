@@ -23,7 +23,13 @@ public interface BuildCategoryConfig {
     Optional<List<String>> versionSuffixAlternatives();
 
     /**
-     * List of additional parameters which are sent to a manipulator.
+     * List of additional parameters which are sent to a manipulator and are possible to be overridden by a user.
      */
-    Optional<List<String>> additionalAlignmentParameters();
+    Optional<List<String>> additionalOverridableAlignmentParameters();
+
+    /**
+     * List of additional parameters which are sent to a manipulator and are **NOT** possible to be overridden by a
+     * user.
+     */
+    Optional<List<String>> additionalNonOverridableAlignmentParameters();
 }

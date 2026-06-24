@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
@@ -119,8 +120,7 @@ public class MvnProviderTest {
                 .of(
                         "-DrestMode=TEST",
                         "-DversionIncrementalSuffix=test-pnc",
-                        "-DrestBrewPullActive=true",
-                        "-DadditionalAlignmentParam=foo");
+                        "-DrestBrewPullActive=true");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -141,8 +141,7 @@ public class MvnProviderTest {
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false",
-                "-DadditionalAlignmentParam=foo");
+                "-DrestBrewPullActive=false");
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -180,7 +179,7 @@ public class MvnProviderTest {
                         MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("versionSuffixAlternatives", 1),
                         MapEntry.entry("restBrewPullActive", 1),
-                        MapEntry.entry("additionalAlignmentParam", 1)));
+                        MapEntry.entry("additionalAlignmentParam", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "configAlignmentParam", List.of("foo"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restURL", List.of("https://da.com/rest/v-1"));
@@ -194,7 +193,10 @@ public class MvnProviderTest {
                 "versionSuffixAlternatives",
                 List.of("pnc,test-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "additionalAlignmentParam", List.of("foo"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "additionalAlignmentParam",
+                List.of("overridable", "non-overridable"));
     }
 
     @Test
@@ -351,6 +353,48 @@ public class MvnProviderTest {
     }
 
     @Test
+    void prepareCommand_overridesPrecedence_isSortedCorrectly() {
+        AdjustRequest adjustRequest = AdjustRequest.builder()
+                .ref("main")
+                .callback(
+                        Request.builder()
+                                .method(Request.Method.POST)
+                                .uri(URI.create("https://example.com/callback"))
+                                .build())
+                .originRepoUrl("git@gitlab.com:repo/project.git")
+                .buildConfigParameters(
+                        Map.of(
+                                BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                TEST_BUILD_CATEGORY,
+                                BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                "-DadditionalAlignmentParam=user"))
+                .taskId(TASK_ID)
+                .buildType(BuildType.MVN)
+                .internalUrl(
+                        InternalGitRepositoryUrl.builder()
+                                .readwriteUrl("git@gitlab.com:test-workspace/repo/project.git")
+                                .readonlyUrl("https://gitlab.com/test-workspace/repo/project.git")
+                                .build())
+                .build();
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                adjustRequest,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger);
+
+        List<String> command = provider.getPreparedCommand();
+
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "additionalAlignmentParam",
+                List.of("overridable", "user", "non-overridable"));
+    }
+
+    @Test
     void adjust_manipulatorReturnsNonZeroExitCode_adjusterExceptionIsThrown() {
         Mockito.when(processExecutor.execute(Mockito.any())).thenReturn(1);
         AdjustRequest adjustRequest = exampleAdjustRequest();
@@ -383,7 +427,7 @@ public class MvnProviderTest {
                                 BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
                                 "-Doverride=user",
                                 BuildConfigurationParameterKeys.BUILD_CATEGORY,
-                                TestDataFactory.TEST_BUILD_CATEGORY))
+                                TEST_BUILD_CATEGORY))
                 .tempBuild(false)
                 .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
                 .taskId(TASK_ID)
