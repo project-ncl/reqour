@@ -29,9 +29,9 @@ public class TestDataFactory {
             .buildConfigParameters(
                     Map.of(
                             BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                            "-D" + AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE
-                                    .getCliName()
-                                    + "=true"))
+                            AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                    AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE,
+                                    "true")))
             .tempBuild(false)
             .brewPullActive(true)
             .build();

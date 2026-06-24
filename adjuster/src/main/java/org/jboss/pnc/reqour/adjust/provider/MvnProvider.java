@@ -31,6 +31,7 @@ import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
@@ -180,7 +181,15 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         VersioningState versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
                 getPathToAlignmentResultFile(),
                 config.getExecutionRootOverrides());
-        log.debug("Parsed versioning state is: {}", versioningState);
+
+        final VersioningState resultingVersioningState;
+        if (isPmeDisabled()) {
+            resultingVersioningState = CommonUtils
+                    .computeResultingVersioningState(getPreparedCommand(), versioningState);
+        } else {
+            resultingVersioningState = versioningState;
+        }
+        log.debug("Parsed versioning state is: {}", resultingVersioningState);
 
         List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
                 config.getSubFolderWithAlignmentResultFile(),
@@ -193,7 +202,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         log.debug("Parsed removed repositories are: {}", removedRepositories);
 
         return ManipulatorResult.builder()
-                .versioningState(versioningState)
+                .versioningState(resultingVersioningState)
                 .removedRepositories(removedRepositories)
                 .build();
     }

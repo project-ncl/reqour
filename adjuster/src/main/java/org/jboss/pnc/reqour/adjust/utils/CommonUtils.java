@@ -4,9 +4,15 @@
  */
 package org.jboss.pnc.reqour.adjust.utils;
 
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
+
+import org.jboss.pnc.api.reqour.dto.VersioningState;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,6 +48,22 @@ public class CommonUtils {
         } catch (JsonProcessingException e) {
             log.warn("Unable to pretty print object {}", object);
             return null;
+        }
+    }
+
+    public static VersioningState computeResultingVersioningState(
+            List<String> preparedCommand,
+            VersioningState versioningState) {
+        final Optional<String> versionOverride = AdjustmentSystemPropertiesUtils
+                .getSystemPropertyValue(VERSION_OVERRIDE, preparedCommand.stream());
+        if (versionOverride.isPresent()) {
+            log.info("Option to version override the project's version was specified to value: '{}'", versionOverride);
+            return VersioningState.builder()
+                    .executionRootName(versioningState.getExecutionRootName())
+                    .executionRootVersion(versionOverride.get())
+                    .build();
+        } else {
+            return versioningState;
         }
     }
 }

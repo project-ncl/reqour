@@ -78,7 +78,8 @@ public class AdjustmentSystemPropertiesUtils {
         VERSION_INCREMENTAL_SUFFIX("versionIncrementalSuffix"),
         BREW_PULL_ACTIVE("restBrewPullActive"),
         VERSION_SUFFIX_ALTERNATIVES("versionSuffixAlternatives"),
-        MANIPULATION_DISABLE("manipulation.disable");
+        MANIPULATION_DISABLE("manipulation.disable"),
+        VERSION_OVERRIDE("versionOverride");
 
         private final String cliName;
 
