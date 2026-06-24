@@ -30,11 +30,11 @@ import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -53,7 +53,6 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     private final AlignmentConfig alignmentConfig;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
-    private final GradleCommands gradleCommands;
 
     public GradleProvider(
             AlignmentConfig alignmentConfig,
@@ -62,12 +61,10 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
-            Logger userLogger,
-            GradleCommands gradleCommands) {
+            Logger userLogger) {
         super(objectMapper, processExecutor, userLogger);
         this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
-        this.gradleCommands = gradleCommands;
 
         GradleProviderConfig gradleProviderConfig = alignmentConfig.gradleProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -137,28 +134,25 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         final VersioningState versioningState;
 
         if (isGmeDisabled()) {
-            userLogger.info("GME disabled");
-
-            if (Files.exists(config.getWorkdir().resolve(GME_DISABLED.getGmeAlignmentResultFile()))) {
-                userLogger.info(
-                        "User provided their own {} file. Reading that to parse project's name and version",
-                        GME_DISABLED.getGmeAlignmentResultFile());
-                ManipulationModel userProvidedResultFile = ManipulationIO
-                        .readManipulationModel(config.getWorkdir().toFile());
-                versioningState = VersioningState.builder()
-                        .executionRootName(userProvidedResultFile.getName())
-                        .executionRootVersion(userProvidedResultFile.getVersion())
-                        .build();
-            } else {
+            userLogger.info(
+                    "GME disabled, parsing result from user-provided {} file",
+                    GME_DISABLED.getGmeAlignmentResultFile());
+            if (Files.notExists(config.getWorkdir().resolve(GME_DISABLED.getGmeAlignmentResultFile()))) {
                 userLogger.warn(
-                        "No user-provided {} file found, computing project's name and version through be guesses",
+                        "No user-provided {} file found, cannot continue",
                         GME_DISABLED.getGmeAlignmentResultFile());
-
-                versioningState = VersioningState.builder()
-                        .executionRootName(gradleCommands.getName(config.getWorkdir()))
-                        .executionRootVersion(gradleCommands.getVersion(config.getWorkdir()))
-                        .build();
+                throw new AdjusterException(
+                        String.format(
+                                "GME disabled, but no user-provided file (%s) was found, cannot proceed further",
+                                GME_DISABLED.getGmeAlignmentResultFile()));
             }
+
+            ManipulationModel userProvidedResultFile = ManipulationIO
+                    .readManipulationModel(config.getWorkdir().toFile());
+            versioningState = VersioningState.builder()
+                    .executionRootName(userProvidedResultFile.getName())
+                    .executionRootVersion(userProvidedResultFile.getVersion())
+                    .build();
         } else {
             versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
                     getPathToGeneratedAlignmentResultFile(),

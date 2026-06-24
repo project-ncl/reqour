@@ -51,7 +51,3 @@ reqour:
       final-log:
         bifrost-uploader:
           base-url: http://localhost:${quarkus.wiremock.devservices.port}
-    envs:
-      # add some reasonable defaults, so that tests can be run via IntelliJ IDEA as well
-      PATH: '/usr/bin:${HOME}/.sdkman/candidates/gradle/current/bin'
-      JAVA_HOME: '/usr/lib/jvm/java-21-openjdk'
