@@ -51,6 +51,8 @@ reqour:
         user-logger-name: 'org.jboss.pnc._userlog_.alignment-log'
     envs:
       HOME: ${HOME}
+      PATH: ${PATH}
+      JAVA_HOME: ${JAVA_HOME}
 
 pnc_client_auth:
     type: OIDC # or LDAP
