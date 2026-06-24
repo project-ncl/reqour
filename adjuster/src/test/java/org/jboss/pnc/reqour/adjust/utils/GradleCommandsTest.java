@@ -12,13 +12,11 @@ import java.nio.file.Path;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
-@Disabled
 class GradleCommandsTest {
 
     private final Path GRADLE_PROJECTS_PATH = Path.of("src/test/resources/projects/gradle");
