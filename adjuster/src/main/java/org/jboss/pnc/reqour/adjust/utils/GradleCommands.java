@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GradleCommands {
 
-    private final String UNSPECIFIED_VERSION = "unspecified";
+    public static final String UNSPECIFIED_VERSION = "unspecified";
 
     @Inject
     ReqourCoreConfig coreConfig;
@@ -55,7 +55,7 @@ public class GradleCommands {
     public String getVersion(Path rootDir) {
         final String version = getProperty(rootDir, "version");
         if (UNSPECIFIED_VERSION.equals(version) || version.isBlank()) {
-            throw new AdjusterException(
+            userLogger.warn(
                     "No version for Gradle project couldn't be found. Computed value was: '" + version + "'");
         }
         return version;

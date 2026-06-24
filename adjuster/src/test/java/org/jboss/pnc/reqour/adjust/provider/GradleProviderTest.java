@@ -35,6 +35,7 @@ import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
+import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -96,7 +97,64 @@ class GradleProviderTest {
     }
 
     @Test
-    void obtainManipulatorResult_gmeEnabledUserProvidedOnlyVersioningFile_versioningReadButRemovedRepositoriesEmpty()
+    void obtainManipulatorResult_gmeDisabledUserProvidedVersioningFileAndProjectVersionOverridden_resultCombined()
+            throws IOException {
+        Files.copy(
+                Path.of(adjustTestUtils.getGradleProviderResourcesLocation())
+                        .resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()),
+                workdir.resolve(GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile()));
+        Files.writeString(
+                Path.of(
+                        workdir.toString(),
+                        GradleAlignmentResultFile.GME_DISABLED.getGmeAlignmentResultFile().toString()),
+                """
+                        {
+                          "group" : "org.example",
+                          "name" : "foo",
+                          "projectPathName" : "foo",
+                          "version" : "1.0.42.Final-rebuild-00001",
+                          "originalVersion" : "unspecified",
+                          "children" : {
+                          }
+                        }""");
+
+        final String overriddenVersion = "overridden-version";
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        String.format(
+                                                "%s %s",
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE,
+                                                        "true"),
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE,
+                                                        overriddenVersion))))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger,
+                null);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("foo")
+                .executionRootVersion(overriddenVersion)
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeEnabled_versioningReadButRemovedRepositoriesEmpty()
             throws IOException {
 
         Path build = Path.of(workdir.toString(), "build");
@@ -118,6 +176,55 @@ class GradleProviderTest {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger,
+                null);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.github.fge:btf")
+                .executionRootVersion("1.2.0.redhat-00020")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeEnabledUserOverridesProjectVersion_overrideIsIgnored()
+            throws IOException {
+        // in case GME is enabled, but we use version override, it's expected to have no effect at all
+        Path build = Path.of(workdir.toString(), "build");
+        Files.createDirectory(build);
+        Files.writeString(
+                Path.of(
+                        workdir.toString(),
+                        GradleAlignmentResultFile.GME_ENABLED.getGmeAlignmentResultFile().toString()),
+                """
+                          {
+                          "executionRoot" : {
+                            "groupId" : "com.github.fge",
+                            "artifactId" : "btf",
+                            "version" : "1.2.0.redhat-00020",
+                            "originalGAV" : "com.github.fge:btf:1.2"
+                          }
+                        }""");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE,
+                                                "overridden-version")))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
                 workdir,
                 null,
                 null,

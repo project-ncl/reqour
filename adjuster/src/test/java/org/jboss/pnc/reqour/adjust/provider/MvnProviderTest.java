@@ -8,6 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.MANIPULATOR_DISABLED_REQUEST;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.STANDARD_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
@@ -27,16 +29,23 @@ import org.jboss.pnc.api.enums.AlignmentPreference;
 import org.jboss.pnc.api.enums.BuildType;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.InternalGitRepositoryUrl;
+import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
+import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.reqour.adjust.AdjustTestUtils;
 import org.jboss.pnc.reqour.adjust.common.TestDataFactory;
 import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
+import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
+import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -53,15 +62,23 @@ public class MvnProviderTest {
     @InjectMock
     ProcessExecutor processExecutor;
 
-    static Path workdir;
+    @Inject
+    CommonManipulatorResultExtractor resultExtractor;
 
-    @BeforeAll
-    static void beforeAll() {
+    @Inject
+    RootGavExtractor rootGavExtractor;
+
+    static Path workdir;
+    @Inject
+    ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() {
         workdir = IOUtils.createTempRandomDirForAdjust();
     }
 
-    @AfterAll
-    static void afterAll() throws IOException {
+    @AfterEach
+    void afterEach() throws IOException {
         IOUtils.deleteTempDir(workdir);
     }
 
@@ -392,6 +409,175 @@ public class MvnProviderTest {
                 command,
                 "additionalAlignmentParam",
                 List.of("overridable", "user", "non-overridable"));
+    }
+
+    @Test
+    void obtainManipulatorResult_pmeEnabled_versioningRead() throws IOException {
+        Path targetDir = workdir.resolve("target");
+        Files.createDirectory(targetDir);
+        Files.writeString(
+                targetDir.resolve("alignmentReport.json"),
+                """
+                                {
+                                  "executionRoot": {
+                                    "groupId": "com.example",
+                                    "artifactId": "foo",
+                                    "version": "1.0.0.rebuild-00042",
+                                    "originalGAV": "com.example:foo:1.0.0"
+                                  },
+                                  "modules": []
+                                }
+                        """);
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                null,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.example:foo")
+                .executionRootVersion("1.0.0.rebuild-00042")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_pmeEnabledAndVersionOverridden_specifiedVersionIgnored() throws IOException {
+        // in case PME is enabled, but we use version override, it's expected to have no effect at all
+        Path targetDir = workdir.resolve("target");
+        Files.createDirectory(targetDir);
+        Files.writeString(
+                targetDir.resolve("alignmentReport.json"),
+                """
+                                {
+                                  "executionRoot": {
+                                    "groupId": "com.example",
+                                    "artifactId": "foo",
+                                    "version": "1.0.0.rebuild-00042",
+                                    "originalGAV": "com.example:foo:1.0.0"
+                                  },
+                                  "modules": []
+                                }
+                        """);
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                        STANDARD_BUILD_CATEGORY,
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE,
+                                                "overridden-version")))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                null,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.example:foo")
+                .executionRootVersion("1.0.0.rebuild-00042")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_pmeDisabled_versioningStateComputedFromPom() throws IOException {
+        Files.writeString(
+                workdir.resolve("pom.xml"),
+                """
+                            <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                              <modelVersion>4.0.0</modelVersion>
+
+                              <groupId>com.example</groupId>
+                              <artifactId>foo</artifactId>
+                              <version>1.0.0</version>
+                            </project>
+                        """);
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                objectMapper,
+                null,
+                resultExtractor,
+                rootGavExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.example:foo")
+                .executionRootVersion("1.0.0")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_pmeDisabledAndVersionOverrideProvided_resultCombined() throws IOException {
+        Files.writeString(
+                workdir.resolve("pom.xml"),
+                """
+                            <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                              xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+                              <modelVersion>4.0.0</modelVersion>
+
+                              <groupId>com.example</groupId>
+                              <artifactId>foo</artifactId>
+                              <version>1.0.0-SNAPSHOT</version>
+                            </project>
+                        """);
+        final String overriddenVersion = "1.0.0";
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        String.format(
+                                                "%s %s",
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE,
+                                                        "true"),
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE,
+                                                        overriddenVersion))))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
+                workdir,
+                objectMapper,
+                null,
+                resultExtractor,
+                rootGavExtractor,
+                TestDataFactory.userLogger);
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.example:foo")
+                .executionRootVersion(overriddenVersion)
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
     }
 
     @Test

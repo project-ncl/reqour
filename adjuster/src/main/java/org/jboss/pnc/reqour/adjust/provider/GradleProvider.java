@@ -10,6 +10,7 @@ import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_SUFFIX_ALTERNATIVES;
+import static org.jboss.pnc.reqour.adjust.utils.GradleCommands.UNSPECIFIED_VERSION;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,10 +31,12 @@ import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
+import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
@@ -141,7 +144,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
 
     @Override
     ManipulatorResult obtainManipulatorResult() {
-        final VersioningState versioningState;
+        VersioningState versioningState;
 
         if (isGmeDisabled()) {
             userLogger.info("GME disabled");
@@ -166,12 +169,23 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         .executionRootVersion(gradleCommands.getVersion(config.getWorkdir()))
                         .build();
             }
+
+            versioningState = CommonUtils
+                    .computeResultingVersioningState(getPreparedCommand(), versioningState);
+            if (versioningState.getExecutionRootVersion().isBlank()
+                    || UNSPECIFIED_VERSION.equals(versioningState.getExecutionRootVersion())) {
+                throw new AdjusterException(
+                        "Project version has invalid value: '" + versioningState.getExecutionRootVersion() + "'");
+            }
+
+            log.debug("Parsed versioning state is: {}", versioningState);
+
         } else {
             versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
                     getPathToGeneratedAlignmentResultFile(),
                     config.getExecutionRootOverrides());
         }
-        log.debug("Parsed versioning state is: {}", versioningState);
+
         List<RemovedRepository> removedRepositories = adjustResultExtractor.obtainRemovedRepositories(
                 config.getWorkdir(),
                 config.getPncDefaultAlignmentParameters());
