@@ -24,18 +24,21 @@ public class AdjustmentSystemPropertiesUtils {
     /**
      * In the given {@code Stream<String>}, it tries to find the occurrence for 'name=<value>'. In case there is no '=',
      * it will apply {@code defaultValue}.<br/>
-     * For instance, when finding '-Dfoo' in '-Dbar -Dfoo=bar', it returns 'bar'. It prefers the first occurrence over
-     * any other, i.e., it returns 'bar' in case '-Dfoo=bar -Dfoo=baz'.
-     * 
+     * For instance, when finding '-Dfoo' in '-Dbar -Dfoo=bar', it returns 'bar'. It prefers the last occurrence over
+     * any other, i.e., it returns 'baz' in case '-Dfoo=bar -Dfoo=baz'.
+     *
      * @param name system property name
      * @param streams string stream, in which to find the value assigned to the given name
      * @param defaultValue value to return in case there is no '='
      */
     public static Optional<String> getSystemPropertyValue(String name, Stream<String> streams, String defaultValue) {
         Pattern pattern = Pattern.compile(String.format("^%s[= ].*$|^%s$", name, name));
-        Optional<String> first = streams.filter(p -> pattern.matcher(p).find()).findFirst();
+
+        // Using reduce to grab the last matching element in the stream
+        Optional<String> last = streams.filter(p -> pattern.matcher(p).find())
+                .reduce((first, second) -> second);
         try {
-            return first.map(s -> s.split("=")[1]);
+            return last.map(s -> s.split("=")[1]);
         } catch (ArrayIndexOutOfBoundsException _e) {
             if (defaultValue == null) {
                 return Optional.empty();
