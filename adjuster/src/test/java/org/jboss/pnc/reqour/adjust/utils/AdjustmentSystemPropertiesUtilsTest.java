@@ -28,6 +28,20 @@ class AdjustmentSystemPropertiesUtilsTest {
     }
 
     @Test
+    void getSystemPropertyValue_optionPresentMultipleTimes_returnsLastOccurrence() {
+        String name = "key";
+        String value = "last";
+        String defaultValue = "default";
+        Stream<String> stream = Stream.of("foo", "key=first", "key=second", "key=" + value);
+
+        Optional<String> optionalValue = AdjustmentSystemPropertiesUtils
+                .getSystemPropertyValue(name, stream, defaultValue);
+
+        assertThat(optionalValue.isPresent()).isTrue();
+        assertThat(optionalValue.get()).isEqualTo(value);
+    }
+
+    @Test
     void getSystemPropertyValue_namePresentButValueNot_returnsDefaultValue() {
         String name = "key";
         String defaultValue = "default";
