@@ -165,7 +165,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                         GME_DISABLED.getGmeAlignmentResultFile());
 
                 versioningState = VersioningState.builder()
-                        .executionRootName(gradleCommands.getName(config.getWorkdir()))
+                        .executionRootName(
+                                gradleCommands.getGroup(config.getWorkdir()) + ":"
+                                        + gradleCommands.getName(config.getWorkdir()))
                         .executionRootVersion(gradleCommands.getVersion(config.getWorkdir()))
                         .build();
             }

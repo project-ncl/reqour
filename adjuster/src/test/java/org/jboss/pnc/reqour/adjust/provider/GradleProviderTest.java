@@ -10,6 +10,8 @@ import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemProperties
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.net.URI;
@@ -36,12 +38,15 @@ import org.jboss.pnc.reqour.adjust.config.ReqourAdjusterConfig;
 import org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
+import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -56,11 +61,15 @@ class GradleProviderTest {
     @Inject
     CommonManipulatorResultExtractor resultExtractor;
 
+    @InjectMock
+    GradleCommands gradleCommands;
+
     static Path workdir;
 
     @BeforeEach
     void setUp() {
         workdir = IOUtils.createTempRandomDirForAdjust();
+        Mockito.reset(gradleCommands);
     }
 
     @AfterEach
@@ -350,6 +359,105 @@ class GradleProviderTest {
 
         assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
         assertThat(manipulatorResult.getRemovedRepositories()).isEqualTo(expectedRemovedRepositories);
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledNoUserProvidedFileWithGroup_computesGroupAndName() {
+        // Configure mock GradleCommands to return group and name
+        when(gradleCommands.getGroup(any(Path.class))).thenReturn("org.example.test");
+        when(gradleCommands.getName(any(Path.class))).thenReturn("test-project");
+        when(gradleCommands.getVersion(any(Path.class))).thenReturn("1.0.0");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger,
+                gradleCommands);
+
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("org.example.test:test-project")
+                .executionRootVersion("1.0.0")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledNoUserProvidedFileWithoutGroup_computesNameOnly() {
+        // Configure mock GradleCommands to return empty group and name
+        when(gradleCommands.getGroup(any(Path.class))).thenReturn("");
+        when(gradleCommands.getName(any(Path.class))).thenReturn("test-project");
+        when(gradleCommands.getVersion(any(Path.class))).thenReturn("2.0.0");
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger,
+                gradleCommands);
+
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName(":test-project")
+                .executionRootVersion("2.0.0")
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
+    }
+
+    @Test
+    void obtainManipulatorResult_gmeDisabledNoUserProvidedFileWithGroupAndVersionOverride_computesGroupNameAndOverriddenVersion() {
+        // Configure mock GradleCommands to return group and name
+        when(gradleCommands.getGroup(any(Path.class))).thenReturn("com.example");
+        when(gradleCommands.getName(any(Path.class))).thenReturn("my-project");
+        when(gradleCommands.getVersion(any(Path.class))).thenReturn("1.0.0");
+
+        final String overriddenVersion = "3.0.0-redhat-00001";
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        String.format(
+                                                "%s %s",
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE,
+                                                        "true"),
+                                                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                        AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_OVERRIDE,
+                                                        overriddenVersion))))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
+                workdir,
+                null,
+                null,
+                resultExtractor,
+                TestDataFactory.userLogger,
+                gradleCommands);
+
+        VersioningState expectedVersioningState = VersioningState.builder()
+                .executionRootName("com.example:my-project")
+                .executionRootVersion(overriddenVersion)
+                .build();
+
+        ManipulatorResult manipulatorResult = provider.obtainManipulatorResult();
+
+        assertThat(manipulatorResult.getVersioningState()).isEqualTo(expectedVersioningState);
+        assertThat(manipulatorResult.getRemovedRepositories()).isEmpty();
     }
 
     @Test

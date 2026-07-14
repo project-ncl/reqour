@@ -8,4 +8,5 @@ java {
   }
 }
 
+group = 'org.example.hardcoded'
 version = '1.0.42'
