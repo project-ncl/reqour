@@ -47,8 +47,16 @@ public class GradleCommands {
     }
 
     /**
+     * Given the root directory of a Gradle project, find out its group.
+     *
+     * @return name of the project
+     */
+    public String getGroup(Path rootDir) {
+        return getProperty(rootDir, "group");
+    }
+
+    /**
      * Given the root directory of a Gradle project, find out its version.<br/>
-     * Throw an exception in case no version couldn't be found.
      *
      * @return version of the project
      */
@@ -56,7 +64,7 @@ public class GradleCommands {
         final String version = getProperty(rootDir, "version");
         if (UNSPECIFIED_VERSION.equals(version) || version.isBlank()) {
             userLogger.warn(
-                    "No version for Gradle project couldn't be found. Computed value was: '" + version + "'");
+                    "No version for Gradle project could be found. Computed value was: '" + version + "'");
         }
         return version;
     }
