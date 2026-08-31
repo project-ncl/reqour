@@ -38,6 +38,7 @@ import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
+import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -66,7 +67,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             Logger userLogger,
-            GradleCommands gradleCommands) {
+            GradleCommands gradleCommands,
+            String gitProviderHostname,
+            String gitProviderToken) {
         super(objectMapper, processExecutor, userLogger);
         this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
@@ -79,7 +82,13 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         config = GmeConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
-                .userSpecifiedAlignmentParameters(userSpecifiedAlignmentParameters.getAlignmentParameters())
+                .userSpecifiedAlignmentParameters(
+                        ScriptPrefetcher.prefetchRemoteScripts(
+                                userSpecifiedAlignmentParameters.getAlignmentParameters(),
+                                gitProviderHostname,
+                                gitProviderToken,
+                                workdir,
+                                userLogger))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .versionIncrementalSuffix(
                         CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))

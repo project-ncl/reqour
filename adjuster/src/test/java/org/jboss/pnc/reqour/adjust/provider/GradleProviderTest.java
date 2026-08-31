@@ -93,7 +93,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -150,7 +152,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion(overriddenVersion)
@@ -190,7 +194,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -239,7 +245,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -277,7 +285,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -315,7 +325,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
 
         assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No file with alignment results found");
@@ -341,7 +353,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -376,7 +390,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                gradleCommands);
+                gradleCommands,
+                "localhost",
+                "test-token");
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("org.example.test:test-project")
@@ -404,7 +420,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                gradleCommands);
+                gradleCommands,
+                "localhost",
+                "test-token");
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName(":test-project")
@@ -447,7 +465,9 @@ class GradleProviderTest {
                 null,
                 resultExtractor,
                 TestDataFactory.userLogger,
-                gradleCommands);
+                gradleCommands,
+                "localhost",
+                "test-token");
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:my-project")
@@ -470,7 +490,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List
                 .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
@@ -489,7 +511,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
@@ -510,7 +534,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List
                 .of(
                         "-DrestMode=TEST",
@@ -532,7 +558,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
@@ -574,7 +602,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -642,7 +672,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -715,7 +747,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -777,7 +811,9 @@ class GradleProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                null);
+                null,
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
