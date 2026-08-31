@@ -17,6 +17,7 @@ import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
 
     private final ReqourAdjusterConfig config;
     private final ReqourCoreConfig coreConfig;
+    private final ConfigUtils configUtils;
     private final ObjectMapper objectMapper;
     private final ProcessExecutor processExecutor;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
@@ -40,6 +42,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     public AdjustProviderPickerImpl(
             ReqourAdjusterConfig config,
             ReqourCoreConfig coreConfig,
+            ConfigUtils configUtils,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
@@ -48,6 +51,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
             GradleCommands gradleCommands) {
         this.config = config;
         this.coreConfig = coreConfig;
+        this.configUtils = configUtils;
         this.objectMapper = objectMapper;
         this.processExecutor = processExecutor;
         this.adjustResultExtractor = adjustResultExtractor;
@@ -58,6 +62,9 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
 
     @Override
     public AdjustProvider pickAdjustProvider(AdjustRequest adjustRequest) {
+        String gitProviderHostname = configUtils.getActiveGitProviderConfig().hostname();
+        String gitProviderToken = configUtils.getActiveGitProviderConfig().token();
+
         return switch (adjustRequest.getBuildType()) {
             case MVN, MVN_RPM -> new MvnProvider(
                     config.alignment(),
@@ -67,7 +74,9 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     processExecutor,
                     adjustResultExtractor,
                     rootGavExtractor,
-                    userLogger);
+                    userLogger,
+                    gitProviderHostname,
+                    gitProviderToken);
             case GRADLE -> new GradleProvider(
                     config.alignment(),
                     adjustRequest,
@@ -76,7 +85,9 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     processExecutor,
                     adjustResultExtractor,
                     userLogger,
-                    gradleCommands);
+                    gradleCommands,
+                    gitProviderHostname,
+                    gitProviderToken);
             case NPM ->
                 new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
