@@ -636,6 +636,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeEnabledStandardBuildCategory_returnsFalse() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -653,6 +654,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeDisabledStandardBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -670,6 +672,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeEnabledLightwellUpstreamBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.LIGHTWELL_UPSTREAM_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -687,6 +690,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeDisabledLightwellUpstreamBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(

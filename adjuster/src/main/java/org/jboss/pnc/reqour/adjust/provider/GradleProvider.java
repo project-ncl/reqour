@@ -210,7 +210,6 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         return isGmeDisabled();
     }
 
-
     private boolean isGmeDisabled() {
         return CommonManipulatorConfigUtils.isManipulatorDisabled(getPreparedCommand());
     }

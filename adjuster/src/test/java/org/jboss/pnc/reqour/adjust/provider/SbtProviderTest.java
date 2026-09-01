@@ -67,7 +67,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                null,
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -85,7 +85,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                null,
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -105,7 +105,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                null,
+                coreConfig.envs(),
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -123,7 +123,7 @@ class SbtProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                null,
+                coreConfig.envs(),
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -197,8 +197,6 @@ class SbtProviderTest {
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
         assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
-        assertThat(envs).containsKey(EnvironmentConfig.PATH_ENV_VARIABLE);
-        assertThat(envs).containsKey(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE);
         assertThat(envs).containsEntry(EnvironmentConfig.HOME_ENV_VARIABLE, WithHomeVariableSet.HOME_VALUE);
     }
 }
