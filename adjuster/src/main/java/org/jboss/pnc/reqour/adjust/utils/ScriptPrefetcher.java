@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -36,11 +37,13 @@ public class ScriptPrefetcher {
 
     private final ConfigUtils configUtils;
     private final Logger userLogger;
+    private final HttpClient httpClient;
 
     @Inject
     public ScriptPrefetcher(ConfigUtils configUtils, @UserLogger Logger userLogger) {
         this.configUtils = configUtils;
         this.userLogger = userLogger;
+        this.httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
     }
 
     public List<String> prefetchRemoteScripts(List<String> params, Path workdir) {
@@ -50,44 +53,45 @@ public class ScriptPrefetcher {
         List<String> result = new ArrayList<>(params.size());
         int scriptCounter = 0;
         for (String param : params) {
-            String processed = tryPrefetchParam(
-                    param,
-                    GROOVY_SCRIPT_PREFIX,
-                    gitProviderHostname,
-                    gitProviderToken,
-                    workdir,
-                    scriptCounter);
-            if (processed == null) {
-                processed = tryPrefetchParam(
-                        param,
-                        GROOVY_SCRIPTS_PREFIX,
+            String prefix = getGroovyScriptPrefix(param);
+            if (prefix == null) {
+                result.add(param);
+                continue;
+            }
+
+            String[] urls = param.substring(prefix.length()).split(",");
+            List<String> processedUrls = new ArrayList<>(urls.length);
+            for (String url : urls) {
+                String prefetched = tryPrefetchSingleUrl(
+                        url,
                         gitProviderHostname,
                         gitProviderToken,
                         workdir,
                         scriptCounter);
+                if (prefetched != null) {
+                    processedUrls.add(prefetched);
+                    scriptCounter++;
+                } else {
+                    processedUrls.add(url);
+                }
             }
-            if (processed != null) {
-                result.add(processed);
-                scriptCounter++;
-            } else {
-                result.add(param);
-            }
+            result.add(prefix + String.join(",", processedUrls));
         }
         return result;
     }
 
-    private String tryPrefetchParam(
-            String param,
-            String prefix,
-            String hostname,
-            String token,
-            Path workdir,
-            int counter) {
-        if (!param.startsWith(prefix)) {
-            return null;
+    private static String getGroovyScriptPrefix(String param) {
+        // Check the longer prefix first — "-DgroovyScripts=" starts with "-DgroovyScript="
+        if (param.startsWith(GROOVY_SCRIPTS_PREFIX)) {
+            return GROOVY_SCRIPTS_PREFIX;
         }
+        if (param.startsWith(GROOVY_SCRIPT_PREFIX)) {
+            return GROOVY_SCRIPT_PREFIX;
+        }
+        return null;
+    }
 
-        String url = param.substring(prefix.length());
+    private String tryPrefetchSingleUrl(String url, String hostname, String token, Path workdir, int counter) {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             return null;
         }
@@ -97,24 +101,21 @@ public class ScriptPrefetcher {
             if (uri.getHost() == null || !uri.getHost().equals(hostname)) {
                 return null;
             }
-            Path localFile = downloadScript(uri, token, workdir, counter);
+            Path localFile = downloadScript(httpClient, uri, token, workdir, counter);
             userLogger.info("Pre-fetched groovy script from {} to {}", url, localFile);
-            return prefix + localFile.toUri();
+            return localFile.toUri().toString();
         } catch (URISyntaxException e) {
             throw new AdjusterException("Invalid URL in groovy script parameter: " + url, e);
         }
     }
 
-    private static Path downloadScript(URI uri, String token, Path workdir, int counter) {
+    private static Path downloadScript(HttpClient client, URI uri, String token, Path workdir, int counter) {
         String fileName = extractFileName(uri, counter);
         Path targetFile = workdir.resolve(fileName);
 
         URI apiUri = convertToApiUri(uri);
 
         try {
-            HttpClient client = HttpClient.newBuilder()
-                    .followRedirects(HttpClient.Redirect.NORMAL)
-                    .build();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(apiUri)
                     .header("Authorization", "token " + token)
@@ -171,12 +172,14 @@ public class ScriptPrefetcher {
         String org = segments[rawIndex - 2];
         String repo = segments[rawIndex - 1];
         String ref = segments[rawIndex + 1];
-        String filePath = String.join("/", java.util.Arrays.copyOfRange(segments, rawIndex + 2, segments.length));
+        String filePath = String.join("/", Arrays.copyOfRange(segments, rawIndex + 2, segments.length));
 
         try {
             return new URI(
                     uri.getScheme(),
+                    null,
                     uri.getHost(),
+                    uri.getPort(),
                     "/api/v3/repos/" + org + "/" + repo + "/contents/" + filePath,
                     "ref=" + ref,
                     null);
