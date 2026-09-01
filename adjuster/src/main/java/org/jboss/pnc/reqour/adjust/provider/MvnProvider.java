@@ -49,7 +49,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements AdjustProvider {
 
-    private final AlignmentConfig alignmentConfig;
+    private static final String LIGHTWELL_UPSTREAM_BUILD_CATEGORY = "LIGHTWELL_UPSTREAM";
+
     private final CommonManipulatorResultExtractor adjustResultExtractor;
     private final RootGavExtractor rootGavExtractor;
 
@@ -64,7 +65,6 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             Logger userLogger,
             ScriptPrefetcher scriptPrefetcher) {
         super(objectMapper, processExecutor, userLogger);
-        this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
@@ -90,6 +90,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .userSpecifiedAlignmentParameters(
                         scriptPrefetcher.prefetchRemoteScripts(userAlignmentParametersWithFile, workdir))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
+                .buildCategory(CommonManipulatorConfigUtils.computeBuildCategory(adjustRequest))
                 .versionIncrementalSuffix(
                         CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
                 .versionSuffixAlternatives(
@@ -211,8 +212,12 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
     }
 
     @Override
-    public boolean failOnNoAlignmentChanges() {
-        return !isPmeDisabled();
+    public boolean noAlignmentChangesAllowed() {
+        return isPmeDisabled() || isLightwellUpstream();
+    }
+
+    private boolean isLightwellUpstream() {
+        return LIGHTWELL_UPSTREAM_BUILD_CATEGORY.equals(config.getBuildCategory());
     }
 
     private boolean isPmeDisabled() {

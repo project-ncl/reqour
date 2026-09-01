@@ -615,6 +615,85 @@ public class MvnProviderTest {
                 .hasMessage("Manipulator subprocess ended with non-zero exit code");
     }
 
+    @Test
+    void noAlignmentChangesAllowed_pmeEnabledStandardBuildCategory_returnsFalse() {
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                TestDataFactory.STANDARD_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
+
+        // PME enabled + standard build category => not allowed
+        assertThat(provider.noAlignmentChangesAllowed()).isFalse();
+    }
+
+    @Test
+    void noAlignmentChangesAllowed_pmeDisabledStandardBuildCategory_returnsTrue() {
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
+
+        // PME disabled + default build category => allowed
+        assertThat(provider.noAlignmentChangesAllowed()).isTrue();
+    }
+
+    @Test
+    void noAlignmentChangesAllowed_pmeEnabledLightwellUpstreamBuildCategory_returnsTrue() {
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                TestDataFactory.LIGHTWELL_UPSTREAM_PERSISTENT_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
+
+        // PME enabled + LW UPSTREAM => allowed
+        assertThat(provider.noAlignmentChangesAllowed()).isTrue();
+    }
+
+    @Test
+    void noAlignmentChangesAllowed_pmeDisabledLightwellUpstreamBuildCategory_returnsTrue() {
+        MvnProvider provider = new MvnProvider(
+                config.alignment(),
+                AdjustRequest.builder()
+                        .buildConfigParameters(
+                                Map.of(
+                                        BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                        TestDataFactory.LIGHTWELL_UPSTREAM_BUILD_CATEGORY,
+                                        BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
+                                        AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
+                                                AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.MANIPULATION_DISABLE,
+                                                "true")))
+                        .tempBuild(false)
+                        .brewPullActive(true)
+                        .build(),
+                workdir,
+                null,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
+
+        // PME disabled + LW UPSTREAM => allowed
+        assertThat(provider.noAlignmentChangesAllowed()).isTrue();
+    }
+
     private static AdjustRequest exampleAdjustRequest() {
         return AdjustRequest.builder()
                 .ref("main")

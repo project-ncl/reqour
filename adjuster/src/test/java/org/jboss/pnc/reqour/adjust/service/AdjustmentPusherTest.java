@@ -103,7 +103,7 @@ class AdjustmentPusherTest {
         AdjustmentPushResult expectedPushResult = new AdjustmentPushResult(expectedUpstreamCommit, version);
 
         AdjustmentPushResult actualPushResult = adjustmentPusher
-                .pushAlignedChanges(adjustRequest, manipulatorResult, false);
+                .pushAlignedChanges(adjustRequest, manipulatorResult, true);
 
         assertThat(actualPushResult).isEqualTo(expectedPushResult);
     }
@@ -123,7 +123,7 @@ class AdjustmentPusherTest {
 
         assertThatThrownBy(
                 () -> adjustmentPusher
-                        .pushAlignedChanges(adjustRequest, manipulatorResult, true))
+                        .pushAlignedChanges(adjustRequest, manipulatorResult, false))
                 .isInstanceOf(GitException.class)
                 .hasMessage("Cannot make the commit");
     }

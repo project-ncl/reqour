@@ -115,7 +115,7 @@ public class App implements Runnable {
                         .pushAlignedChanges(
                                 adjustRequest,
                                 manipulatorResult,
-                                adjustProvider.failOnNoAlignmentChanges());
+                                adjustProvider.noAlignmentChangesAllowed());
                 combineResultsOfStages(
                         adjustRequest,
                         cloningResult,

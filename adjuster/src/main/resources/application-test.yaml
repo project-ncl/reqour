@@ -84,6 +84,13 @@ reqour:
             - '-DadditionalAlignmentParam=overridable'
           additional-non-overridable-alignment-parameters:
             - '-DadditionalAlignmentParam=non-overridable'
+        LIGHTWELL_UPSTREAM:
+          persistent-mode: LIGHTWELL_UPSTREAM_PERSISTENT
+          temporary-mode: LIGHTWELL_UPSTREAM_TEMPORARY
+          temporary-prefer-persistent-mode: LIGHTWELL_UPSTREAM_TEMPORARY_PREFER_PERSISTENT
+          version-incremental-suffix:
+            permanent: not-used
+            temporary: not-used
 
     maven-executable: './mvnw'
     mdc: '{}'

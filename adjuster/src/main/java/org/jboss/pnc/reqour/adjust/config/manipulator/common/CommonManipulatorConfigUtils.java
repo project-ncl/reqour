@@ -189,6 +189,11 @@ public class CommonManipulatorConfigUtils {
         return buildCategoryConfig.persistentMode();
     }
 
+    public static String computeBuildCategory(AdjustRequest request) {
+        return request.getBuildConfigParameters()
+                .getOrDefault(BuildConfigurationParameterKeys.BUILD_CATEGORY, DEFAULT_BUILD_CATEGORY);
+    }
+
     public static boolean isBrewPullEnabled(AdjustRequest request) {
         return request.isBrewPullActive();
     }

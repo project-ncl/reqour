@@ -206,8 +206,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
     }
 
     @Override
-    public boolean failOnNoAlignmentChanges() {
-        return !isGmeDisabled();
+    public boolean noAlignmentChangesAllowed() {
+        return isGmeDisabled();
     }
 
     private boolean isGmeDisabled() {

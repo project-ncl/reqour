@@ -56,6 +56,11 @@ public class PmeConfig extends CommonManipulatorConfig {
     ExecutionRootOverrides executionRootOverrides;
 
     /**
+     * Build category, see {@link org.jboss.pnc.api.constants.BuildConfigurationParameterKeys#BUILD_CATEGORY}.
+     */
+    String buildCategory;
+
+    /**
      * Comma-separated list of version suffix alternatives, see <a href=
      * "https://project-ncl.github.io/pom-manipulation-ext/guide/project-version-manip.html#alternate-suffix-handling">PME
      * Docs</a>.

@@ -19,7 +19,10 @@ public interface AdjustProvider {
      */
     ManipulatorResult adjust(AdjustRequest adjustRequest);
 
-    default boolean failOnNoAlignmentChanges() {
-        return true;
+    /**
+     * True, in case no alignment changes are allowed (=not problematic). False otherwise.
+     */
+    default boolean noAlignmentChangesAllowed() {
+        return false;
     }
 }
