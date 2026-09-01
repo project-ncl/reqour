@@ -42,6 +42,8 @@ import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,9 @@ class GradleProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -91,6 +96,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -135,6 +141,7 @@ class GradleProviderTest {
         final String overriddenVersion = "overridden-version";
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -190,6 +197,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -231,6 +239,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -279,6 +288,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -318,6 +328,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -345,6 +356,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -381,6 +393,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -410,6 +423,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -440,6 +454,7 @@ class GradleProviderTest {
         final String overriddenVersion = "3.0.0-redhat-00001";
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -478,6 +493,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -498,6 +514,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -520,6 +537,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -543,6 +561,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -586,6 +605,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -655,6 +675,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -729,6 +750,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -792,6 +814,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -807,5 +830,25 @@ class GradleProviderTest {
                 command,
                 "additionalAlignmentParam",
                 List.of("overridable", "user", "non-overridable"));
+    }
+
+    @Test
+    void prepareExtraEnvs_standardRequest_containsRequiredEnvVariables() {
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                coreConfig,
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                null);
+
+        Map<String, String> envs = provider.prepareExtraEnvs();
+
+        assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.PATH_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE);
     }
 }

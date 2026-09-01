@@ -16,7 +16,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -43,6 +45,8 @@ import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,12 +59,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements AdjustProvider {
 
-    private final AlignmentConfig alignmentConfig;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
     private final GradleCommands gradleCommands;
 
     public GradleProvider(
             AlignmentConfig alignmentConfig,
+            ReqourCoreConfig coreConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -69,8 +73,7 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             Logger userLogger,
             GradleCommands gradleCommands,
             ScriptPrefetcher scriptPrefetcher) {
-        super(objectMapper, processExecutor, userLogger);
-        this.alignmentConfig = alignmentConfig;
+        super(objectMapper, processExecutor, coreConfig, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
         this.gradleCommands = gradleCommands;
 
@@ -208,6 +211,15 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
     @Override
     public boolean noAlignmentChangesAllowed() {
         return isGmeDisabled();
+    }
+
+    protected Map<String, String> prepareExtraEnvs() {
+        Map<String, String> extraEnvs = new HashMap<>(super.prepareExtraEnvs());
+        coreConfig.envs()
+                .artifactoryReadToken()
+                .ifPresent(
+                        token -> extraEnvs.put(EnvironmentConfig.ARTIFACTORY_READ_TOKEN_ENV_VARIABLE, token));
+        return extraEnvs;
     }
 
     private boolean isGmeDisabled() {

@@ -53,6 +53,7 @@ reqour:
       HOME: ${HOME}
       PATH: ${PATH}
       JAVA_HOME: ${JAVA_HOME}
+      ARTIFACTORY_READ_TOKEN: ${ARTIFACTORY_READ_TOKEN:}
 
 pnc_client_auth:
     type: OIDC # or LDAP

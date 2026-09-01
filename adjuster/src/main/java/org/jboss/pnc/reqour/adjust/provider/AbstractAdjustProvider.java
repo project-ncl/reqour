@@ -4,7 +4,7 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +14,8 @@ import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.slf4j.Logger;
 
@@ -30,12 +32,18 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     protected T config;
     protected final ObjectMapper objectMapper;
     protected final ProcessExecutor processExecutor;
+    protected final ReqourCoreConfig coreConfig;
     protected final Logger userLogger;
     private List<String> preparedCommand;
 
-    public AbstractAdjustProvider(ObjectMapper objectMapper, ProcessExecutor processExecutor, Logger userLogger) {
+    public AbstractAdjustProvider(
+            ObjectMapper objectMapper,
+            ProcessExecutor processExecutor,
+            ReqourCoreConfig coreConfig,
+            Logger userLogger) {
         this.objectMapper = objectMapper;
         this.processExecutor = processExecutor;
+        this.coreConfig = coreConfig;
         this.userLogger = userLogger;
     }
 
@@ -67,7 +75,13 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     }
 
     protected Map<String, String> prepareExtraEnvs() {
-        return Collections.emptyMap();
+        // NCL-9710: always forward HOME, PATH, and JAVA_HOME into the manipulator subprocess
+        EnvironmentConfig envConfig = coreConfig.envs();
+        Map<String, String> extraEnvs = new HashMap<>();
+        extraEnvs.put(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home());
+        extraEnvs.put(EnvironmentConfig.PATH_ENV_VARIABLE, envConfig.path());
+        extraEnvs.put(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE, envConfig.javaHome());
+        return extraEnvs;
     }
 
     protected List<String> getPreparedCommand() {

@@ -196,7 +196,9 @@ class SbtProviderTest {
                 List.of("temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
 
-        assertThat(envs).isNotEmpty();
+        assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.PATH_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE);
         assertThat(envs).containsEntry(EnvironmentConfig.HOME_ENV_VARIABLE, WithHomeVariableSet.HOME_VALUE);
     }
 }

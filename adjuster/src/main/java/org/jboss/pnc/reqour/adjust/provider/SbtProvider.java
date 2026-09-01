@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -28,7 +27,6 @@ import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.slf4j.Logger;
 
@@ -42,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
-    private final ReqourCoreConfig coreConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
@@ -53,8 +50,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             Logger userLogger) {
-        super(objectMapper, processExecutor, userLogger);
-        this.coreConfig = coreConfig;
+        super(objectMapper, processExecutor, coreConfig, userLogger);
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -101,11 +97,6 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                         config.getAlignmentConfigParameters(),
                         computeAlignmentParametersOverrides(),
                         List.of("manipulate", "writeReport")));
-    }
-
-    @Override
-    protected Map<String, String> prepareExtraEnvs() {
-        return Map.ofEntries(Map.entry(EnvironmentConfig.HOME_ENV_VARIABLE, coreConfig.envs().home())); // NCL-9710
     }
 
     @Override

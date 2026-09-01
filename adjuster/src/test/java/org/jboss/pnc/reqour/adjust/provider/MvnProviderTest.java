@@ -41,6 +41,7 @@ import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,9 @@ public class MvnProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -90,6 +94,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -110,6 +115,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -132,6 +138,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -155,6 +162,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -177,6 +185,7 @@ public class MvnProviderTest {
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 exampleAdjustRequest(),
                 workdir,
                 null,
@@ -255,6 +264,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -338,6 +348,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -406,6 +417,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
@@ -442,6 +454,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -481,6 +494,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -527,6 +541,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 objectMapper,
@@ -563,6 +578,7 @@ public class MvnProviderTest {
         final String overriddenVersion = "1.0.0";
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -602,6 +618,7 @@ public class MvnProviderTest {
         AdjustRequest adjustRequest = exampleAdjustRequest();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig,
                 adjustRequest,
                 workdir,
                 null,
