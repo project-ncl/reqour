@@ -65,7 +65,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
         return switch (adjustRequest.getBuildType()) {
             case MVN, MVN_RPM -> new MvnProvider(
                     config.alignment(),
-                    coreConfig,
+                    coreConfig.envs(),
                     adjustRequest,
                     workdir,
                     objectMapper,
@@ -76,7 +76,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     scriptPrefetcher);
             case GRADLE -> new GradleProvider(
                     config.alignment(),
-                    coreConfig,
+                    coreConfig.envs(),
                     adjustRequest,
                     workdir,
                     objectMapper,
@@ -88,7 +88,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
             case NPM ->
                 new NpmProvider(
                         config.alignment(),
-                        coreConfig,
+                        coreConfig.envs(),
                         adjustRequest,
                         workdir,
                         objectMapper,
@@ -97,7 +97,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
             case SBT ->
                 new SbtProvider(
                         config.alignment(),
-                        coreConfig,
+                        coreConfig.envs(),
                         adjustRequest,
                         workdir,
                         objectMapper,

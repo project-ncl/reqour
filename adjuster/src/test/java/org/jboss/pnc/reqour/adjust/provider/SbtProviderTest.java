@@ -168,7 +168,7 @@ class SbtProviderTest {
                 .build();
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                coreConfig,
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,

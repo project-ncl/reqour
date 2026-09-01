@@ -27,7 +27,7 @@ import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.ReqourCoreConfig;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,13 +44,13 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
     public SbtProvider(
             AlignmentConfig alignmentConfig,
-            ReqourCoreConfig coreConfig,
+            EnvironmentConfig envConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             Logger userLogger) {
-        super(objectMapper, processExecutor, coreConfig, userLogger);
+        super(objectMapper, processExecutor, envConfig, userLogger);
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
