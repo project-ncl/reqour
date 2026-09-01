@@ -18,6 +18,7 @@ public class TestDataFactory {
 
     public static final String STANDARD_BUILD_CATEGORY = "STANDARD";
     public static final String TEST_BUILD_CATEGORY = "TEST";
+    public static final String LIGHTWELL_UPSTREAM_BUILD_CATEGORY = "LIGHTWELL_UPSTREAM";
 
     public static AdjustRequest STANDARD_PERSISTENT_REQUEST = AdjustRequest.builder()
             .buildConfigParameters(Map.of(BuildConfigurationParameterKeys.BUILD_CATEGORY, STANDARD_BUILD_CATEGORY))
@@ -50,5 +51,12 @@ public class TestDataFactory {
     public static AdjustRequest TEST_TEMPORARY_REQUEST = AdjustRequest.builder()
             .buildConfigParameters(Map.of(BuildConfigurationParameterKeys.BUILD_CATEGORY, TEST_BUILD_CATEGORY))
             .tempBuild(true)
+            .build();
+
+    public static AdjustRequest LIGHTWELL_UPSTREAM_PERSISTENT_REQUEST = AdjustRequest.builder()
+            .buildConfigParameters(
+                    Map.of(BuildConfigurationParameterKeys.BUILD_CATEGORY, LIGHTWELL_UPSTREAM_BUILD_CATEGORY))
+            .tempBuild(false)
+            .brewPullActive(true)
             .build();
 }

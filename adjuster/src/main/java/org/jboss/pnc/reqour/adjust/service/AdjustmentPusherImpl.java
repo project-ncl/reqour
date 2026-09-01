@@ -53,7 +53,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     public AdjustmentPushResult pushAlignedChanges(
             AdjustRequest adjustRequest,
             ManipulatorResult manipulatorResult,
-            boolean failOnNoAlignmentChanges) {
+            boolean noAlignmentChangesAllowed) {
         userLogger.info("Pushing aligned changes");
         prepareSearchingBranch(workdir);
         String tagName = findTag(workdir);
@@ -63,7 +63,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
                     workdir,
                     manipulatorResult.getVersioningState().getExecutionRootVersion(),
                     getTagMessage(adjustRequest.getRef(), adjustRequest.getBuildType()),
-                    failOnNoAlignmentChanges);
+                    noAlignmentChangesAllowed);
         }
         userLogger.info("Tag name is '{}'", tagName);
 
@@ -132,26 +132,26 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
             Path workdir,
             String alignmentRootVersion,
             String tagMessage,
-            boolean failOnNoAlignmentChanges) {
+            boolean noAlignmentChangesAllowed) {
         ProcessContext.Builder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
-        String commitId = tryCommitChanges(processContextBuilder, failOnNoAlignmentChanges);
+        String commitId = tryCommitChanges(processContextBuilder, noAlignmentChangesAllowed);
 
         log.debug("Going to create a new tag for commit: {}", commitId);
         String tagName = computeTagName(processContextBuilder, alignmentRootVersion, commitId);
         log.debug("The commit is going to be tagged as '{}'", tagName);
 
-        tryTagHead(processContextBuilder, tagName, tagMessage, failOnNoAlignmentChanges);
+        tryTagHead(processContextBuilder, tagName, tagMessage, noAlignmentChangesAllowed);
         return tagName;
     }
 
-    private String tryCommitChanges(ProcessContext.Builder processContextBuilder, boolean failOnNoAlignmentChanges) {
+    private String tryCommitChanges(ProcessContext.Builder processContextBuilder, boolean noAlignmentChangesAllowed) {
         try {
             return commitChanges(processContextBuilder);
         } catch (GitException ex) {
-            if (failOnNoAlignmentChanges) {
-                // in case no alignment changes do matter, we (intentionally) re-throw the exception
+            if (!noAlignmentChangesAllowed) {
+                // in case no alignment changes are a problem, we (intentionally) re-throw the exception
                 throw ex;
             }
             log.warn("Reqour failed to commit, but was set not to fail on no alignment changes");
