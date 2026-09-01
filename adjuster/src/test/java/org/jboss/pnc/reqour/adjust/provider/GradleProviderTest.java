@@ -851,4 +851,36 @@ class GradleProviderTest {
         assertThat(envs).containsKey(EnvironmentConfig.PATH_ENV_VARIABLE);
         assertThat(envs).containsKey(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE);
     }
+
+    @Test
+    void prepareExtraEnvs_propagatedEnvPrefixes_configuredWithArtifactoryPrefix() {
+        assertThat(coreConfig.envs().propagatedEnvPrefixes()).containsExactly("ARTIFACTORY");
+    }
+
+    @Test
+    void prepareExtraEnvs_prefixMatchedEnvVars_areIncluded() {
+        // Find any env var in the current process that starts with a configured prefix
+        List<String> prefixes = coreConfig.envs().propagatedEnvPrefixes();
+        Map<String, String> matchingEnvVars = System.getenv()
+                .entrySet()
+                .stream()
+                .filter(e -> prefixes.stream().anyMatch(e.getKey()::startsWith))
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                coreConfig,
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                null);
+
+        Map<String, String> envs = provider.prepareExtraEnvs();
+
+        // All prefix-matched process env vars must be present in the result
+        matchingEnvVars.forEach((key, value) -> assertThat(envs).containsEntry(key, value));
+    }
 }

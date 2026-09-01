@@ -81,6 +81,17 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         extraEnvs.put(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home());
         extraEnvs.put(EnvironmentConfig.PATH_ENV_VARIABLE, envConfig.path());
         extraEnvs.put(EnvironmentConfig.JAVA_HOME_ENV_VARIABLE, envConfig.javaHome());
+
+        // Forward any process environment variables whose names match a configured prefix
+        List<String> prefixes = envConfig.propagatedEnvPrefixes();
+        if (!prefixes.isEmpty()) {
+            System.getenv().forEach((key, value) -> {
+                if (prefixes.stream().anyMatch(key::startsWith)) {
+                    extraEnvs.put(key, value);
+                }
+            });
+        }
+
         return extraEnvs;
     }
 

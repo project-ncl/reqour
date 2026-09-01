@@ -16,9 +16,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -45,7 +43,6 @@ import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
-import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.slf4j.Logger;
 
@@ -213,14 +210,6 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
         return isGmeDisabled();
     }
 
-    protected Map<String, String> prepareExtraEnvs() {
-        Map<String, String> extraEnvs = new HashMap<>(super.prepareExtraEnvs());
-        coreConfig.envs()
-                .artifactoryReadToken()
-                .ifPresent(
-                        token -> extraEnvs.put(EnvironmentConfig.ARTIFACTORY_READ_TOKEN_ENV_VARIABLE, token));
-        return extraEnvs;
-    }
 
     private boolean isGmeDisabled() {
         return CommonManipulatorConfigUtils.isManipulatorDisabled(getPreparedCommand());

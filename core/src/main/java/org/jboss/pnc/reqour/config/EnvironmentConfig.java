@@ -4,8 +4,9 @@
  */
 package org.jboss.pnc.reqour.config;
 
-import java.util.Optional;
+import java.util.List;
 
+import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
 public interface EnvironmentConfig {
@@ -13,7 +14,6 @@ public interface EnvironmentConfig {
     String HOME_ENV_VARIABLE = "HOME";
     String PATH_ENV_VARIABLE = "PATH";
     String JAVA_HOME_ENV_VARIABLE = "JAVA_HOME";
-    String ARTIFACTORY_READ_TOKEN_ENV_VARIABLE = "ARTIFACTORY_READ_TOKEN";
 
     @WithName(HOME_ENV_VARIABLE)
     String home();
@@ -24,6 +24,11 @@ public interface EnvironmentConfig {
     @WithName(JAVA_HOME_ENV_VARIABLE)
     String javaHome();
 
-    @WithName(ARTIFACTORY_READ_TOKEN_ENV_VARIABLE)
-    Optional<String> artifactoryReadToken();
+    /**
+     * List of environment variable name prefixes whose matching entries from the process environment will be forwarded
+     * into every manipulator subprocess. For example, {@code ["ARTIFACTORY"]} causes all env vars whose names begin
+     * with {@code ARTIFACTORY} to be propagated.
+     */
+    @WithDefault("")
+    List<String> propagatedEnvPrefixes();
 }
