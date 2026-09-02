@@ -150,8 +150,11 @@ public class ScriptPrefetcher {
     /**
      * Converts a GitHub raw URL to a GitHub API contents URL.
      *
-     * Input: https://github.ibm.com/org/repo/raw/ref/path/to/file.groovy
-     * Output: https://github.ibm.com/api/v3/repos/org/repo/contents/path/to/file.groovy?ref=ref
+     * Examples:
+     * {@code /org/repo/raw/main/file.groovy} → ref={@code main}, path={@code file.groovy}
+     * {@code /org/repo/raw/v1.0/path/file.groovy} → ref={@code v1.0}, path={@code path/file.groovy}
+     * {@code /org/repo/raw/refs/heads/main/file.groovy} → ref={@code refs/heads/main}, path={@code file.groovy}
+     * {@code /org/repo/raw/refs/tags/v1.0/file.groovy} → ref={@code refs/tags/v1.0}, path={@code file.groovy}
      */
     static URI convertToApiUri(URI uri) {
         String path = uri.getPath();
@@ -160,7 +163,7 @@ public class ScriptPrefetcher {
         }
 
         String[] segments = path.split("/");
-        // Expected: ["", org, repo, "raw", ref, path...]
+        // Expected: ["", org, repo, "raw", ref-segments..., path-segments...]
         int rawIndex = -1;
         for (int i = 0; i < segments.length; i++) {
             if ("raw".equals(segments[i])) {
@@ -176,8 +179,17 @@ public class ScriptPrefetcher {
 
         String org = segments[rawIndex - 2];
         String repo = segments[rawIndex - 1];
-        String ref = segments[rawIndex + 1];
-        String filePath = String.join("/", Arrays.copyOfRange(segments, rawIndex + 2, segments.length));
+
+        int refSegments = computeRefSegmentCount(segments, rawIndex);
+        int filePathStart = rawIndex + 1 + refSegments;
+
+        if (filePathStart >= segments.length) {
+            throw new AdjusterException(
+                    "URL does not contain a file path after the ref: " + uri);
+        }
+
+        String ref = String.join("/", Arrays.copyOfRange(segments, rawIndex + 1, filePathStart));
+        String filePath = String.join("/", Arrays.copyOfRange(segments, filePathStart, segments.length));
 
         try {
             return new URI(
@@ -191,6 +203,24 @@ public class ScriptPrefetcher {
         } catch (URISyntaxException e) {
             throw new AdjusterException("Failed to construct API URL from " + uri, e);
         }
+    }
+
+    /**
+     * Determines how many path segments after "raw" belong to the ref.
+     *
+     * {@code refs/heads/<branch>} and {@code refs/tags/<tag>} consume 3 segments; everything else is a single-segment
+     * ref (plain branch name or tag).
+     */
+    private static int computeRefSegmentCount(String[] segments, int rawIndex) {
+        int afterRaw = rawIndex + 1;
+        if (afterRaw < segments.length && "refs".equals(segments[afterRaw])) {
+            int nextIndex = afterRaw + 1;
+            if (nextIndex < segments.length
+                    && ("heads".equals(segments[nextIndex]) || "tags".equals(segments[nextIndex]))) {
+                return 3;
+            }
+        }
+        return 1;
     }
 
     private static String extractFileName(URI uri, int counter) {

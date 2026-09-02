@@ -65,6 +65,28 @@ class ScriptPrefetcherTest {
     }
 
     @Test
+    void convertToApiUri_refsHeadsRef_fullRefPreserved() throws Exception {
+        URI input = new URI(
+                "https://github.ibm.com/pnc-prod/tpolacek-empty/raw/refs/heads/main/scripts/info.groovy");
+
+        URI result = ScriptPrefetcher.convertToApiUri(input);
+
+        assertThat(result.getPath())
+                .isEqualTo("/api/v3/repos/pnc-prod/tpolacek-empty/contents/scripts/info.groovy");
+        assertThat(result.getQuery()).isEqualTo("ref=refs/heads/main");
+    }
+
+    @Test
+    void convertToApiUri_refsTagsRef_fullRefPreserved() throws Exception {
+        URI input = new URI("https://github.ibm.com/org/repo/raw/refs/tags/v1.0/path/file.groovy");
+
+        URI result = ScriptPrefetcher.convertToApiUri(input);
+
+        assertThat(result.getPath()).isEqualTo("/api/v3/repos/org/repo/contents/path/file.groovy");
+        assertThat(result.getQuery()).isEqualTo("ref=refs/tags/v1.0");
+    }
+
+    @Test
     void convertToApiUri_noRawSegment_throwsException() throws Exception {
         URI input = new URI("https://github.ibm.com/org/repo/blob/main/file.groovy");
 
