@@ -608,7 +608,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
 
         // PME enabled + standard build category => not allowed
         assertThat(provider.noAlignmentChangesAllowed()).isFalse();
@@ -624,7 +625,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
 
         // PME disabled + default build category => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();
@@ -640,7 +642,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
 
         // PME enabled + LW UPSTREAM => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();
@@ -667,7 +670,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                scriptPrefetcher);
 
         // PME disabled + LW UPSTREAM => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();
