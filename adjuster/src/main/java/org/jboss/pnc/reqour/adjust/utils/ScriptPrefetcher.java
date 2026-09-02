@@ -22,7 +22,6 @@ import jakarta.inject.Inject;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.runtime.UserLogger;
-import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.slf4j.Logger;
 
 /**
@@ -48,10 +47,6 @@ public class ScriptPrefetcher {
     }
 
     public List<String> prefetchRemoteScripts(List<String> params, Path workdir) {
-        if (configUtils.getActiveGitProvider() != GitProvider.GITHUB) {
-            return params;
-        }
-
         String gitProviderHostname = configUtils.getActiveGitProviderConfig().hostname();
         String gitProviderToken = configUtils.getActiveGitProviderConfig().token();
 

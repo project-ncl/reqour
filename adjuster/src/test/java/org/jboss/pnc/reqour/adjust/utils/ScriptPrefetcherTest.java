@@ -18,7 +18,6 @@ import java.util.List;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.GitProviderConfig;
-import org.jboss.pnc.reqour.service.translation.GitProvider;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
@@ -202,7 +201,6 @@ class ScriptPrefetcherTest {
         Mockito.when(gitProviderConfig.token()).thenReturn(token);
 
         ConfigUtils configUtils = Mockito.mock(ConfigUtils.class);
-        Mockito.when(configUtils.getActiveGitProvider()).thenReturn(GitProvider.GITHUB);
         Mockito.when(configUtils.getActiveGitProviderConfig()).thenReturn(gitProviderConfig);
 
         return new ScriptPrefetcher(configUtils, LoggerFactory.getLogger("test-user-logger"));
