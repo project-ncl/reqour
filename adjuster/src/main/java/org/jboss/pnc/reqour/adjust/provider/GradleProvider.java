@@ -68,7 +68,8 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             CommonManipulatorResultExtractor adjustResultExtractor,
             Logger userLogger,
             GradleCommands gradleCommands,
-            ScriptPrefetcher scriptPrefetcher) {
+            String gitProviderHostname,
+            String gitProviderToken) {
         super(objectMapper, processExecutor, userLogger);
         this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
@@ -82,9 +83,12 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(
-                        scriptPrefetcher.prefetchRemoteScripts(
+                        ScriptPrefetcher.prefetchRemoteScripts(
                                 userSpecifiedAlignmentParameters.getAlignmentParameters(),
-                                workdir))
+                                gitProviderHostname,
+                                gitProviderToken,
+                                workdir,
+                                userLogger))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .versionIncrementalSuffix(
                         CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))

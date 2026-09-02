@@ -38,7 +38,6 @@ import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
-import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -69,9 +68,6 @@ public class MvnProviderTest {
     @Inject
     RootGavExtractor rootGavExtractor;
 
-    @Inject
-    ScriptPrefetcher scriptPrefetcher;
-
     static Path workdir;
     @Inject
     ObjectMapper objectMapper;
@@ -97,7 +93,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List
                 .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
 
@@ -117,7 +114,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
@@ -139,7 +137,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List
                 .of(
                         "-DrestMode=TEST",
@@ -162,7 +161,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
@@ -184,7 +184,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -262,7 +263,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -345,7 +347,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -413,7 +416,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
 
         List<String> command = provider.getPreparedCommand();
 
@@ -449,7 +453,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0.rebuild-00042")
@@ -499,7 +504,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0.rebuild-00042")
@@ -534,7 +540,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 rootGavExtractor,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0")
@@ -584,7 +591,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 rootGavExtractor,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion(overriddenVersion)
@@ -609,7 +617,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                "localhost",
+                "test-token");
 
         assertThatThrownBy(() -> provider.adjust(adjustRequest)).isInstanceOf(AdjusterException.class)
                 .hasMessage("Manipulator subprocess ended with non-zero exit code");

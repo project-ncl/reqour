@@ -15,12 +15,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
-import org.jboss.pnc.reqour.config.ConfigUtils;
-import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
 
 /**
@@ -28,25 +23,17 @@ import org.slf4j.Logger;
  * {@code -DgroovyScripts} parameter points to an HTTPS URL on the configured git provider, the script is downloaded
  * using the provider's token and the parameter is rewritten to a local {@code file://} path.
  */
-@ApplicationScoped
 public class ScriptPrefetcher {
 
     private static final String GROOVY_SCRIPT_PREFIX = "-DgroovyScript=";
     private static final String GROOVY_SCRIPTS_PREFIX = "-DgroovyScripts=";
 
-    private final ConfigUtils configUtils;
-    private final Logger userLogger;
-
-    @Inject
-    public ScriptPrefetcher(ConfigUtils configUtils, @UserLogger Logger userLogger) {
-        this.configUtils = configUtils;
-        this.userLogger = userLogger;
-    }
-
-    public List<String> prefetchRemoteScripts(List<String> params, Path workdir) {
-        String gitProviderHostname = configUtils.getActiveGitProviderConfig().hostname();
-        String gitProviderToken = configUtils.getActiveGitProviderConfig().token();
-
+    public static List<String> prefetchRemoteScripts(
+            List<String> params,
+            String gitProviderHostname,
+            String gitProviderToken,
+            Path workdir,
+            Logger userLogger) {
         List<String> result = new ArrayList<>(params.size());
         int scriptCounter = 0;
         for (String param : params) {
@@ -56,7 +43,8 @@ public class ScriptPrefetcher {
                     gitProviderHostname,
                     gitProviderToken,
                     workdir,
-                    scriptCounter);
+                    scriptCounter,
+                    userLogger);
             if (processed == null) {
                 processed = tryPrefetchParam(
                         param,
@@ -64,7 +52,8 @@ public class ScriptPrefetcher {
                         gitProviderHostname,
                         gitProviderToken,
                         workdir,
-                        scriptCounter);
+                        scriptCounter,
+                        userLogger);
             }
             if (processed != null) {
                 result.add(processed);
@@ -76,13 +65,14 @@ public class ScriptPrefetcher {
         return result;
     }
 
-    private String tryPrefetchParam(
+    private static String tryPrefetchParam(
             String param,
             String prefix,
             String hostname,
             String token,
             Path workdir,
-            int counter) {
+            int counter,
+            Logger userLogger) {
         if (!param.startsWith(prefix)) {
             return null;
         }
