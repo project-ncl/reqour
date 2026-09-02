@@ -48,12 +48,15 @@ public class ScriptPrefetcher {
     }
 
     public List<String> prefetchRemoteScripts(List<String> params, Path workdir) {
-        if (configUtils.getActiveGitProvider() != GitProvider.GITHUB) {
+        GitProvider activeProvider = configUtils.getActiveGitProvider();
+        if (activeProvider != GitProvider.GITHUB) {
+            userLogger.info("Script prefetching skipped (active provider: {})", activeProvider);
             return params;
         }
 
         String gitProviderHostname = configUtils.getActiveGitProviderConfig().hostname();
         String gitProviderToken = configUtils.getActiveGitProviderConfig().token();
+        userLogger.info("Script prefetching enabled for GitHub provider (hostname: {})", gitProviderHostname);
 
         List<String> result = new ArrayList<>(params.size());
         int scriptCounter = 0;
