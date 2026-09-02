@@ -16,8 +16,8 @@ import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
-import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
+import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
@@ -29,6 +29,7 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
 
     private final ReqourAdjusterConfig config;
     private final ReqourCoreConfig coreConfig;
+    private final ConfigUtils configUtils;
     private final ObjectMapper objectMapper;
     private final ProcessExecutor processExecutor;
     private final CommonManipulatorResultExtractor adjustResultExtractor;
@@ -36,32 +37,34 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
     private final Path workdir = CommonUtils.getAdjustDir();
     private final Logger userLogger;
     private final GradleCommands gradleCommands;
-    private final ScriptPrefetcher scriptPrefetcher;
 
     @Inject
     public AdjustProviderPickerImpl(
             ReqourAdjusterConfig config,
             ReqourCoreConfig coreConfig,
+            ConfigUtils configUtils,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
             @UserLogger Logger userLogger,
-            GradleCommands gradleCommands,
-            ScriptPrefetcher scriptPrefetcher) {
+            GradleCommands gradleCommands) {
         this.config = config;
         this.coreConfig = coreConfig;
+        this.configUtils = configUtils;
         this.objectMapper = objectMapper;
         this.processExecutor = processExecutor;
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
         this.userLogger = userLogger;
         this.gradleCommands = gradleCommands;
-        this.scriptPrefetcher = scriptPrefetcher;
     }
 
     @Override
     public AdjustProvider pickAdjustProvider(AdjustRequest adjustRequest) {
+        String gitProviderHostname = configUtils.getActiveGitProviderConfig().hostname();
+        String gitProviderToken = configUtils.getActiveGitProviderConfig().token();
+
         return switch (adjustRequest.getBuildType()) {
             case MVN, MVN_RPM -> new MvnProvider(
                     config.alignment(),
@@ -72,7 +75,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     adjustResultExtractor,
                     rootGavExtractor,
                     userLogger,
-                    scriptPrefetcher);
+                    gitProviderHostname,
+                    gitProviderToken);
             case GRADLE -> new GradleProvider(
                     config.alignment(),
                     adjustRequest,
@@ -82,7 +86,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     adjustResultExtractor,
                     userLogger,
                     gradleCommands,
-                    scriptPrefetcher);
+                    gitProviderHostname,
+                    gitProviderToken);
             case NPM ->
                 new NpmProvider(config.alignment(), adjustRequest, workdir, objectMapper, processExecutor, userLogger);
             case SBT ->
