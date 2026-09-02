@@ -53,8 +53,7 @@ reqour:
       HOME: ${HOME}
       PATH: ${PATH}
       JAVA_HOME: ${JAVA_HOME}
-      propagated-env-prefixes:
-        - ARTIFACTORY
+      propagated-env-prefixes: []
 
 pnc_client_auth:
     type: OIDC # or LDAP
