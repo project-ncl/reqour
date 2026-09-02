@@ -32,6 +32,7 @@ import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
+import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
@@ -61,7 +62,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
-            Logger userLogger) {
+            Logger userLogger,
+            String gitProviderHostname,
+            String gitProviderToken) {
         super(objectMapper, processExecutor, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
@@ -85,7 +88,13 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         config = PmeConfig.builder()
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
-                .userSpecifiedAlignmentParameters(userAlignmentParametersWithFile)
+                .userSpecifiedAlignmentParameters(
+                        ScriptPrefetcher.prefetchRemoteScripts(
+                                userAlignmentParametersWithFile,
+                                gitProviderHostname,
+                                gitProviderToken,
+                                workdir,
+                                userLogger))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .buildCategory(CommonManipulatorConfigUtils.computeBuildCategory(adjustRequest))
                 .versionIncrementalSuffix(
