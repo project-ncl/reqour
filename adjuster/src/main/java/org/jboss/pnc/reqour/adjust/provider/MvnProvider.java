@@ -63,7 +63,8 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
             Logger userLogger,
-            ScriptPrefetcher scriptPrefetcher) {
+            String gitProviderHostname,
+            String gitProviderToken) {
         super(objectMapper, processExecutor, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
@@ -88,7 +89,12 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .pncDefaultAlignmentParameters(
                         CommonManipulatorConfigUtils.transformPncDefaultAlignmentParametersIntoList(adjustRequest))
                 .userSpecifiedAlignmentParameters(
-                        scriptPrefetcher.prefetchRemoteScripts(userAlignmentParametersWithFile, workdir))
+                        ScriptPrefetcher.prefetchRemoteScripts(
+                                userAlignmentParametersWithFile,
+                                gitProviderHostname,
+                                gitProviderToken,
+                                workdir,
+                                userLogger))
                 .restMode(CommonManipulatorConfigUtils.computeRestMode(adjustRequest, alignmentConfig))
                 .buildCategory(CommonManipulatorConfigUtils.computeBuildCategory(adjustRequest))
                 .versionIncrementalSuffix(
