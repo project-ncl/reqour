@@ -853,13 +853,13 @@ class GradleProviderTest {
 
     @Test
     void prepareExtraEnvs_propagatedEnvPrefixes_configuredWithArtifactoryPrefix() {
-        assertThat(coreConfig.envs().propagatedEnvPrefixes()).containsExactly("ARTIFACTORY");
+        assertThat(coreConfig.envs().propagatedEnvPrefixes().orElse(List.of())).containsExactly("ARTIFACTORY");
     }
 
     @Test
     void prepareExtraEnvs_prefixMatchedEnvVars_areIncluded() {
         // Find any env var in the current process that starts with a configured prefix
-        List<String> prefixes = coreConfig.envs().propagatedEnvPrefixes();
+        List<String> prefixes = coreConfig.envs().propagatedEnvPrefixes().orElse(List.of());
         Map<String, String> matchingEnvVars = System.getenv()
                 .entrySet()
                 .stream()
