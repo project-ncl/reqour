@@ -5,8 +5,8 @@
 package org.jboss.pnc.reqour.config;
 
 import java.util.List;
+import java.util.Optional;
 
-import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
 public interface EnvironmentConfig {
@@ -29,6 +29,5 @@ public interface EnvironmentConfig {
      * into every manipulator subprocess. For example, {@code ["ARTIFACTORY"]} causes all env vars whose names begin
      * with {@code ARTIFACTORY} to be propagated.
      */
-    @WithDefault("")
-    List<String> propagatedEnvPrefixes();
+    Optional<List<String>> propagatedEnvPrefixes();
 }

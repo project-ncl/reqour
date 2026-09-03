@@ -80,7 +80,7 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         extraEnvs.put(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home());
 
         // Forward any process environment variables whose names match a configured prefix
-        List<String> prefixes = envConfig.propagatedEnvPrefixes();
+        List<String> prefixes = envConfig.propagatedEnvPrefixes().orElse(List.of());
         if (!prefixes.isEmpty()) {
             System.getenv().forEach((key, value) -> {
                 if (prefixes.stream().anyMatch(key::startsWith)) {
