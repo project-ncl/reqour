@@ -4,6 +4,9 @@
  */
 package org.jboss.pnc.reqour.config;
 
+import java.util.List;
+
+import io.smallrye.config.WithDefault;
 import io.smallrye.config.WithName;
 
 public interface EnvironmentConfig {
@@ -20,4 +23,12 @@ public interface EnvironmentConfig {
 
     @WithName(JAVA_HOME_ENV_VARIABLE)
     String javaHome();
+
+    /**
+     * List of environment variable name prefixes whose matching entries from the process environment will be forwarded
+     * into every manipulator subprocess. For example, {@code ["ARTIFACTORY"]} causes all env vars whose names begin
+     * with {@code ARTIFACTORY} to be propagated.
+     */
+    @WithDefault("")
+    List<String> propagatedEnvPrefixes();
 }

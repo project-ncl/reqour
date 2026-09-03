@@ -42,6 +42,8 @@ import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.adjust.utils.ScriptPrefetcher;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,9 @@ class GradleProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -91,6 +96,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -135,6 +141,7 @@ class GradleProviderTest {
         final String overriddenVersion = "overridden-version";
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -190,6 +197,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -231,6 +239,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -279,6 +288,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -318,6 +328,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -345,6 +356,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -381,6 +393,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -410,6 +423,7 @@ class GradleProviderTest {
 
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -440,6 +454,7 @@ class GradleProviderTest {
         final String overriddenVersion = "3.0.0-redhat-00001";
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -478,6 +493,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -498,6 +514,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -520,6 +537,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -543,6 +561,7 @@ class GradleProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -586,6 +605,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -655,6 +675,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -729,6 +750,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -792,6 +814,7 @@ class GradleProviderTest {
                 .build();
         GradleProvider provider = new GradleProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -807,5 +830,57 @@ class GradleProviderTest {
                 command,
                 "additionalAlignmentParam",
                 List.of("overridable", "user", "non-overridable"));
+    }
+
+    @Test
+    void prepareExtraEnvs_standardRequest_containsRequiredEnvVariables() {
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                coreConfig.envs(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                null,
+                scriptPrefetcher);
+
+        Map<String, String> envs = provider.prepareExtraEnvs();
+
+        assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
+    }
+
+    @Test
+    void prepareExtraEnvs_propagatedEnvPrefixes_configuredWithArtifactoryPrefix() {
+        assertThat(coreConfig.envs().propagatedEnvPrefixes()).containsExactly("ARTIFACTORY");
+    }
+
+    @Test
+    void prepareExtraEnvs_prefixMatchedEnvVars_areIncluded() {
+        // Find any env var in the current process that starts with a configured prefix
+        List<String> prefixes = coreConfig.envs().propagatedEnvPrefixes();
+        Map<String, String> matchingEnvVars = System.getenv()
+                .entrySet()
+                .stream()
+                .filter(e -> prefixes.stream().anyMatch(e.getKey()::startsWith))
+                .collect(java.util.stream.Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                coreConfig.envs(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                TestDataFactory.userLogger,
+                null,
+                scriptPrefetcher);
+
+        Map<String, String> envs = provider.prepareExtraEnvs();
+
+        // All prefix-matched process env vars must be present in the result
+        matchingEnvVars.forEach((key, value) -> assertThat(envs).containsEntry(key, value));
     }
 }
