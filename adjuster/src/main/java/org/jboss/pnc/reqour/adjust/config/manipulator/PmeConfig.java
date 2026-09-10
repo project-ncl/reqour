@@ -5,7 +5,6 @@
 package org.jboss.pnc.reqour.adjust.config.manipulator;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.model.ExecutionRootOverrides;
@@ -67,13 +66,4 @@ public class PmeConfig extends CommonManipulatorConfig {
      */
     String versionSuffixAlternatives;
 
-    /**
-     * List of additional alignment parameters, which are sent to PME (and can be possibly overridden by a user).
-     */
-    List<String> additionalOverridableAlignmentParameters;
-
-    /**
-     * List of additional alignment parameters, which are sent to PME (and cannot be overridden by a user).
-     */
-    List<String> additionalNonOverridableAlignmentParameters;
 }

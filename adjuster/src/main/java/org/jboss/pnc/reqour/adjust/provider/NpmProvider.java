@@ -66,6 +66,12 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
                 .versionIncrementalSuffix(
                         CommonManipulatorConfigUtils.computeVersionIncrementalSuffix(adjustRequest, alignmentConfig))
                 .alignmentConfigParameters(npmProviderConfig.alignmentParameters())
+                .additionalOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalOverridableAlignmentParameters(adjustRequest, alignmentConfig))
+                .additionalNonOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalNonOverridableAlignmentParameters(adjustRequest, alignmentConfig))
                 .workdir(workdir)
                 .resultsFilePath(getResultsFile(workdir))
                 .cliJarPath(npmProviderConfig.cliJarPath())
@@ -91,9 +97,13 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
                 List.of(
                         List.of(javaLocation.toString(), "-jar", config.getCliJarPath().toString()),
                         config.getPncDefaultAlignmentParameters(),
+                        // overridable alignment params are placed before users params, so that they can override it if needed
+                        config.getAdditionalOverridableAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         computeAlignmentParametersOverrides(),
+                        // non-overridable parameters are placed at the very end of manipulation command, so that a user cannot override them
+                        config.getAdditionalNonOverridableAlignmentParameters(),
                         List.of("--result=" + config.getResultsFilePath())));
     }
 

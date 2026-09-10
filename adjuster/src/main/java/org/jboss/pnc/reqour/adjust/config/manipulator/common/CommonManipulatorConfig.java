@@ -51,4 +51,15 @@ public class CommonManipulatorConfig {
      * Working directory, in which should the manipulator run.
      */
     Path workdir;
+
+    /**
+     * List of additional alignment parameters, which are sent to a manipulator (and can be possibly overridden by a
+     * user).
+     */
+    List<String> additionalOverridableAlignmentParameters;
+
+    /**
+     * List of additional alignment parameters, which are sent to a manipulator (and cannot be overridden by a user).
+     */
+    List<String> additionalNonOverridableAlignmentParameters;
 }
