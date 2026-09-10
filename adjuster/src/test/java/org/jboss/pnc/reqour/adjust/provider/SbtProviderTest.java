@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.provider;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
@@ -153,7 +154,9 @@ class SbtProviderTest {
                 .buildConfigParameters(
                         Map.of(
                                 BuildConfigurationParameterKeys.ALIGNMENT_PARAMETERS,
-                                "-Doverride=user"))
+                                "-Doverride=user",
+                                BuildConfigurationParameterKeys.BUILD_CATEGORY,
+                                TEST_BUILD_CATEGORY))
                 .tempBuild(true)
                 .alignmentPreference(AlignmentPreference.PREFER_PERSISTENT)
                 .taskId(TASK_ID)
@@ -187,14 +190,19 @@ class SbtProviderTest {
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 1),
-                        MapEntry.entry("restBrewPullActive", 1)));
+                        MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("additionalAlignmentParam", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
-        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEMPORARY_PREFER_PERSISTENT"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST_TEMPORARY_PREFER_PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "versionIncrementalSuffix",
-                List.of("temporary-pnc"));
+                List.of("test-temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "additionalAlignmentParam",
+                List.of("overridable", "non-overridable"));
 
         assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
         assertThat(envs).containsEntry(EnvironmentConfig.HOME_ENV_VARIABLE, WithHomeVariableSet.HOME_VALUE);

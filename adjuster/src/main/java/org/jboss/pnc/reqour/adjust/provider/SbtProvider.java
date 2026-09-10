@@ -70,6 +70,12 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                                 : workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get()))
                 .sbtPath(sbtProviderConfig.sbtPath())
                 .executionRootOverrides(CommonManipulatorConfigUtils.getExecutionRootOverrides(adjustRequest))
+                .additionalOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalOverridableAlignmentParameters(adjustRequest, alignmentConfig))
+                .additionalNonOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalNonOverridableAlignmentParameters(adjustRequest, alignmentConfig))
                 .build();
 
         if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
@@ -93,9 +99,13 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                 List.of(
                         List.of(config.getSbtPath().toString()),
                         config.getPncDefaultAlignmentParameters(),
+                        // overridable alignment params are placed before users params, so that they can override it if needed
+                        config.getAdditionalOverridableAlignmentParameters(),
                         config.getUserSpecifiedAlignmentParameters(),
                         config.getAlignmentConfigParameters(),
                         computeAlignmentParametersOverrides(),
+                        // non-overridable parameters are placed at the very end of manipulation command, so that a user cannot override them
+                        config.getAdditionalNonOverridableAlignmentParameters(),
                         List.of("manipulate", "writeReport")));
     }
 
