@@ -9,8 +9,10 @@ import static org.jboss.pnc.reqour.common.utils.IOUtils.createTempDir;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -135,6 +137,55 @@ class RepositoryFetcherTest {
         CloningResult actualCloningResult = repositoryFetcher.cloneRepository(adjustRequest, workdir);
 
         assertThat(actualCloningResult).isEqualTo(expectedCloningResult);
+    }
+
+    @Test
+    void transformGitSubmodulesIntoFatRepository_staleGitmodulesEntry_skipsWithoutFailing() throws Exception {
+        // A path can be declared in .gitmodules without a corresponding gitlink in the index (a stale/orphaned
+        // entry), e.g. apache-camel's .github/actions/backport. Such a path must be skipped instead of failing the
+        // whole transformation with 'git rm --cached ... did not match any files'.
+        Path repo = workdir.resolve("stale-submodule-repo");
+        Files.createDirectories(repo);
+        git(repo, "init", "-q");
+        git(repo, "config", "user.email", "test@test");
+        git(repo, "config", "user.name", "test");
+
+        // A regular checked-in directory (not a submodule), so it has no .git inside it
+        Path actionDir = repo.resolve(".github/actions/backport");
+        Files.createDirectories(actionDir);
+        Files.writeString(actionDir.resolve("action.yml"), "name: backport\n");
+
+        // Stale .gitmodules stanza referencing that path, but with no gitlink in the index
+        Files.writeString(
+                repo.resolve(".gitmodules"),
+                """
+                        [submodule ".github/actions/backport"]
+                            path = .github/actions/backport
+                            url = https://example.com/backport.git
+                        """);
+        git(repo, "add", "-A");
+        git(repo, "commit", "-q", "-m", "initial");
+
+        repositoryFetcher.transformGitSubmodulesIntoFatRepository(repo);
+
+        // The stale entry's files are preserved and the .gitmodules file is removed
+        assertThat(actionDir.resolve("action.yml")).exists();
+        assertThat(repo.resolve(".gitmodules")).doesNotExist();
+    }
+
+    private static void git(Path workdir, String... args) throws IOException, InterruptedException {
+        List<String> command = new ArrayList<>(List.of("git"));
+        command.addAll(List.of(args));
+        Process process = new ProcessBuilder(command)
+                .directory(workdir.toFile())
+                .redirectErrorStream(true)
+                .start();
+        String output = new String(process.getInputStream().readAllBytes());
+        int exitCode = process.waitFor();
+        if (exitCode != 0) {
+            throw new IllegalStateException(
+                    "git " + String.join(" ", args) + " failed (exit " + exitCode + "):\n" + output);
+        }
     }
 
     @Test
