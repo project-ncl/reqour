@@ -196,6 +196,10 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
             }
         }
 
+        // At this point the target repository might have the ref we want to sync, but the local repository might not
+        // have all the tags from the target repository. We need to sync tags because we use it to know if we have
+        // tags with existing changes or if we need to create tags of format <version>-<sha> if existing tag with name
+        // <version> exists after manipulator's changes
         gitCommands.fetchTags(DEFAULT_REMOTE_NAME, false, processContextBuilder);
         return isRefInternal;
     }
