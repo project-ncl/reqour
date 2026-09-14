@@ -216,7 +216,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
      * <a href="https://www.atlassian.com/git/articles/core-concept-workflows-and-tips#integrate-submodule">Atlassian
      * docs</a>.
      */
-    private void transformGitSubmodulesIntoFatRepository(Path workdir) {
+    void transformGitSubmodulesIntoFatRepository(Path workdir) {
         String gitModulesFilename = ".gitmodules";
         Path submodulesFile = workdir.resolve(gitModulesFilename);
 
@@ -231,6 +231,17 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
         List<String> submoduleLocations = getSubmoduleLocations(submodulesFile);
         for (var submoduleLocation : submoduleLocations) {
+            // A path can be listed in .gitmodules without a corresponding gitlink (a stale/orphaned entry). Such a
+            // path is not checked out by 'git submodule update --init', so it has no .git and 'git rm --cached' would
+            // fail on it - skip it. See NCLSUP-1509 (apache-camel's .github/actions/backport).
+            Path submoduleGit = workdir.resolve(submoduleLocation).resolve(".git");
+            if (Files.notExists(submoduleGit)) {
+                userLogger.warn(
+                        "Path '{}' is declared in .gitmodules but is not an initialized submodule, skipping",
+                        submoduleLocation);
+                continue;
+            }
+
             // 1) Delete the reference to the submodule from the index, but keep the files
             gitCommands.remove(submoduleLocation, true, processContextBuilder);
 
