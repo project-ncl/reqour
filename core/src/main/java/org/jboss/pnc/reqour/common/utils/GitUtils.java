@@ -193,7 +193,19 @@ public class GitUtils {
     }
 
     public static List<String> submoduleUpdateInit() {
-        return List.of("git", "submodule", "update", "--init");
+        // Rewrite the unauthenticated git://github.com/ protocol to https://github.com/ for the (recursive) submodule
+        // clones. GitHub permanently disabled the git:// protocol in 2022 (and it is commonly blocked by firewalls), so
+        // submodules declaring such URLs (e.g. okhttp's hpack-test-case) would otherwise hang and time out. This has to
+        // be passed as '-c' on the command (rather than 'git config'), because the surrounding repository's local
+        // config is not read by the fresh 'git clone' subprocess spawned per submodule; '-c' propagates to it via
+        // GIT_CONFIG_PARAMETERS.
+        return List.of(
+                "git",
+                "-c",
+                "url.https://github.com/.insteadOf=git://github.com/",
+                "submodule",
+                "update",
+                "--init");
     }
 
     public static List<String> createBranch(String branchName) {
