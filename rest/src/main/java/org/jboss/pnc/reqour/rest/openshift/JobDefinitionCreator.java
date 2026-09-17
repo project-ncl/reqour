@@ -70,7 +70,7 @@ public class JobDefinitionCreator {
             properties.put("appEnvironment", config.appEnvironment());
             properties.put("resourcesMemory", getResourcesMemory(adjustRequest.getBuildConfigParameters()));
             properties.put("reqourSecretKey", config.reqourSecretKey());
-            properties.put("indyUrl", config.indyUrl());
+            properties.put("repositoryManagerUrl", config.repositoryManagerUrl());
             properties.put("bifrostUrl", reqourCoreConfig.log().finalLog().bifrostUploader().baseUrl());
             properties.put("mdc", objectMapper.writeValueAsString(MDC.getCopyOfContextMap()));
             properties.put("saSecret", saSecret);
