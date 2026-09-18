@@ -13,11 +13,10 @@ import java.util.function.Consumer;
 
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 
-import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder(builderClassName = "Builder", toBuilder = true)
+@lombok.Builder(builderClassName = "Builder", toBuilder = true)
 public class ProcessContext {
 
     List<String> command;
