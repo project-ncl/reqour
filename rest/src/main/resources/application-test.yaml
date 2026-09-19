@@ -23,7 +23,7 @@ reqour:
   rest:
     app-environment: test
     reqour-secret-key: test-secret
-    indy-url: https://test.indy.com
+    repository-manager-url: https://repository-manager.test.example.com
     sasl-jaas-conf: sasl-jaas-config
     job-definition-file-path: 'src/test/resources/job.yaml'
 
