@@ -84,7 +84,7 @@
     <!-- Plugins versions -->
     <version.maven-surefire-plugin>3.6.0</version.maven-surefire-plugin>
     <version.maven-compiler-plugin>3.16.0</version.maven-compiler-plugin>
-    <version.license-maven-plugin>5.0.0</version.license-maven-plugin>
+    <version.license-maven-plugin>5.1.2</version.license-maven-plugin>
     <version.spotless-maven-plugin>3.10.2</version.spotless-maven-plugin>
     <version.central-publishing-maven-plugin>0.11.0</version.central-publishing-maven-plugin>
     <version.maven-source-plugin>3.4.0</version.maven-source-plugin>
