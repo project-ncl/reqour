@@ -198,6 +198,17 @@
         <groupId>org.jboss.pnc.maven-manipulator</groupId>
         <artifactId>pom-manipulation-common-lite</artifactId>
         <version>${version.pom-manipulation-common}</version>
+        <exclusions>
+          <exclusion>
+            <!-- Exclude reports-model entirely: reqour has no use for it (pom-manipulation-common-lite only
+                 pulls it in for the GAV class). From reports-model 3.0.8+ the jar ships a Jandex index,
+                 which causes Quarkus/Hibernate Validator to discover ScmUrlValidator at startup and attempt
+                 to load commons-validator — a transitive dep that is not on reqour's classpath. Excluding
+                 reports-model avoids the problem regardless of what its transitive dependencies look like. -->
+            <groupId>org.jboss.da</groupId>
+            <artifactId>reports-model</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.jboss.pnc.npm-manipulator</groupId>
