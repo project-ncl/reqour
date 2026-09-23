@@ -40,6 +40,7 @@ import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
 import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,9 @@ public class MvnProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -86,6 +90,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_standardPersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -105,6 +110,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_standardTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -126,6 +132,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_servicePersistentRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.TEST_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -148,6 +155,7 @@ public class MvnProviderTest {
     void computeAlignmentParametersOverrides_serviceTemporaryRequest_overridesCorrectly() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.TEST_TEMPORARY_REQUEST,
                 workdir,
                 null,
@@ -169,6 +177,7 @@ public class MvnProviderTest {
     void prepareCommand_servicePersistentBuildWithPersistentPreference_generatedCommandIsCorrect() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 exampleAdjustRequest(),
                 workdir,
                 null,
@@ -246,6 +255,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -328,6 +338,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -395,6 +406,7 @@ public class MvnProviderTest {
                 .build();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -430,6 +442,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -468,6 +481,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -513,6 +527,7 @@ public class MvnProviderTest {
                         """);
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 objectMapper,
@@ -548,6 +563,7 @@ public class MvnProviderTest {
         final String overriddenVersion = "1.0.0";
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(
@@ -586,6 +602,7 @@ public class MvnProviderTest {
         AdjustRequest adjustRequest = exampleAdjustRequest();
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -602,6 +619,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeEnabledStandardBuildCategory_returnsFalse() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.STANDARD_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -618,6 +636,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeDisabledStandardBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 MANIPULATOR_DISABLED_REQUEST,
                 workdir,
                 null,
@@ -634,6 +653,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeEnabledLightwellUpstreamBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 TestDataFactory.LIGHTWELL_UPSTREAM_PERSISTENT_REQUEST,
                 workdir,
                 null,
@@ -650,6 +670,7 @@ public class MvnProviderTest {
     void noAlignmentChangesAllowed_pmeDisabledLightwellUpstreamBuildCategory_returnsTrue() {
         MvnProvider provider = new MvnProvider(
                 config.alignment(),
+                coreConfig.envs(),
                 AdjustRequest.builder()
                         .buildConfigParameters(
                                 Map.of(

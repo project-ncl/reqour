@@ -41,6 +41,8 @@ import org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils;
 import org.jboss.pnc.reqour.adjust.utils.GradleCommands;
 import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
+import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +56,9 @@ class GradleProviderTest {
 
     @Inject
     ReqourAdjusterConfig config;
+
+    @Inject
+    ReqourCoreConfig coreConfig;
 
     @Inject
     AdjustTestUtils adjustTestUtils;
@@ -92,6 +97,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -149,6 +155,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -189,6 +196,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -238,6 +246,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -276,6 +285,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -314,6 +324,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
 
@@ -340,6 +351,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         VersioningState expectedVersioningState = VersioningState.builder()
@@ -375,6 +387,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 gradleCommands);
 
@@ -403,6 +416,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 gradleCommands);
 
@@ -446,6 +460,7 @@ class GradleProviderTest {
                 null,
                 null,
                 resultExtractor,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 gradleCommands);
 
@@ -469,6 +484,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         List<String> expectedOverrides = List
@@ -488,6 +504,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         List<String> expectedOverrides = List.of(
@@ -509,6 +526,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         List<String> expectedOverrides = List
@@ -531,6 +549,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
         List<String> expectedOverrides = List.of(
@@ -573,6 +592,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
 
@@ -641,6 +661,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
 
@@ -714,6 +735,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
 
@@ -776,6 +798,7 @@ class GradleProviderTest {
                 null,
                 null,
                 null,
+                coreConfig.envs(),
                 TestDataFactory.userLogger,
                 null);
 
@@ -785,5 +808,24 @@ class GradleProviderTest {
                 command,
                 "additionalAlignmentParam",
                 List.of("overridable", "user", "non-overridable"));
+    }
+
+    @Test
+    void prepareExtraEnvs_standardRequest_containsRequiredEnvVariables() {
+        GradleProvider provider = new GradleProvider(
+                config.alignment(),
+                TestDataFactory.MANIPULATOR_DISABLED_REQUEST,
+                workdir,
+                null,
+                null,
+                null,
+                coreConfig.envs(),
+                TestDataFactory.userLogger,
+                null);
+
+        Map<String, String> envs = provider.prepareExtraEnvs();
+
+        assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.LANG_ENV_VARIABLE);
     }
 }

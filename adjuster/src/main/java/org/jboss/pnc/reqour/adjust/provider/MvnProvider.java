@@ -35,6 +35,7 @@ import org.jboss.pnc.reqour.adjust.utils.CommonUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,6 +56,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
 
     public MvnProvider(
             AlignmentConfig alignmentConfig,
+            EnvironmentConfig envConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
@@ -62,7 +64,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
             Logger userLogger) {
-        super(objectMapper, processExecutor, userLogger);
+        super(objectMapper, processExecutor, envConfig, userLogger);
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
