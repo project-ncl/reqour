@@ -29,7 +29,6 @@ import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.EnvironmentConfig;
-import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -42,19 +41,19 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
-    private final ReqourCoreConfig coreConfig;
+    private final EnvironmentConfig envConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
             AlignmentConfig alignmentConfig,
-            ReqourCoreConfig coreConfig,
+            EnvironmentConfig envConfig,
             AdjustRequest adjustRequest,
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             Logger userLogger) {
-        super(objectMapper, processExecutor, userLogger);
-        this.coreConfig = coreConfig;
+        super(objectMapper, processExecutor, envConfig, userLogger);
+        this.envConfig = envConfig;
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -115,7 +114,7 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
 
     @Override
     protected Map<String, String> prepareExtraEnvs() {
-        return Map.ofEntries(Map.entry(EnvironmentConfig.HOME_ENV_VARIABLE, coreConfig.envs().home())); // NCL-9710
+        return Map.ofEntries(Map.entry(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home())); // NCL-9710
     }
 
     @Override

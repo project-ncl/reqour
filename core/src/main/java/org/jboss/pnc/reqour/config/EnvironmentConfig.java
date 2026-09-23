@@ -11,6 +11,7 @@ public interface EnvironmentConfig {
     String HOME_ENV_VARIABLE = "HOME";
     String PATH_ENV_VARIABLE = "PATH";
     String JAVA_HOME_ENV_VARIABLE = "JAVA_HOME";
+    String LANG_ENV_VARIABLE = "LANG";
 
     @WithName(HOME_ENV_VARIABLE)
     String home();
@@ -20,4 +21,7 @@ public interface EnvironmentConfig {
 
     @WithName(JAVA_HOME_ENV_VARIABLE)
     String javaHome();
+
+    @WithName(LANG_ENV_VARIABLE)
+    String lang();
 }

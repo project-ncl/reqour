@@ -171,7 +171,7 @@ class SbtProviderTest {
                 .build();
         SbtProvider provider = new SbtProvider(
                 config.alignment(),
-                coreConfig,
+                coreConfig.envs(),
                 adjustRequest,
                 workdir,
                 null,
@@ -206,5 +206,7 @@ class SbtProviderTest {
 
         assertThat(envs).isNotEmpty();
         assertThat(envs).containsEntry(EnvironmentConfig.HOME_ENV_VARIABLE, WithHomeVariableSet.HOME_VALUE);
+        assertThat(envs).containsKey(EnvironmentConfig.LANG_ENV_VARIABLE);
+        assertThat(envs).containsEntry(EnvironmentConfig.LANG_ENV_VARIABLE, WithHomeVariableSet.LANG_VALUE);
     }
 }

@@ -42,6 +42,7 @@ import org.jboss.pnc.reqour.common.exceptions.ResourceNotFoundException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.config.ConfigConstants;
+import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,9 +66,10 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             CommonManipulatorResultExtractor adjustResultExtractor,
+            EnvironmentConfig envConfig,
             Logger userLogger,
             GradleCommands gradleCommands) {
-        super(objectMapper, processExecutor, userLogger);
+        super(objectMapper, processExecutor, envConfig, userLogger);
         this.alignmentConfig = alignmentConfig;
         this.adjustResultExtractor = adjustResultExtractor;
         this.gradleCommands = gradleCommands;
