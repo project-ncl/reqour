@@ -849,6 +849,7 @@ class GradleProviderTest {
         Map<String, String> envs = provider.prepareExtraEnvs();
 
         assertThat(envs).containsKey(EnvironmentConfig.HOME_ENV_VARIABLE);
+        assertThat(envs).containsKey(EnvironmentConfig.LANG_ENV_VARIABLE);
     }
 
     @Test
