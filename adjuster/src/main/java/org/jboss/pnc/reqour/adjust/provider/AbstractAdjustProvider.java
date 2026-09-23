@@ -74,10 +74,11 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     }
 
     protected Map<String, String> prepareExtraEnvs() {
-        // NCL-9710: always forward HOME into the manipulator subprocess
+        // NCL-9710, NCL-9977: always forward HOME and LANG into the manipulator subprocess
         //    ( PATH & JAVA_HOME excluded for now )
         Map<String, String> extraEnvs = new HashMap<>();
         extraEnvs.put(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home());
+        extraEnvs.put(EnvironmentConfig.LANG_ENV_VARIABLE, envConfig.lang());
 
         // Forward any process environment variables whose names match a configured prefix
         List<String> prefixes = envConfig.propagatedEnvPrefixes().orElse(List.of());
