@@ -13,7 +13,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -41,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements AdjustProvider {
 
-    private final EnvironmentConfig envConfig;
     private static final String ALIGNMENT_RESULTS_FILENAME = "manipulations.json";
 
     public SbtProvider(
@@ -53,7 +51,6 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             ProcessExecutor processExecutor,
             Logger userLogger) {
         super(objectMapper, processExecutor, envConfig, userLogger);
-        this.envConfig = envConfig;
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -110,11 +107,6 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
                         // non-overridable parameters are placed at the very end of manipulation command, so that a user cannot override them
                         config.getAdditionalNonOverridableAlignmentParameters(),
                         List.of("manipulate", "writeReport")));
-    }
-
-    @Override
-    protected Map<String, String> prepareExtraEnvs() {
-        return Map.ofEntries(Map.entry(EnvironmentConfig.HOME_ENV_VARIABLE, envConfig.home())); // NCL-9710
     }
 
     @Override
