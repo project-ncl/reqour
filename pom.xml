@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2024 Red Hat, Inc.
+    SPDX-FileCopyrightText: Copyright © 2024 Red Hat, Inc.
     SPDX-License-Identifier: Apache-2.0
 
 -->
@@ -322,9 +322,10 @@
           <configuration>
             <licenseSets>
               <licenseSet>
-                <header>${rootPath}/.license-header.txt</header>
+                <inlineHeader><![CDATA[SPDX-FileCopyrightText: Copyright © ${project.inceptionYear} Red Hat, Inc.
+SPDX-License-Identifier: Apache-2.0
+]]></inlineHeader>
                 <excludes>
-                  <exclude>.license-header.txt</exclude>
                   <exclude>**/README.md</exclude>
                   <exclude>LICENSE.txt</exclude>
                   <exclude>eclipse-codeStyle.xml</exclude>
