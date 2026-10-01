@@ -43,6 +43,6 @@ reqour:
   rest:
     app-environment: ${APP_ENV}
     reqour-secret-key: ${REQOUR_SECRET_NAME}
-    indy-url: ${INDY_URL}
+    repository-manager-url: ${REPOSITORY_MGR_URL}
     job-definition-file-path: 'src/main/resources/job.yaml' # overridden in runtime config
     sasl-jaas-conf: ${SASL_JAAS_CONF}
