@@ -90,7 +90,7 @@
 
     <!-- Plugins versions -->
     <version.license-maven-plugin>5.1.2</version.license-maven-plugin>
-    <version.spotless-maven-plugin>3.10.2</version.spotless-maven-plugin>
+    <version.spotless-maven-plugin>3.10.3</version.spotless-maven-plugin>
     <version.lombok-maven-plugin>1.18.20.0</version.lombok-maven-plugin>
     <version.jandex-maven-plugin>3.6.0</version.jandex-maven-plugin>
     <version.git-commit-id-plugin>4.9.10</version.git-commit-id-plugin>
