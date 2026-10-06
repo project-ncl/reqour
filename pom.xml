@@ -7,6 +7,14 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>54</version>
+    <relativePath/>
+  </parent>
+
   <groupId>org.jboss.pnc.reqour</groupId>
   <artifactId>reqour-parent</artifactId>
   <version>3.5.6-SNAPSHOT</version>
@@ -52,8 +60,7 @@
 
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <jdk.min.version>21</jdk.min.version>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
     <quarkus.platform.version>3.39.4</quarkus.platform.version>
@@ -82,18 +89,12 @@
     <version.smallrye-common-process>2.21.1</version.smallrye-common-process>
 
     <!-- Plugins versions -->
-    <version.maven-surefire-plugin>3.6.0</version.maven-surefire-plugin>
-    <version.maven-compiler-plugin>3.16.0</version.maven-compiler-plugin>
     <version.license-maven-plugin>5.1.2</version.license-maven-plugin>
     <version.spotless-maven-plugin>3.10.2</version.spotless-maven-plugin>
-    <version.maven-source-plugin>3.4.0</version.maven-source-plugin>
     <version.lombok-maven-plugin>1.18.20.0</version.lombok-maven-plugin>
-    <version.maven-javadoc-plugin>3.12.0</version.maven-javadoc-plugin>
-    <version.maven-gpg-plugin>3.2.8</version.maven-gpg-plugin>
     <version.jandex-maven-plugin>3.6.0</version.jandex-maven-plugin>
     <version.git-commit-id-plugin>4.9.10</version.git-commit-id-plugin>
     <version.maven-replacer-plugin>1.4.1</version.maven-replacer-plugin>
-    <version.maven-jar-plugin>3.5.1</version.maven-jar-plugin>
     <version.quarkus-pnc-client-auth>1.0.0</version.quarkus-pnc-client-auth>
   </properties>
 
@@ -374,18 +375,12 @@ SPDX-License-Identifier: Apache-2.0
           <artifactId>maven-replacer-plugin</artifactId>
           <version>${version.maven-replacer-plugin}</version>
         </plugin>
-        <plugin>
-          <groupId>org.apache.maven.plugins</groupId>
-          <artifactId>maven-jar-plugin</artifactId>
-          <version>${version.maven-jar-plugin}</version>
-        </plugin>
       </plugins>
     </pluginManagement>
 
     <plugins>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>${version.maven-compiler-plugin}</version>
         <configuration>
           <compilerArgs>
             <arg>-parameters</arg>
@@ -394,7 +389,6 @@ SPDX-License-Identifier: Apache-2.0
       </plugin>
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${version.maven-surefire-plugin}</version>
         <configuration>
           <argLine>-XX:+EnableDynamicAgentLoading</argLine>
           <systemPropertyVariables>
@@ -406,7 +400,6 @@ SPDX-License-Identifier: Apache-2.0
       </plugin>
       <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>${version.maven-surefire-plugin}</version>
         <configuration>
           <systemPropertyVariables>
             <native.image.path>${project.build.directory}/${project.build.finalName}-runner</native.image.path>
@@ -481,7 +474,7 @@ SPDX-License-Identifier: Apache-2.0
           <tagNameFormat>@{project.version}${tagSuffix}</tagNameFormat>
           <autoVersionSubmodules>true</autoVersionSubmodules>
           <useReleaseProfile>false</useReleaseProfile>
-          <releaseProfiles>release</releaseProfiles>
+          <releaseProfiles>central-release</releaseProfiles>
           <goals>deploy</goals>
         </configuration>
       </plugin>
@@ -532,19 +525,6 @@ SPDX-License-Identifier: Apache-2.0
       <build>
         <plugins>
           <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-source-plugin</artifactId>
-            <version>${version.maven-source-plugin}</version>
-            <executions>
-              <execution>
-                <id>attach-sources</id>
-                <goals>
-                  <goal>jar-no-fork</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok-maven-plugin</artifactId>
             <version>${version.lombok-maven-plugin}</version>
@@ -566,39 +546,6 @@ SPDX-License-Identifier: Apache-2.0
                   <goal>delombok</goal>
                 </goals>
                 <phase>generate-sources</phase>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>${version.maven-javadoc-plugin}</version>
-            <executions>
-              <execution>
-                <id>attach-javadocs</id>
-                <goals>
-                  <goal>jar</goal>
-                </goals>
-                <configuration>
-                  <detectOfflineLinks>false</detectOfflineLinks>
-                  <quiet>true</quiet>
-                  <doclint>none</doclint>
-                  <sourcepath>target/generated-sources/delombok</sourcepath>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>${version.maven-gpg-plugin}</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-                <phase>verify</phase>
               </execution>
             </executions>
           </plugin>
