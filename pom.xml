@@ -521,7 +521,10 @@ SPDX-License-Identifier: Apache-2.0
       </build>
     </profile>
     <profile>
-      <id>release</id>
+      <id>central-release</id>
+      <properties>
+        <delombok.output>${project.build.directory}/delombok</delombok.output>
+      </properties>
       <build>
         <plugins>
           <plugin>
@@ -548,6 +551,12 @@ SPDX-License-Identifier: Apache-2.0
                 <phase>generate-sources</phase>
               </execution>
             </executions>
+          </plugin>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <configuration>
+              <sourcepath>${delombok.output}</sourcepath>
+            </configuration>
           </plugin>
         </plugins>
       </build>
