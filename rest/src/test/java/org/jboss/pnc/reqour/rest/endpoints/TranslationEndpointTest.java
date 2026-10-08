@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.rest.endpoints;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jboss.pnc.reqour.rest.endpoints.TestConstants.TEST_USER;
 
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response.Status;
@@ -23,11 +24,13 @@ import org.mockito.Mockito;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 @QuarkusTest
 @TestHTTPEndpoint(TranslateEndpoint.class)
+@TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
 class TranslationEndpointTest {
 
     @InjectMock
