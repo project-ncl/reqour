@@ -21,7 +21,7 @@ public interface ReqourRestConfig {
 
     String reqourSecretKey();
 
-    String indyUrl();
+    String repositoryManagerUrl();
 
     String saslJaasConf();
 
