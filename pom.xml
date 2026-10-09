@@ -339,7 +339,6 @@ SPDX-License-Identifier: Apache-2.0
                 <excludes>
                   <exclude>**/README.md</exclude>
                   <exclude>LICENSE.txt</exclude>
-                  <exclude>eclipse-codeStyle.xml</exclude>
                   <exclude>**/Dockerfile</exclude>
                   <exclude>**/scripts/**</exclude>
                   <exclude>**/images/**</exclude>
@@ -435,6 +434,11 @@ SPDX-License-Identifier: Apache-2.0
         <artifactId>spotless-maven-plugin</artifactId>
         <version>${version.spotless-maven-plugin}</version>
         <configuration>
+          <pom>
+            <sortPom>
+              <expandEmptyElements>false</expandEmptyElements>
+            </sortPom>
+          </pom>
           <java>
             <removeUnusedImports/>
             <importOrder>
@@ -445,11 +449,6 @@ SPDX-License-Identifier: Apache-2.0
             </eclipse>
             <lineEndings>UNIX</lineEndings>
           </java>
-          <pom>
-            <sortPom>
-              <expandEmptyElements>false</expandEmptyElements>
-            </sortPom>
-          </pom>
         </configuration>
         <dependencies>
           <dependency>
