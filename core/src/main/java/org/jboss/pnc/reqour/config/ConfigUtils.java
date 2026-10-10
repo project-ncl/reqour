@@ -62,4 +62,12 @@ public class ConfigUtils {
     public Committer getCommitter() {
         return config.git().user();
     }
+
+    public String getCloneSourceHost() {
+        return config.git().cloneSource().host();
+    }
+
+    public Optional<String> getCloneSourceToken() {
+        return config.git().cloneSource().token().filter(t -> !t.isBlank());
+    }
 }
