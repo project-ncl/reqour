@@ -6,10 +6,13 @@ package org.jboss.pnc.reqour.common;
 
 import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,6 +23,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
@@ -124,7 +128,7 @@ public class GitCommands {
     }
 
     private void tryClone(
-            Function<String, List<String>> commandSupplier,
+            BiFunction<String, List<String>, List<String>> commandSupplier,
             ProcessContext.Builder processContextBuilder,
             String url,
             String errorMessage) {
@@ -132,7 +136,54 @@ public class GitCommands {
             errorMessage += " " + githubRepoCloningInfo(url);
         }
 
-        executeGitCommand(commandSupplier.apply(url), processContextBuilder, errorMessage);
+        Optional<String> cloneSourceToken = cloneSourceTokenFor(url);
+        if (cloneSourceToken.isEmpty()) {
+            executeGitCommand(commandSupplier.apply(url, List.of()), processContextBuilder, errorMessage);
+            return;
+        }
+
+        // Authenticate the source clone via a temporary credentials file, keeping the token out of logs
+        Path credentialsFile = writeCredentialsFile(url, cloneSourceToken.get());
+        try {
+            executeGitCommand(
+                    commandSupplier.apply(url, GitUtils.credentialStoreConfig(credentialsFile)),
+                    processContextBuilder,
+                    errorMessage);
+        } finally {
+            deleteCredentialsFile(credentialsFile);
+        }
+    }
+
+    /**
+     * Token to use for the given clone url, present only when the url host matches the configured clone-source host.
+     */
+    private Optional<String> cloneSourceTokenFor(String url) {
+        var parsedUrl = URLUtils.parseURL(url);
+        if (parsedUrl == null || !configUtils.getCloneSourceHost().equals(parsedUrl.getHost())) {
+            return Optional.empty();
+        }
+        return configUtils.getCloneSourceToken();
+    }
+
+    private Path writeCredentialsFile(String url, String token) {
+        var parsedUrl = URLUtils.parseURL(url);
+        String entry = String.format("%s://oauth2:%s@%s", parsedUrl.getProtocol(), token, parsedUrl.getHost());
+        try {
+            Path credentialsFile = Files.createTempFile("reqour-git-creds-", null);
+            Files.setPosixFilePermissions(credentialsFile, PosixFilePermissions.fromString("rw-------"));
+            Files.writeString(credentialsFile, entry + System.lineSeparator());
+            return credentialsFile;
+        } catch (IOException e) {
+            throw new GitException("Cannot create git credentials file for the source clone");
+        }
+    }
+
+    private void deleteCredentialsFile(Path credentialsFile) {
+        try {
+            Files.deleteIfExists(credentialsFile);
+        } catch (IOException e) {
+            log.warn("Could not delete temporary git credentials file");
+        }
     }
 
     public void commit(String commitMessage, ProcessContext.Builder processContextBuilder) {
