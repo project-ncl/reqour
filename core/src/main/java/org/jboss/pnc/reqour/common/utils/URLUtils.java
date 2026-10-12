@@ -35,6 +35,90 @@ public class URLUtils {
                         .build());
     }
 
+    /**
+     * Inject {@code username:token@} userinfo into an http(s) URL so git clones with those credentials
+     * ({@code https://username:token@host/path}). Returns the URL unchanged for non-http(s) URLs (e.g.
+     * scp-like or git+ssh, where token-in-URL does not apply) or when the token is missing. Any existing
+     * userinfo is replaced. {@code username} defaults to {@code oauth2} when blank.
+     */
+    public static String addCredentialsToUrl(String url, String username, String token) {
+        if (url == null || token == null || token.isBlank()) {
+            return url;
+        }
+        if (!(url.startsWith("https://") || url.startsWith("http://"))) {
+            return url;
+        }
+        int schemeEnd = url.indexOf("://") + 3;
+        String protocolPart = url.substring(0, schemeEnd);
+        String rest = url.substring(schemeEnd);
+        // drop any existing "userinfo@" to avoid duplication
+        int at = rest.indexOf('@');
+        int firstSlash = rest.indexOf('/');
+        if (at >= 0 && (firstSlash < 0 || at < firstSlash)) {
+            rest = rest.substring(at + 1);
+        }
+        String user = (username == null || username.isBlank()) ? "oauth2" : username;
+        return protocolPart + user + ":" + token + "@" + rest;
+    }
+
+    /**
+     * Mask credentials embedded in a URL (or a string containing one) for safe logging:
+     * {@code https://user:token@host/...} becomes {@code https://***@host/...}. Returns the input
+     * unchanged when there is no embedded userinfo.
+     */
+    public static String maskCredentials(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceAll("://[^/@\\s]+@", "://***@");
+    }
+
+    /**
+     * Normalize a git URL to a lower-cased {@code host/path} (no scheme, userinfo, port, {@code .git}
+     * suffix or trailing slash), so host+group prefixes can be compared regardless of URL form (https,
+     * git+ssh, or scp-like {@code git@host:group/repo.git}).
+     */
+    public static String normalizeHostAndPath(String url) {
+        if (url == null || url.isBlank()) {
+            return "";
+        }
+        String s = url.trim();
+        // strip scheme, or the scp-like "git@" user prefix
+        if (s.startsWith("git@")) {
+            s = s.substring("git@".length());
+        } else {
+            int scheme = s.indexOf("://");
+            if (scheme >= 0) {
+                s = s.substring(scheme + 3);
+            }
+        }
+        // strip any remaining userinfo "user@host..."
+        int at = s.indexOf('@');
+        int firstSlash = s.indexOf('/');
+        if (at >= 0 && (firstSlash < 0 || at < firstSlash)) {
+            s = s.substring(at + 1);
+        }
+        // host/path separator: scp-like "host:group/..." -> "host/group/..."; "host:port" -> "host"
+        int colon = s.indexOf(':');
+        int slash = s.indexOf('/');
+        if (colon >= 0 && (slash < 0 || colon < slash)) {
+            String afterColon = (slash < 0) ? s.substring(colon + 1) : s.substring(colon + 1, slash);
+            if (!afterColon.isEmpty() && afterColon.chars().allMatch(Character::isDigit)) {
+                s = s.substring(0, colon) + (slash < 0 ? "" : s.substring(slash));
+            } else {
+                s = s.substring(0, colon) + "/" + s.substring(colon + 1);
+            }
+        }
+        s = stripTrailing(s, "/");
+        s = stripTrailing(s, ".git");
+        s = stripTrailing(s, "/");
+        return s.toLowerCase();
+    }
+
+    private static String stripTrailing(String s, String suffix) {
+        return s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s;
+    }
+
     private static boolean isNonScpLike(String url) {
         return Patterns.NonScpLike.PATTERN.matcher(url).matches();
     }

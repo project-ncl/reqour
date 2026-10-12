@@ -16,6 +16,7 @@ import jakarta.inject.Inject;
 
 import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.slf4j.Logger;
@@ -104,7 +105,8 @@ public class ProcessExecutorImpl implements ProcessExecutor {
         if (extraEnvVariables != null && !extraEnvVariables.isEmpty()) {
             extraEnvVariables.forEach((k, v) -> IOUtils.quoteIfNeeded(result.append(k).append("="), v).append(' '));
         }
-        command.forEach(arg -> IOUtils.quoteIfNeeded(result, arg).append(' '));
+        // mask any credentials embedded in a command argument (e.g. https://user:token@host) before logging
+        command.forEach(arg -> IOUtils.quoteIfNeeded(result, URLUtils.maskCredentials(arg)).append(' '));
         final int newLen = result.length() - 1;
         if (newLen >= 0 && result.charAt(newLen) == ' ') {
             result.setLength(newLen);

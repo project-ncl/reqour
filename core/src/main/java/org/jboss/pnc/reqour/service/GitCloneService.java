@@ -53,10 +53,14 @@ public class GitCloneService implements CloneService {
         boolean isInternalRepoNew = isInternalRepoNew(adjustedUrl);
         log.debug("Internal repository with adjusted URL '{}' is considered new: {}", adjustedUrl, isInternalRepoNew);
 
+        // Apply per-origin credentials if the origin falls under a configured protected source provider;
+        // otherwise clone the origin exactly as before.
+        String originRepoUrl = withProtectedSourceCredentials(cloneRequest.getOriginRepoUrl());
+
         if (cloneRequest.getRef() == null || isInternalRepoNew) {
-            cloneEverything(cloneRequest, cloneDir);
+            cloneEverything(cloneRequest, originRepoUrl, cloneDir);
         } else {
-            cloneRefOnly(cloneRequest, cloneDir);
+            cloneRefOnly(cloneRequest, originRepoUrl, cloneDir);
         }
 
         try {
@@ -72,7 +76,23 @@ public class GitCloneService implements CloneService {
                 .build();
     }
 
-    private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {
+    /**
+     * If the origin URL falls under a configured protected source-code git provider, return the URL with
+     * that provider's credentials injected (so the clone authenticates); otherwise return it unchanged.
+     * The returned URL may contain a token and must never be logged directly (command logging masks it).
+     */
+    private String withProtectedSourceCredentials(String originUrl) {
+        return configUtils.findProtectedSourceCodeGitProvider(originUrl)
+                .map(provider -> {
+                    log.info(
+                            "Using protected source-code provider credentials for origin matching '{}'",
+                            provider.urlPrefix());
+                    return URLUtils.addCredentialsToUrl(originUrl, provider.username(), provider.token());
+                })
+                .orElse(originUrl);
+    }
+
+    private void cloneEverything(RepositoryCloneRequest request, String originRepoUrl, Path cloneDir) {
         log.info("Syncing everything");
 
         ProcessContext.Builder processContextBuilder = ProcessContext
@@ -81,7 +101,7 @@ public class GitCloneService implements CloneService {
         String targetRemote = "target";
 
         // From: https://stackoverflow.com/a/7216269/2907906
-        gitCommands.cloneMirror(request.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.cloneMirror(originRepoUrl, processContextBuilder);
         gitCommands.disableBareRepository(processContextBuilder);
         gitCommands.resetHard(processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
@@ -90,7 +110,7 @@ public class GitCloneService implements CloneService {
         gitCommands.pushAllTags(targetRemote, processContextBuilder);
     }
 
-    private void cloneRefOnly(RepositoryCloneRequest request, Path cloneDir) {
+    private void cloneRefOnly(RepositoryCloneRequest request, String originRepoUrl, Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
         ProcessContext.Builder processContextBuilder = ProcessContext
@@ -98,7 +118,7 @@ public class GitCloneService implements CloneService {
 
         String targetRemote = "target";
 
-        gitCommands.clone(request.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.clone(originRepoUrl, processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.checkout(request.getRef(), true, processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);

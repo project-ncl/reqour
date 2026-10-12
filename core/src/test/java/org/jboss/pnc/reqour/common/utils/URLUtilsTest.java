@@ -25,4 +25,47 @@ class URLUtilsTest {
 
         assertThat(adjustedUrl).isEqualTo("https://user@github.com/foo/bar.git");
     }
+
+    @Test
+    void addCredentialsToUrl_https_injectsUserAndToken() {
+        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/lw-builds/foo.git", "oauth2", "tok"))
+                .isEqualTo("https://oauth2:tok@gitlab.com/lw/lw-builds/foo.git");
+    }
+
+    @Test
+    void addCredentialsToUrl_blankUsername_defaultsToOauth2() {
+        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/foo.git", "  ", "tok"))
+                .isEqualTo("https://oauth2:tok@gitlab.com/lw/foo.git");
+    }
+
+    @Test
+    void addCredentialsToUrl_replacesExistingUserinfo() {
+        assertThat(URLUtils.addCredentialsToUrl("https://old@gitlab.com/lw/foo.git", "bot", "tok"))
+                .isEqualTo("https://bot:tok@gitlab.com/lw/foo.git");
+    }
+
+    @Test
+    void addCredentialsToUrl_nonHttpOrMissingToken_returnsUnchanged() {
+        assertThat(URLUtils.addCredentialsToUrl("git@gitlab.com:lw/foo.git", "bot", "tok"))
+                .isEqualTo("git@gitlab.com:lw/foo.git");
+        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/foo.git", "bot", null))
+                .isEqualTo("https://gitlab.com/lw/foo.git");
+    }
+
+    @Test
+    void normalizeHostAndPath_variousForms_normalizeToHostSlashPath() {
+        String expected = "gitlab.com/lw/lw-builds/foo";
+        assertThat(URLUtils.normalizeHostAndPath("https://gitlab.com/lw/lw-builds/foo.git")).isEqualTo(expected);
+        assertThat(URLUtils.normalizeHostAndPath("git+ssh://git@gitlab.com/lw/lw-builds/foo.git")).isEqualTo(expected);
+        assertThat(URLUtils.normalizeHostAndPath("git@gitlab.com:lw/lw-builds/foo.git")).isEqualTo(expected);
+        assertThat(URLUtils.normalizeHostAndPath("https://gitlab.com:443/lw/lw-builds/foo/")).isEqualTo(expected);
+    }
+
+    @Test
+    void maskCredentials_hidesUserinfo() {
+        assertThat(URLUtils.maskCredentials("git clone https://oauth2:secret@gitlab.com/lw/foo.git ."))
+                .isEqualTo("git clone https://***@gitlab.com/lw/foo.git .");
+        assertThat(URLUtils.maskCredentials("https://gitlab.com/lw/foo.git"))
+                .isEqualTo("https://gitlab.com/lw/foo.git");
+    }
 }

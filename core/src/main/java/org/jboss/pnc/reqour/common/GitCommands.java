@@ -20,6 +20,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
+import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
@@ -112,7 +113,7 @@ public class GitCommands {
                 GitUtils::clone,
                 processContextBuilder,
                 url,
-                String.format("Failed to clone repository from '%s'.", url));
+                String.format("Failed to clone repository from '%s'.", URLUtils.maskCredentials(url)));
     }
 
     public void cloneMirror(String url, ProcessContext.Builder processContextBuilder) {
@@ -120,7 +121,7 @@ public class GitCommands {
                 GitUtils::cloneMirror,
                 processContextBuilder,
                 url,
-                String.format("Cannot mirror-clone the repository from '%s'.", url));
+                String.format("Cannot mirror-clone the repository from '%s'.", URLUtils.maskCredentials(url)));
     }
 
     private void tryClone(
@@ -385,12 +386,12 @@ public class GitCommands {
             return String.format(
                     "If the Github repository is a private repository, you need to add a Github user "
                             + "with read-permissions to '%s'. Please email the Newcastle mailing list for more information.",
-                    url);
+                    URLUtils.maskCredentials(url));
         }
 
         return String.format(
                 "If the Github repository is a private repository, you need to add the Github user '%s' with read-permissions to '%s'.",
                 configUtils.getPrivateGithubUser().get(),
-                url);
+                URLUtils.maskCredentials(url));
     }
 }

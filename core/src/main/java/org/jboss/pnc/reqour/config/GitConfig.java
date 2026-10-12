@@ -17,6 +17,13 @@ public interface GitConfig {
 
     GitProvidersConfig gitProviders();
 
+    /**
+     * Credentials for cloning from protected (private) source-code providers, keyed by host+group
+     * prefix. Used only for the origin clone when a match is found; unrelated to {@link #gitProviders()}
+     * (the push destination). Absent/empty = previous behavior for all origins.
+     */
+    Optional<List<ProtectedSourceCodeGitProviderConfig>> protectedSourceCodeGitProviders();
+
     Set<String> acceptableSchemes();
 
     Optional<String> privateGithubUser();
