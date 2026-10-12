@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_REST_HEADERS;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
@@ -73,9 +74,13 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                TestDataFactory.userLogger);
-        List<String> expectedOverrides = List
-                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
+                TestDataFactory.userLogger,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=PERSISTENT",
+                "-DversionIncrementalSuffix=pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -91,11 +96,13 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -111,9 +118,13 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                TestDataFactory.userLogger);
-        List<String> expectedOverrides = List
-                .of("-DrestMode=TEST", "-DversionIncrementalSuffix=test-pnc", "-DrestBrewPullActive=true");
+                TestDataFactory.userLogger,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=TEST",
+                "-DversionIncrementalSuffix=test-pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -129,11 +140,13 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -176,7 +189,8 @@ class SbtProviderTest {
                 workdir,
                 null,
                 null,
-                TestDataFactory.userLogger);
+                TestDataFactory.userLogger,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
         Map<String, String> envs = provider.prepareExtraEnvs();
@@ -191,6 +205,7 @@ class SbtProviderTest {
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1),
                         MapEntry.entry("additionalAlignmentParam", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST_TEMPORARY_PREFER_PERSISTENT"));
@@ -199,6 +214,10 @@ class SbtProviderTest {
                 "versionIncrementalSuffix",
                 List.of("test-temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "restHeaders",
+                List.of(TEST_REST_HEADERS));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "additionalAlignmentParam",

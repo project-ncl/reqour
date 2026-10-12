@@ -11,6 +11,7 @@ import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHa
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.MANIPULATOR_DISABLED_REQUEST;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.STANDARD_BUILD_CATEGORY;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_REST_HEADERS;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 
 import java.io.IOException;
@@ -102,9 +103,13 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
-        List<String> expectedOverrides = List
-                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
+                scriptPrefetcher,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=PERSISTENT",
+                "-DversionIncrementalSuffix=pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -123,11 +128,13 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -146,12 +153,13 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
-        List<String> expectedOverrides = List
-                .of(
-                        "-DrestMode=TEST",
-                        "-DversionIncrementalSuffix=test-pnc",
-                        "-DrestBrewPullActive=true");
+                scriptPrefetcher,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=TEST",
+                "-DversionIncrementalSuffix=test-pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -170,11 +178,13 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -193,7 +203,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -214,6 +225,7 @@ public class MvnProviderTest {
                         MapEntry.entry("versionIncrementalSuffix", 1),
                         MapEntry.entry("versionSuffixAlternatives", 1),
                         MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1),
                         MapEntry.entry("additionalAlignmentParam", 2)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "configAlignmentParam", List.of("foo"));
@@ -228,6 +240,10 @@ public class MvnProviderTest {
                 "versionSuffixAlternatives",
                 List.of("pnc,test-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "restHeaders",
+                List.of(TEST_REST_HEADERS));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
                 "additionalAlignmentParam",
@@ -272,7 +288,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -295,7 +312,8 @@ public class MvnProviderTest {
                         MapEntry.entry("restURL", 2),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 2),
-                        MapEntry.entry("restBrewPullActive", 1)));
+                        MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "Repour_Java", List.of("17"));
         assertSystemPropertyHasValuesSortedByPriority(command, "defaultAlignmentParam", List.of("foo"));
         assertSystemPropertyHasValuesSortedByPriority(
@@ -315,6 +333,10 @@ public class MvnProviderTest {
                 "versionIncrementalSuffix",
                 List.of("user", "temporary-pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "restHeaders",
+                List.of(TEST_REST_HEADERS));
     }
 
     @Test
@@ -356,7 +378,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -376,7 +399,8 @@ public class MvnProviderTest {
                         MapEntry.entry("restURL", 1),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 1),
-                        MapEntry.entry("restBrewPullActive", 1)));
+                        MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "configAlignmentParam", List.of("foo"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restURL", List.of("https://da.com/rest/v-1"));
@@ -386,6 +410,10 @@ public class MvnProviderTest {
                 "versionIncrementalSuffix",
                 List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(
+                command,
+                "restHeaders",
+                List.of(TEST_REST_HEADERS));
 
         Files.deleteIfExists(workdir.resolve(Path.of("directory/pom.xml"))); // pom file checked for existence
         Files.deleteIfExists(workdir.resolve("directory")); // pom file checked for existence
@@ -425,7 +453,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -462,7 +491,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0.rebuild-00042")
@@ -513,7 +543,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0.rebuild-00042")
@@ -549,7 +580,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 rootGavExtractor,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion("1.0.0")
@@ -600,7 +632,8 @@ public class MvnProviderTest {
                 resultExtractor,
                 rootGavExtractor,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:foo")
                 .executionRootVersion(overriddenVersion)
@@ -626,7 +659,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         assertThatThrownBy(() -> provider.adjust(adjustRequest)).isInstanceOf(AdjusterException.class)
                 .hasMessage("Manipulator subprocess ended with non-zero exit code");
@@ -644,7 +678,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         // PME enabled + standard build category => not allowed
         assertThat(provider.noAlignmentChangesAllowed()).isFalse();
@@ -662,7 +697,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         // PME disabled + default build category => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();
@@ -680,7 +716,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         // PME enabled + LW UPSTREAM => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();
@@ -709,7 +746,8 @@ public class MvnProviderTest {
                 null,
                 null,
                 TestDataFactory.userLogger,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         // PME disabled + LW UPSTREAM => allowed
         assertThat(provider.noAlignmentChangesAllowed()).isTrue();

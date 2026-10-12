@@ -10,9 +10,10 @@ import java.util.Map;
 
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
-import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
+import org.jboss.pnc.reqour.adjust.config.ManipulatorAuthConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
+import org.jboss.pnc.reqour.adjust.utils.AuthUtils;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.config.EnvironmentConfig;
 import org.jboss.pnc.reqour.model.ProcessContext;
@@ -33,17 +34,21 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
     protected final ProcessExecutor processExecutor;
     protected final EnvironmentConfig envConfig;
     protected final Logger userLogger;
+    protected final String restHeaders;
     private List<String> preparedCommand;
 
     public AbstractAdjustProvider(
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
             EnvironmentConfig envConfig,
-            Logger userLogger) {
+            Logger userLogger,
+            ManipulatorAuthConfig manipulatorAuthConfig) {
         this.objectMapper = objectMapper;
         this.processExecutor = processExecutor;
         this.envConfig = envConfig;
         this.userLogger = userLogger;
+        this.restHeaders = AuthUtils
+                .createBasicAuthRestHeaders(manipulatorAuthConfig.username(), manipulatorAuthConfig.password());
     }
 
     @Override

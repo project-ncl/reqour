@@ -3,6 +3,9 @@ reqour:
     alignment:
       validate: true
       request: ${ADJUST_REQUEST}
+    manipulator-auth:
+      username: ${PNC_MANIPULATOR_USERNAME}
+      password: ${PNC_MANIPULATOR_PASSWORD}
     maven-executable: mvn
     mdc: ${MDC}
     log:
