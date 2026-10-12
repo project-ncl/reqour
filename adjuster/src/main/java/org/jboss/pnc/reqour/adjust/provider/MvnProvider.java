@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_HEADERS;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_SUFFIX_ALTERNATIVES;
@@ -24,6 +25,7 @@ import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.mavenmanipulator.common.json.GAV;
 import org.jboss.pnc.mavenmanipulator.common.json.PME;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
+import org.jboss.pnc.reqour.adjust.config.ManipulatorAuthConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
@@ -66,8 +68,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             CommonManipulatorResultExtractor adjustResultExtractor,
             RootGavExtractor rootGavExtractor,
             Logger userLogger,
-            ScriptPrefetcher scriptPrefetcher) {
-        super(objectMapper, processExecutor, envConfig, userLogger);
+            ScriptPrefetcher scriptPrefetcher,
+            ManipulatorAuthConfig manipulatorAuthConfig) {
+        super(objectMapper, processExecutor, envConfig, userLogger, manipulatorAuthConfig);
         this.adjustResultExtractor = adjustResultExtractor;
         this.rootGavExtractor = rootGavExtractor;
 
@@ -178,6 +181,9 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
+
+        alignmentParameters
+                .add(AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_HEADERS, restHeaders));
 
         return alignmentParameters;
     }

@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.adjust.provider;
 
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_HEADERS;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 
@@ -21,6 +22,7 @@ import org.jboss.pnc.api.reqour.dto.VersioningState;
 import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.npmmanipulator.impl.NpmResult;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
+import org.jboss.pnc.reqour.adjust.config.ManipulatorAuthConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.NpmManipulatorConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
@@ -52,8 +54,9 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
-            Logger userLogger) {
-        super(objectMapper, processExecutor, envConfig, userLogger);
+            Logger userLogger,
+            ManipulatorAuthConfig manipulatorAuthConfig) {
+        super(objectMapper, processExecutor, envConfig, userLogger, manipulatorAuthConfig);
 
         NpmProviderConfig npmProviderConfig = alignmentConfig.npmProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -157,6 +160,9 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
                 AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(
                         VERSION_INCREMENTAL_SUFFIX,
                         config.getVersionIncrementalSuffix()));
+
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_HEADERS, restHeaders));
 
         return alignmentParameters;
     }

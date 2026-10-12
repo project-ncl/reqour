@@ -92,6 +92,9 @@ reqour:
             permanent: not-used
             temporary: not-used
 
+    manipulator-auth:
+      username: testuser
+      password: testpassword
     maven-executable: './mvnw'
     mdc: '{}'
 

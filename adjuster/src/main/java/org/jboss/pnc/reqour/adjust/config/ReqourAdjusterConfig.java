@@ -17,6 +17,8 @@ public interface ReqourAdjusterConfig {
 
     AlignmentConfig alignment();
 
+    ManipulatorAuthConfig manipulatorAuth();
+
     String mavenExecutable();
 
     @WithName("mdc")

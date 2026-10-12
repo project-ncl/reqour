@@ -73,7 +73,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     adjustResultExtractor,
                     rootGavExtractor,
                     userLogger,
-                    scriptPrefetcher);
+                    scriptPrefetcher,
+                    config.manipulatorAuth());
             case GRADLE -> new GradleProvider(
                     config.alignment(),
                     coreConfig.envs(),
@@ -84,7 +85,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     adjustResultExtractor,
                     userLogger,
                     gradleCommands,
-                    scriptPrefetcher);
+                    scriptPrefetcher,
+                    config.manipulatorAuth());
             case NPM ->
                 new NpmProvider(
                         config.alignment(),
@@ -93,7 +95,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                         workdir,
                         objectMapper,
                         processExecutor,
-                        userLogger);
+                        userLogger,
+                        config.manipulatorAuth());
             case SBT ->
                 new SbtProvider(
                         config.alignment(),
@@ -102,7 +105,8 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                         workdir,
                         objectMapper,
                         processExecutor,
-                        userLogger);
+                        userLogger,
+                        config.manipulatorAuth());
             case RPM -> throw new AdjusterException("Alignment for RPM builds is not supported yet");
         };
     }
