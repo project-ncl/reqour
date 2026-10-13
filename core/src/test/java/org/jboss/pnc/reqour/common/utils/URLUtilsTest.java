@@ -62,6 +62,19 @@ class URLUtilsTest {
     }
 
     @Test
+    void convertToHttps_scpAndSshForms_becomeHttps() {
+        assertThat(URLUtils.convertToHttps("git@gitlab.com:lw/lw-builds/repo.git"))
+                .isEqualTo("https://gitlab.com/lw/lw-builds/repo.git");
+        assertThat(URLUtils.convertToHttps("git+ssh://git@gitlab.com/lw/lw-builds/repo.git"))
+                .isEqualTo("https://gitlab.com/lw/lw-builds/repo.git");
+        assertThat(URLUtils.convertToHttps("ssh://git@gitlab.com/lw/repo.git"))
+                .isEqualTo("https://gitlab.com/lw/repo.git");
+        // already https / http -> unchanged
+        assertThat(URLUtils.convertToHttps("https://gitlab.com/lw/repo.git"))
+                .isEqualTo("https://gitlab.com/lw/repo.git");
+    }
+
+    @Test
     void maskCredentials_hidesUserinfo() {
         assertThat(URLUtils.maskCredentials("git clone https://oauth2:secret@gitlab.com/lw/foo.git ."))
                 .isEqualTo("git clone https://***@gitlab.com/lw/foo.git .");

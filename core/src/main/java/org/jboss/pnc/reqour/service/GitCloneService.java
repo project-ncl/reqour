@@ -56,26 +56,15 @@ public class GitCloneService implements CloneService {
         boolean isInternalRepoNew = isInternalRepoNew(adjustedUrl);
         log.debug("Internal repository with adjusted URL '{}' is considered new: {}", adjustedUrl, isInternalRepoNew);
 
-        // If the origin falls under a configured protected source provider, inject that provider's
-        // credentials and route the clone through the dedicated source-clone proxy (if configured).
-        // Otherwise clone the origin exactly as before.
-        String rawOrigin = cloneRequest.getOriginRepoUrl();
-        Optional<ProtectedSourceCodeGitProviderConfig> protectedProvider = configUtils
-                .findProtectedSourceCodeGitProvider(rawOrigin);
-        String originRepoUrl = protectedProvider.map(provider -> {
-            log.info(
-                    "Using protected source-code provider credentials for origin matching '{}'",
-                    provider.urlPrefix());
-            return URLUtils.addCredentialsToUrl(rawOrigin, provider.username(), provider.token());
-        }).orElse(rawOrigin);
-        // Proxy applies ONLY to protected (external) origins, and only to the clone command below — so the
+        // Resolve the origin for protected external providers (scp->https + token + proxy); otherwise
+        // it is cloned exactly as before. The proxy applies only to the clone commands below, so the
         // subsequent push to the internal target repository is never sent through the external proxy.
-        List<String> cloneGitConfig = protectedProvider.isPresent() ? sourceCloneProxyGitConfig() : List.of();
+        ResolvedOrigin origin = resolveProtectedOrigin(cloneRequest.getOriginRepoUrl());
 
         if (cloneRequest.getRef() == null || isInternalRepoNew) {
-            cloneEverything(cloneRequest, originRepoUrl, cloneGitConfig, cloneDir);
+            cloneEverything(cloneRequest, origin.url(), origin.gitConfig(), cloneDir);
         } else {
-            cloneRefOnly(cloneRequest, originRepoUrl, cloneGitConfig, cloneDir);
+            cloneRefOnly(cloneRequest, origin.url(), origin.gitConfig(), cloneDir);
         }
 
         try {
@@ -89,6 +78,33 @@ public class GitCloneService implements CloneService {
                 .targetRepoUrl(cloneRequest.getTargetRepoUrl())
                 .callback(ReqourCallback.builder().id(cloneRequest.getTaskId()).status(ResultStatus.SUCCESS).build())
                 .build();
+    }
+
+    /** A resolved origin to clone: the (possibly rewritten/credentialed) URL and per-clone git config options. */
+    public record ResolvedOrigin(String url, List<String> gitConfig) {
+    }
+
+    /**
+     * Resolve how to clone an origin. When the origin falls under a configured protected source provider,
+     * the scp/ssh URL is converted to HTTPS, the provider's credentials are injected, and the dedicated
+     * source-clone proxy (if configured) is returned as per-clone git config. Otherwise the origin is
+     * returned unchanged with no extra config (previous behavior). Shared by the SCM-creation clone and
+     * the build-time adjuster clone. The returned URL may contain a token and must never be logged
+     * directly (command logging masks credentials).
+     */
+    public ResolvedOrigin resolveProtectedOrigin(String originUrl) {
+        Optional<ProtectedSourceCodeGitProviderConfig> provider = configUtils
+                .findProtectedSourceCodeGitProvider(originUrl);
+        if (provider.isEmpty()) {
+            return new ResolvedOrigin(originUrl, List.of());
+        }
+        log.info(
+                "Using protected source-code provider credentials for origin matching '{}'",
+                provider.get().urlPrefix());
+        String httpsUrl = URLUtils.convertToHttps(originUrl);
+        String withCredentials = URLUtils
+                .addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
+        return new ResolvedOrigin(withCredentials, sourceCloneProxyGitConfig());
     }
 
     /**

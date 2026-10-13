@@ -62,6 +62,50 @@ public class URLUtils {
     }
 
     /**
+     * Convert an SSH/scp-style git URL to its HTTPS equivalent, so it can be cloned over HTTPS (with a
+     * token and/or through an HTTP proxy). Handles scp-like {@code git@host:group/repo.git},
+     * {@code git+ssh://git@host/group/repo.git} and {@code ssh://git@host/...}. {@code http(s)://} URLs
+     * (and anything not recognized as ssh/scp) are returned unchanged.
+     * <p>
+     * Example: {@code git@gitlab.com:lw/lw-builds/repo.git} →
+     * {@code https://gitlab.com/lw/lw-builds/repo.git}.
+     */
+    public static String convertToHttps(String url) {
+        if (url == null || url.isBlank()) {
+            return url;
+        }
+        String s = url.trim();
+        if (s.startsWith("https://") || s.startsWith("http://")) {
+            return s;
+        }
+        // strip ssh schemes if present
+        if (s.startsWith("git+ssh://")) {
+            s = s.substring("git+ssh://".length());
+        } else if (s.startsWith("ssh://")) {
+            s = s.substring("ssh://".length());
+        } else if (!s.startsWith("git@") && !s.contains("@") && !s.contains(":")) {
+            // not recognizably an ssh/scp URL -> leave as is
+            return url;
+        }
+        // strip userinfo "user@"
+        int at = s.indexOf('@');
+        int firstSlash = s.indexOf('/');
+        if (at >= 0 && (firstSlash < 0 || at < firstSlash)) {
+            s = s.substring(at + 1);
+        }
+        // scp-like "host:group/..." -> "host/group/..."; leave a numeric "host:port" as is
+        int colon = s.indexOf(':');
+        int slash = s.indexOf('/');
+        if (colon >= 0 && (slash < 0 || colon < slash)) {
+            String afterColon = (slash < 0) ? s.substring(colon + 1) : s.substring(colon + 1, slash);
+            if (afterColon.isEmpty() || !afterColon.chars().allMatch(Character::isDigit)) {
+                s = s.substring(0, colon) + "/" + s.substring(colon + 1);
+            }
+        }
+        return "https://" + s;
+    }
+
+    /**
      * Mask credentials embedded in a URL (or a string containing one) for safe logging:
      * {@code https://user:token@host/...} becomes {@code https://***@host/...}. Returns the input
      * unchanged when there is no embedded userinfo.
