@@ -9,7 +9,7 @@ import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -109,23 +109,31 @@ public class GitCommands {
     }
 
     public void clone(String url, ProcessContext.Builder processContextBuilder) {
+        clone(url, List.of(), processContextBuilder);
+    }
+
+    public void clone(String url, List<String> gitConfigOptions, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                GitUtils::clone,
+                () -> GitUtils.clone(url, gitConfigOptions),
                 processContextBuilder,
                 url,
                 String.format("Failed to clone repository from '%s'.", URLUtils.maskCredentials(url)));
     }
 
     public void cloneMirror(String url, ProcessContext.Builder processContextBuilder) {
+        cloneMirror(url, List.of(), processContextBuilder);
+    }
+
+    public void cloneMirror(String url, List<String> gitConfigOptions, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                GitUtils::cloneMirror,
+                () -> GitUtils.cloneMirror(url, gitConfigOptions),
                 processContextBuilder,
                 url,
                 String.format("Cannot mirror-clone the repository from '%s'.", URLUtils.maskCredentials(url)));
     }
 
     private void tryClone(
-            Function<String, List<String>> commandSupplier,
+            Supplier<List<String>> commandSupplier,
             ProcessContext.Builder processContextBuilder,
             String url,
             String errorMessage) {
@@ -133,7 +141,7 @@ public class GitCommands {
             errorMessage += " " + githubRepoCloningInfo(url);
         }
 
-        executeGitCommand(commandSupplier.apply(url), processContextBuilder, errorMessage);
+        executeGitCommand(commandSupplier.get(), processContextBuilder, errorMessage);
     }
 
     public void commit(String commitMessage, ProcessContext.Builder processContextBuilder) {

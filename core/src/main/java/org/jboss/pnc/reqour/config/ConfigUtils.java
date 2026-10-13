@@ -86,4 +86,9 @@ public class ConfigUtils {
                 })
                 .findFirst();
     }
+
+    /** The configured dedicated proxy for cloning protected external source providers, if any. */
+    public Optional<SourceCloneProxyConfig> getSourceCloneProxy() {
+        return config.git().sourceCloneProxy();
+    }
 }

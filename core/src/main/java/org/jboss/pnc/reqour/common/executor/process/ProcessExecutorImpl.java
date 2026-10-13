@@ -103,7 +103,9 @@ public class ProcessExecutorImpl implements ProcessExecutor {
             IOUtils.quoteIfNeeded(result.append("cd "), workingDirectory.toString()).append(" && ");
         }
         if (extraEnvVariables != null && !extraEnvVariables.isEmpty()) {
-            extraEnvVariables.forEach((k, v) -> IOUtils.quoteIfNeeded(result.append(k).append("="), v).append(' '));
+            extraEnvVariables.forEach(
+                    (k, v) -> IOUtils.quoteIfNeeded(result.append(k).append("="), URLUtils.maskCredentials(v))
+                            .append(' '));
         }
         // mask any credentials embedded in a command argument (e.g. https://user:token@host) before logging
         command.forEach(arg -> IOUtils.quoteIfNeeded(result, URLUtils.maskCredentials(arg)).append(' '));

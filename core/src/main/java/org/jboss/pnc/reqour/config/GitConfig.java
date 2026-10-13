@@ -24,6 +24,12 @@ public interface GitConfig {
      */
     Optional<List<ProtectedSourceCodeGitProviderConfig>> protectedSourceCodeGitProviders();
 
+    /**
+     * Optional forward proxy used only when cloning the origin of a matched protected source provider
+     * (e.g. a firewalled env that can reach GitLab only via an authenticated proxy). Absent = no proxy.
+     */
+    Optional<SourceCloneProxyConfig> sourceCloneProxy();
+
     Set<String> acceptableSchemes();
 
     Optional<String> privateGithubUser();
