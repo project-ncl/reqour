@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.common.utils;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,8 +51,11 @@ public class GitUtils {
         return command;
     }
 
-    public static List<String> clone(String url) {
-        return List.of("git", "clone", url, ".");
+    public static List<String> clone(String url, List<String> configOptions) {
+        List<String> command = new ArrayList<>(List.of("git"));
+        command.addAll(configOptions);
+        command.addAll(List.of("clone", url, "."));
+        return command;
     }
 
     /**
@@ -62,8 +66,19 @@ public class GitUtils {
      * @param url git url to clone to
      * @return
      */
-    public static List<String> cloneMirror(String url) {
-        return List.of("git", "clone", "--mirror", url, "./.git");
+    public static List<String> cloneMirror(String url, List<String> configOptions) {
+        List<String> command = new ArrayList<>(List.of("git"));
+        command.addAll(configOptions);
+        command.addAll(List.of("clone", "--mirror", url, "./.git"));
+        return command;
+    }
+
+    /**
+     * Git {@code -c} options making the clone authenticate via the given credentials file. Resets inherited helpers
+     * first, so only this file is used, and keeps the token off the command line (only the path is referenced).
+     */
+    public static List<String> credentialStoreConfig(Path credentialsFile) {
+        return List.of("-c", "credential.helper=", "-c", "credential.helper=store --file=" + credentialsFile);
     }
 
     public static List<String> commit(String commitMessage) {
