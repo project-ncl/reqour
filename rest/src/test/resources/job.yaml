@@ -26,8 +26,8 @@ spec:
               value: '%{reqourSecretKey}'
             - name: APP_ENV
               value: '%{appEnvironment}'
-            - name: INDY_URL
-              value: '%{indyUrl}'
+            - name: REPOSITORY_MGR_URL
+              value: '%{repositoryManagerUrl}'
             - name: BIFROST_URL
               value: '%{bifrostUrl}'
             - name: BUILD_TYPE

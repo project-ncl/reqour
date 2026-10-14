@@ -98,8 +98,8 @@ class JobDefinitionCreatorTest {
         assertThat(envVars.get(2).getName()).isEqualTo("APP_ENV");
         assertThat(envVars.get(2).getValue()).isEqualTo("test");
 
-        assertThat(envVars.get(3).getName()).isEqualTo("INDY_URL");
-        assertThat(envVars.get(3).getValue()).isEqualTo("https://test.indy.com");
+        assertThat(envVars.get(3).getName()).isEqualTo("REPOSITORY_MGR_URL");
+        assertThat(envVars.get(3).getValue()).isEqualTo("https://repository-manager.test.example.com");
 
         assertThat(envVars.get(4).getName()).isEqualTo("BIFROST_URL");
         assertThat(envVars.get(4).getValue()).isEqualTo("https://test.bifrost.com");
