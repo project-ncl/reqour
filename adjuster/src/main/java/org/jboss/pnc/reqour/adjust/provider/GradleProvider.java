@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.adjust.provider;
 import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_DISABLED;
 import static org.jboss.pnc.reqour.adjust.model.GradleAlignmentResultFile.GME_ENABLED;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_HEADERS;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_SUFFIX_ALTERNATIVES;
@@ -29,6 +30,7 @@ import org.jboss.pnc.gradlemanipulator.common.io.ManipulationIO;
 import org.jboss.pnc.gradlemanipulator.common.model.ManipulationModel;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.GradleProviderConfig;
+import org.jboss.pnc.reqour.adjust.config.ManipulatorAuthConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.GmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
 import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
@@ -69,8 +71,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
             CommonManipulatorResultExtractor adjustResultExtractor,
             Logger userLogger,
             GradleCommands gradleCommands,
-            ScriptPrefetcher scriptPrefetcher) {
-        super(objectMapper, processExecutor, envConfig, userLogger);
+            ScriptPrefetcher scriptPrefetcher,
+            ManipulatorAuthConfig manipulatorAuthConfig) {
+        super(objectMapper, processExecutor, envConfig, userLogger, manipulatorAuthConfig);
         this.adjustResultExtractor = adjustResultExtractor;
         this.gradleCommands = gradleCommands;
 
@@ -235,6 +238,9 @@ public class GradleProvider extends AbstractAdjustProvider<GmeConfig> implements
                             VERSION_SUFFIX_ALTERNATIVES,
                             versionSuffixAlternatives));
         }
+
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_HEADERS, restHeaders));
 
         return alignmentParameters;
     }

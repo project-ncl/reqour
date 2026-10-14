@@ -16,6 +16,9 @@ public class TestDataFactory {
 
     public static Logger userLogger = LoggerFactory.getLogger("com.example.userlogger");
 
+    // HashiCorpIgnore
+    public static final String TEST_REST_HEADERS = "Authorization:Basic dGVzdHVzZXI6dGVzdHBhc3N3b3Jk";
+
     public static final String STANDARD_BUILD_CATEGORY = "STANDARD";
     public static final String TEST_BUILD_CATEGORY = "TEST";
     public static final String LIGHTWELL_UPSTREAM_BUILD_CATEGORY = "LIGHTWELL_UPSTREAM";

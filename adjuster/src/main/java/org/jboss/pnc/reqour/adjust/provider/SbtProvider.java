@@ -5,6 +5,7 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_HEADERS;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
 
@@ -18,6 +19,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
+import org.jboss.pnc.reqour.adjust.config.ManipulatorAuthConfig;
 import org.jboss.pnc.reqour.adjust.config.SbtProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.SmegConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
@@ -49,8 +51,9 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
             Path workdir,
             ObjectMapper objectMapper,
             ProcessExecutor processExecutor,
-            Logger userLogger) {
-        super(objectMapper, processExecutor, envConfig, userLogger);
+            Logger userLogger,
+            ManipulatorAuthConfig manipulatorAuthConfig) {
+        super(objectMapper, processExecutor, envConfig, userLogger, manipulatorAuthConfig);
 
         SbtProviderConfig sbtProviderConfig = alignmentConfig.scalaProviderConfig();
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
@@ -141,6 +144,9 @@ public class SbtProvider extends AbstractAdjustProvider<SmegConfig> implements A
         alignmentParameters.add(
                 AdjustmentSystemPropertiesUtils
                         .createAdjustmentSystemProperty(BREW_PULL_ACTIVE, config.isBrewPullEnabled()));
+
+        alignmentParameters.add(
+                AdjustmentSystemPropertiesUtils.createAdjustmentSystemProperty(REST_HEADERS, restHeaders));
 
         return alignmentParameters;
     }

@@ -9,6 +9,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertiesContainExactly;
 import static org.jboss.pnc.reqour.adjust.AdjustTestUtils.assertSystemPropertyHasValuesSortedByPriority;
 import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_BUILD_CATEGORY;
+import static org.jboss.pnc.reqour.adjust.common.TestDataFactory.TEST_REST_HEADERS;
 import static org.jboss.pnc.reqour.common.TestDataSupplier.TASK_ID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -104,7 +105,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -163,7 +165,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion(overriddenVersion)
@@ -205,7 +208,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -256,7 +260,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -296,7 +301,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.github.fge:btf")
                 .executionRootVersion("1.2.0.redhat-00020")
@@ -336,7 +342,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         assertThatThrownBy(provider::obtainManipulatorResult).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("No file with alignment results found");
@@ -364,7 +371,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("foo")
                 .executionRootVersion("1.0.42.Final-rebuild-00001")
@@ -401,7 +409,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 gradleCommands,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("org.example.test:test-project")
@@ -431,7 +440,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 gradleCommands,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName(":test-project")
@@ -476,7 +486,8 @@ class GradleProviderTest {
                 resultExtractor,
                 TestDataFactory.userLogger,
                 gradleCommands,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         VersioningState expectedVersioningState = VersioningState.builder()
                 .executionRootName("com.example:my-project")
@@ -501,9 +512,13 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
-        List<String> expectedOverrides = List
-                .of("-DrestMode=PERSISTENT", "-DversionIncrementalSuffix=pnc", "-DrestBrewPullActive=true");
+                scriptPrefetcher,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=PERSISTENT",
+                "-DversionIncrementalSuffix=pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -522,11 +537,13 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEMPORARY",
                 "-DversionIncrementalSuffix=temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -545,12 +562,13 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
-        List<String> expectedOverrides = List
-                .of(
-                        "-DrestMode=TEST",
-                        "-DversionIncrementalSuffix=test-pnc",
-                        "-DrestBrewPullActive=true");
+                scriptPrefetcher,
+                config.manipulatorAuth());
+        List<String> expectedOverrides = List.of(
+                "-DrestMode=TEST",
+                "-DversionIncrementalSuffix=test-pnc",
+                "-DrestBrewPullActive=true",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -569,11 +587,13 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
         List<String> expectedOverrides = List.of(
                 "-DrestMode=TEST_TEMPORARY",
                 "-DversionIncrementalSuffix=test-temporary-pnc",
-                "-DrestBrewPullActive=false");
+                "-DrestBrewPullActive=false",
+                "-DrestHeaders=" + TEST_REST_HEADERS);
 
         List<String> actualOverrides = provider.computeAlignmentParametersOverrides();
 
@@ -613,7 +633,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -634,7 +655,8 @@ class GradleProviderTest {
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 1),
-                        MapEntry.entry("restBrewPullActive", 1)));
+                        MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(
                 command,
@@ -642,6 +664,7 @@ class GradleProviderTest {
                 List.of("PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(command, "versionIncrementalSuffix", List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restHeaders", List.of(TEST_REST_HEADERS));
     }
 
     @Test
@@ -683,7 +706,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -705,7 +729,8 @@ class GradleProviderTest {
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("restBrewPullActive", 1),
                         MapEntry.entry("versionIncrementalSuffix", 2),
-                        MapEntry.entry("additionalAlignmentParam", 2)));
+                        MapEntry.entry("additionalAlignmentParam", 2),
+                        MapEntry.entry("restHeaders", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("TEST"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("true"));
@@ -717,6 +742,7 @@ class GradleProviderTest {
                 command,
                 "additionalAlignmentParam",
                 List.of("overridable", "non-overridable"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restHeaders", List.of(TEST_REST_HEADERS));
     }
 
     @Test
@@ -758,7 +784,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -779,11 +806,13 @@ class GradleProviderTest {
                         MapEntry.entry("override", 3),
                         MapEntry.entry("restMode", 1),
                         MapEntry.entry("versionIncrementalSuffix", 1),
-                        MapEntry.entry("restBrewPullActive", 1)));
+                        MapEntry.entry("restBrewPullActive", 1),
+                        MapEntry.entry("restHeaders", 1)));
         assertSystemPropertyHasValuesSortedByPriority(command, "override", List.of("default", "user", "config"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restMode", List.of("PERSISTENT"));
         assertSystemPropertyHasValuesSortedByPriority(command, "versionIncrementalSuffix", List.of("pnc"));
         assertSystemPropertyHasValuesSortedByPriority(command, "restBrewPullActive", List.of("false"));
+        assertSystemPropertyHasValuesSortedByPriority(command, "restHeaders", List.of(TEST_REST_HEADERS));
 
         Files.deleteIfExists(workdir.resolve("gradle-directory")); // gradle target directory checked for existence
     }
@@ -822,7 +851,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         List<String> command = provider.getPreparedCommand();
 
@@ -844,7 +874,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         Map<String, String> envs = provider.prepareExtraEnvs();
 
@@ -877,7 +908,8 @@ class GradleProviderTest {
                 null,
                 TestDataFactory.userLogger,
                 null,
-                scriptPrefetcher);
+                scriptPrefetcher,
+                config.manipulatorAuth());
 
         Map<String, String> envs = provider.prepareExtraEnvs();
 
