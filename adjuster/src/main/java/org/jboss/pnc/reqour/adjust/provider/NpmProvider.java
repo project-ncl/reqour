@@ -18,6 +18,7 @@ import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
 import org.jboss.pnc.api.reqour.dto.ManipulatorResult;
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.npmmanipulator.impl.NpmResult;
 import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.NpmProviderConfig;
@@ -79,9 +80,13 @@ public class NpmProvider extends AbstractAdjustProvider<NpmManipulatorConfig> im
 
         if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
             validateConfig();
-            userLogger.info("NPM manipulator config was successfully initialized and validated: {}", config);
+            log.debug(
+                    "NPM manipulator config was successfully initialized and validated: {}",
+                    LogSanitizer.maskKnownSecrets(config.toString()));
         } else {
-            userLogger.info("NPM manipulator config was successfully initialized: {}", config);
+            log.debug(
+                    "NPM manipulator config was successfully initialized: {}",
+                    LogSanitizer.maskKnownSecrets(config.toString()));
         }
     }
 
