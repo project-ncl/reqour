@@ -59,7 +59,6 @@ public abstract class AbstractAdjustProvider<T extends CommonManipulatorConfig> 
         List<String> preparedCommand = getPreparedCommand();
         Map<String, String> extraEnvs = prepareExtraEnvs();
 
-        userLogger.info("Prepared command to be executed is: {}", preparedCommand);
         int manipulatorExitCode = processExecutor.execute(
                 ProcessContext.withWorkdirAndConsumers(config.getWorkdir(), userLogger::info, userLogger::warn)
                         .command(preparedCommand)

@@ -14,6 +14,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
@@ -57,11 +58,17 @@ public class ProcessExecutorImpl implements ProcessExecutor {
                     return true;
                 });
 
-        String loggedProcessContext = logProcessContext(
-                processContext.getCommand(),
-                processContext.getWorkingDirectory(),
-                processContext.getExtraEnvVariables());
-        userLogger.info("Executing {}", loggedProcessContext);
+        String maskedCommand = LogSanitizer.maskKnownSecrets(
+                logProcessContext(processContext.getCommand(), processContext.getWorkingDirectory(), null));
+        userLogger.info("Executing {}", maskedCommand);
+
+        if (log.isDebugEnabled()) {
+            String maskedEnv = LogSanitizer.maskKnownSecrets(
+                    Optional.ofNullable(processContext.getExtraEnvVariables())
+                            .orElse(Collections.emptyMap())
+                            .toString());
+            log.debug("Executing {} (env: {})", maskedCommand, maskedEnv);
+        }
 
         // Configure consumers for stdout and stderr
         processBuilder.output().consumeLinesWith(MAX_LINE_LENGTH, processContext.getStdoutConsumer()::accept);
@@ -70,10 +77,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
         // Run with configured consumers
         processBuilder.run();
         int exitCode = holder.getExitCode();
-        log.debug(
-                "Command with process context {} terminated with the exit code: {}",
-                loggedProcessContext,
-                exitCode);
+        log.debug("Command with process context {} terminated with the exit code: {}", maskedCommand, exitCode);
         return exitCode;
     }
 
