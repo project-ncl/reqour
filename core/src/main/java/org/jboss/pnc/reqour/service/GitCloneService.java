@@ -6,6 +6,7 @@ package org.jboss.pnc.reqour.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,11 +15,14 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
+import org.jboss.pnc.common.Urls;
+import org.jboss.pnc.common.scm.ScmUrlConverter;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
 import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.ProtectedSourceCodeGitProviderConfig;
 import org.jboss.pnc.reqour.model.ProcessContext;
 import org.jboss.pnc.reqour.runtime.UserLogger;
 import org.jboss.pnc.reqour.service.api.CloneService;
@@ -53,10 +57,14 @@ public class GitCloneService implements CloneService {
         boolean isInternalRepoNew = isInternalRepoNew(adjustedUrl);
         log.debug("Internal repository with adjusted URL '{}' is considered new: {}", adjustedUrl, isInternalRepoNew);
 
+        // For a protected external origin this converts scp->https and injects the token; otherwise the
+        // origin is cloned exactly as before.
+        String originUrl = resolveProtectedOrigin(cloneRequest.getOriginRepoUrl());
+
         if (cloneRequest.getRef() == null || isInternalRepoNew) {
-            cloneEverything(cloneRequest, cloneDir);
+            cloneEverything(cloneRequest, originUrl, cloneDir);
         } else {
-            cloneRefOnly(cloneRequest, cloneDir);
+            cloneRefOnly(cloneRequest, originUrl, cloneDir);
         }
 
         try {
@@ -72,7 +80,29 @@ public class GitCloneService implements CloneService {
                 .build();
     }
 
-    private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {
+    /**
+     * Resolve how to clone an origin. When the origin falls under a configured protected source provider,
+     * the scp/ssh URL is converted to HTTPS and the provider's credentials are injected; otherwise the
+     * origin is returned unchanged. The returned URL may contain a token and must never be logged directly
+     * (command logging masks credentials).
+     */
+    public String resolveProtectedOrigin(String originUrl) {
+        Optional<ProtectedSourceCodeGitProviderConfig> provider = configUtils
+                .findProtectedSourceCodeGitProvider(originUrl);
+        if (provider.isEmpty()) {
+            return originUrl;
+        }
+        log.info(
+                "Using protected source-code provider credentials for origin matching '{}'",
+                provider.get().urlPrefix());
+        String httpsUrl = ScmUrlConverter.toHttps(originUrl);
+        return Urls.addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
+    }
+
+    private void cloneEverything(
+            RepositoryCloneRequest request,
+            String originRepoUrl,
+            Path cloneDir) {
         log.info("Syncing everything");
 
         ProcessContext.Builder processContextBuilder = ProcessContext
@@ -81,7 +111,7 @@ public class GitCloneService implements CloneService {
         String targetRemote = "target";
 
         // From: https://stackoverflow.com/a/7216269/2907906
-        gitCommands.cloneMirror(request.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.cloneMirror(originRepoUrl, processContextBuilder);
         gitCommands.disableBareRepository(processContextBuilder);
         gitCommands.resetHard(processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
@@ -90,7 +120,10 @@ public class GitCloneService implements CloneService {
         gitCommands.pushAllTags(targetRemote, processContextBuilder);
     }
 
-    private void cloneRefOnly(RepositoryCloneRequest request, Path cloneDir) {
+    private void cloneRefOnly(
+            RepositoryCloneRequest request,
+            String originRepoUrl,
+            Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
         ProcessContext.Builder processContextBuilder = ProcessContext
@@ -98,7 +131,7 @@ public class GitCloneService implements CloneService {
 
         String targetRemote = "target";
 
-        gitCommands.clone(request.getOriginRepoUrl(), processContextBuilder);
+        gitCommands.clone(originRepoUrl, processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.checkout(request.getRef(), true, processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);

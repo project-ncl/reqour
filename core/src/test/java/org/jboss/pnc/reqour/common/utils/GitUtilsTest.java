@@ -33,4 +33,16 @@ class GitUtilsTest {
                 "update",
                 "--init");
     }
+
+    @Test
+    void clone_isPlainClone() {
+        assertThat(GitUtils.clone("https://host/group/repo.git"))
+                .containsExactly("git", "clone", "https://host/group/repo.git", ".");
+    }
+
+    @Test
+    void cloneMirror_isPlainMirrorClone() {
+        assertThat(GitUtils.cloneMirror("https://host/group/repo.git"))
+                .containsExactly("git", "clone", "--mirror", "https://host/group/repo.git", "./.git");
+    }
 }

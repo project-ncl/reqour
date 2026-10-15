@@ -17,6 +17,12 @@ public interface GitConfig {
 
     GitProvidersConfig gitProviders();
 
+    /**
+     * Credentials for cloning from protected (private) source-code providers, applied only to the origin
+     * clone when its URL matches a configured prefix.
+     */
+    Optional<List<ProtectedSourceCodeGitProviderConfig>> protectedSourceCodeGitProviders();
+
     Set<String> acceptableSchemes();
 
     Optional<String> privateGithubUser();

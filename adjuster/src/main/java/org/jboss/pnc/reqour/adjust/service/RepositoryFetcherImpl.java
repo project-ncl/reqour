@@ -136,7 +136,10 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
 
         ProcessContext.Builder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
-        gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
+        // For a protected external origin this converts scp->https and injects the token; otherwise the
+        // origin is cloned exactly as before.
+        String originUrl = gitCloneService.resolveProtectedOrigin(adjustRequest.getOriginRepoUrl());
+        gitCommands.clone(originUrl, processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
 
         if (gitCommands.doesReferenceExistRemotely(adjustRequest.getRef(), processContextBuilder)) {

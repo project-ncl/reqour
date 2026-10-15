@@ -104,6 +104,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
         if (extraEnvVariables != null && !extraEnvVariables.isEmpty()) {
             extraEnvVariables.forEach((k, v) -> IOUtils.quoteIfNeeded(result.append(k).append("="), v).append(' '));
         }
+        // Credentials (env values, URL userinfo, etc.) are masked by the caller via LogSanitizer.maskKnownSecrets.
         command.forEach(arg -> IOUtils.quoteIfNeeded(result, arg).append(' '));
         final int newLen = result.length() - 1;
         if (newLen >= 0 && result.charAt(newLen) == ' ') {

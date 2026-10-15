@@ -9,13 +9,14 @@ import static org.jboss.pnc.reqour.common.utils.GitUtils.DEFAULT_REMOTE_NAME;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
@@ -109,22 +110,22 @@ public class GitCommands {
 
     public void clone(String url, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                GitUtils::clone,
+                () -> GitUtils.clone(url),
                 processContextBuilder,
                 url,
-                String.format("Failed to clone repository from '%s'.", url));
+                String.format("Failed to clone repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));
     }
 
     public void cloneMirror(String url, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                GitUtils::cloneMirror,
+                () -> GitUtils.cloneMirror(url),
                 processContextBuilder,
                 url,
-                String.format("Cannot mirror-clone the repository from '%s'.", url));
+                String.format("Cannot mirror-clone the repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));
     }
 
     private void tryClone(
-            Function<String, List<String>> commandSupplier,
+            Supplier<List<String>> commandSupplier,
             ProcessContext.Builder processContextBuilder,
             String url,
             String errorMessage) {
@@ -132,7 +133,7 @@ public class GitCommands {
             errorMessage += " " + githubRepoCloningInfo(url);
         }
 
-        executeGitCommand(commandSupplier.apply(url), processContextBuilder, errorMessage);
+        executeGitCommand(commandSupplier.get(), processContextBuilder, errorMessage);
     }
 
     public void commit(String commitMessage, ProcessContext.Builder processContextBuilder) {
@@ -385,12 +386,12 @@ public class GitCommands {
             return String.format(
                     "If the Github repository is a private repository, you need to add a Github user "
                             + "with read-permissions to '%s'. Please email the Newcastle mailing list for more information.",
-                    url);
+                    LogSanitizer.maskKnownSecrets(url));
         }
 
         return String.format(
                 "If the Github repository is a private repository, you need to add the Github user '%s' with read-permissions to '%s'.",
                 configUtils.getPrivateGithubUser().get(),
-                url);
+                LogSanitizer.maskKnownSecrets(url));
     }
 }

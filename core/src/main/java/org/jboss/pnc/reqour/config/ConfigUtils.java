@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.config;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.common.http.PNCHttpClientConfig;
+import org.jboss.pnc.common.scm.ScmUrlNormalizer;
 import org.jboss.pnc.reqour.service.translation.GitProvider;
 
 import lombok.extern.slf4j.Slf4j;
@@ -61,5 +63,26 @@ public class ConfigUtils {
 
     public Committer getCommitter() {
         return config.git().user();
+    }
+
+    /**
+     * Find the protected source-code git provider whose {@code urlPrefix} covers the given origin URL,
+     * or empty if none matches.
+     */
+    public Optional<ProtectedSourceCodeGitProviderConfig> findProtectedSourceCodeGitProvider(String url) {
+        if (url == null || url.isBlank()) {
+            return Optional.empty();
+        }
+        String normalizedUrl = ScmUrlNormalizer.normalize(url);
+        return config.git()
+                .protectedSourceCodeGitProviders()
+                .orElse(List.of())
+                .stream()
+                .filter(provider -> {
+                    String prefix = ScmUrlNormalizer.normalize(provider.urlPrefix());
+                    return !prefix.isEmpty()
+                            && (normalizedUrl.equals(prefix) || normalizedUrl.startsWith(prefix + "/"));
+                })
+                .findFirst();
     }
 }
