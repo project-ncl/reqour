@@ -25,43 +25,4 @@ class URLUtilsTest {
 
         assertThat(adjustedUrl).isEqualTo("https://user@github.com/foo/bar.git");
     }
-
-    @Test
-    void addCredentialsToUrl_https_injectsUserAndToken() {
-        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/lw-builds/foo.git", "oauth2", "tok"))
-                .isEqualTo("https://oauth2:tok@gitlab.com/lw/lw-builds/foo.git");
-    }
-
-    @Test
-    void addCredentialsToUrl_blankUsername_defaultsToOauth2() {
-        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/foo.git", "  ", "tok"))
-                .isEqualTo("https://oauth2:tok@gitlab.com/lw/foo.git");
-    }
-
-    @Test
-    void addCredentialsToUrl_replacesExistingUserinfo() {
-        assertThat(URLUtils.addCredentialsToUrl("https://old@gitlab.com/lw/foo.git", "bot", "tok"))
-                .isEqualTo("https://bot:tok@gitlab.com/lw/foo.git");
-    }
-
-    @Test
-    void addCredentialsToUrl_nonHttpOrMissingToken_returnsUnchanged() {
-        assertThat(URLUtils.addCredentialsToUrl("git@gitlab.com:lw/foo.git", "bot", "tok"))
-                .isEqualTo("git@gitlab.com:lw/foo.git");
-        assertThat(URLUtils.addCredentialsToUrl("https://gitlab.com/lw/foo.git", "bot", null))
-                .isEqualTo("https://gitlab.com/lw/foo.git");
-    }
-
-    @Test
-    void convertToHttps_scpAndSshForms_becomeHttps() {
-        assertThat(URLUtils.convertToHttps("git@gitlab.com:lw/lw-builds/repo.git"))
-                .isEqualTo("https://gitlab.com/lw/lw-builds/repo.git");
-        assertThat(URLUtils.convertToHttps("git+ssh://git@gitlab.com/lw/lw-builds/repo.git"))
-                .isEqualTo("https://gitlab.com/lw/lw-builds/repo.git");
-        assertThat(URLUtils.convertToHttps("ssh://git@gitlab.com/lw/repo.git"))
-                .isEqualTo("https://gitlab.com/lw/repo.git");
-        // already https / http -> unchanged
-        assertThat(URLUtils.convertToHttps("https://gitlab.com/lw/repo.git"))
-                .isEqualTo("https://gitlab.com/lw/repo.git");
-    }
 }

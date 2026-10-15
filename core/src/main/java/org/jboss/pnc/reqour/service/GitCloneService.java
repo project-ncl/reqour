@@ -15,6 +15,8 @@ import org.jboss.pnc.api.enums.ResultStatus;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneRequest;
 import org.jboss.pnc.api.reqour.dto.RepositoryCloneResponse;
 import org.jboss.pnc.api.reqour.dto.ReqourCallback;
+import org.jboss.pnc.common.Urls;
+import org.jboss.pnc.common.scm.ScmUrlConverter;
 import org.jboss.pnc.reqour.common.GitCommands;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
@@ -93,8 +95,8 @@ public class GitCloneService implements CloneService {
         log.info(
                 "Using protected source-code provider credentials for origin matching '{}'",
                 provider.get().urlPrefix());
-        String httpsUrl = URLUtils.convertToHttps(originUrl);
-        return URLUtils.addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
+        String httpsUrl = ScmUrlConverter.toHttps(originUrl);
+        return Urls.addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
     }
 
     private void cloneEverything(
