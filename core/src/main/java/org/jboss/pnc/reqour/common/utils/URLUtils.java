@@ -105,52 +105,6 @@ public class URLUtils {
         return "https://" + s;
     }
 
-    /**
-     * Normalize a git URL to a lower-cased {@code host/path} (no scheme, userinfo, port, {@code .git}
-     * suffix or trailing slash), so host+group prefixes can be compared regardless of URL form (https,
-     * git+ssh, or scp-like {@code git@host:group/repo.git}).
-     */
-    public static String normalizeHostAndPath(String url) {
-        if (url == null || url.isBlank()) {
-            return "";
-        }
-        String s = url.trim();
-        // strip scheme, or the scp-like "git@" user prefix
-        if (s.startsWith("git@")) {
-            s = s.substring("git@".length());
-        } else {
-            int scheme = s.indexOf("://");
-            if (scheme >= 0) {
-                s = s.substring(scheme + 3);
-            }
-        }
-        // strip any remaining userinfo "user@host..."
-        int at = s.indexOf('@');
-        int firstSlash = s.indexOf('/');
-        if (at >= 0 && (firstSlash < 0 || at < firstSlash)) {
-            s = s.substring(at + 1);
-        }
-        // host/path separator: scp-like "host:group/..." -> "host/group/..."; "host:port" -> "host"
-        int colon = s.indexOf(':');
-        int slash = s.indexOf('/');
-        if (colon >= 0 && (slash < 0 || colon < slash)) {
-            String afterColon = (slash < 0) ? s.substring(colon + 1) : s.substring(colon + 1, slash);
-            if (!afterColon.isEmpty() && afterColon.chars().allMatch(Character::isDigit)) {
-                s = s.substring(0, colon) + (slash < 0 ? "" : s.substring(slash));
-            } else {
-                s = s.substring(0, colon) + "/" + s.substring(colon + 1);
-            }
-        }
-        s = stripTrailing(s, "/");
-        s = stripTrailing(s, ".git");
-        s = stripTrailing(s, "/");
-        return s.toLowerCase();
-    }
-
-    private static String stripTrailing(String s, String suffix) {
-        return s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : s;
-    }
-
     private static boolean isNonScpLike(String url) {
         return Patterns.NonScpLike.PATTERN.matcher(url).matches();
     }

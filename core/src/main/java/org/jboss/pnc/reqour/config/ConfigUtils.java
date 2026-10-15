@@ -12,7 +12,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.jboss.pnc.common.http.PNCHttpClientConfig;
-import org.jboss.pnc.reqour.common.utils.URLUtils;
+import org.jboss.pnc.common.scm.ScmUrlNormalizer;
 import org.jboss.pnc.reqour.service.translation.GitProvider;
 
 import lombok.extern.slf4j.Slf4j;
@@ -74,13 +74,13 @@ public class ConfigUtils {
         if (url == null || url.isBlank()) {
             return Optional.empty();
         }
-        String normalizedUrl = URLUtils.normalizeHostAndPath(url);
+        String normalizedUrl = ScmUrlNormalizer.normalize(url);
         return config.git()
                 .protectedSourceCodeGitProviders()
                 .orElse(List.of())
                 .stream()
                 .filter(provider -> {
-                    String prefix = URLUtils.normalizeHostAndPath(provider.urlPrefix());
+                    String prefix = ScmUrlNormalizer.normalize(provider.urlPrefix());
                     return !prefix.isEmpty()
                             && (normalizedUrl.equals(prefix) || normalizedUrl.startsWith(prefix + "/"));
                 })

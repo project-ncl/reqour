@@ -53,15 +53,6 @@ class URLUtilsTest {
     }
 
     @Test
-    void normalizeHostAndPath_variousForms_normalizeToHostSlashPath() {
-        String expected = "gitlab.com/lw/lw-builds/foo";
-        assertThat(URLUtils.normalizeHostAndPath("https://gitlab.com/lw/lw-builds/foo.git")).isEqualTo(expected);
-        assertThat(URLUtils.normalizeHostAndPath("git+ssh://git@gitlab.com/lw/lw-builds/foo.git")).isEqualTo(expected);
-        assertThat(URLUtils.normalizeHostAndPath("git@gitlab.com:lw/lw-builds/foo.git")).isEqualTo(expected);
-        assertThat(URLUtils.normalizeHostAndPath("https://gitlab.com:443/lw/lw-builds/foo/")).isEqualTo(expected);
-    }
-
-    @Test
     void convertToHttps_scpAndSshForms_becomeHttps() {
         assertThat(URLUtils.convertToHttps("git@gitlab.com:lw/lw-builds/repo.git"))
                 .isEqualTo("https://gitlab.com/lw/lw-builds/repo.git");
