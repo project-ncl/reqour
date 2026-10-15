@@ -106,18 +106,6 @@ public class URLUtils {
     }
 
     /**
-     * Mask credentials embedded in a URL (or a string containing one) for safe logging:
-     * {@code https://user:token@host/...} becomes {@code https://***@host/...}. Returns the input
-     * unchanged when there is no embedded userinfo.
-     */
-    public static String maskCredentials(String value) {
-        if (value == null) {
-            return null;
-        }
-        return value.replaceAll("://[^/@\\s]+@", "://***@");
-    }
-
-    /**
      * Normalize a git URL to a lower-cased {@code host/path} (no scheme, userinfo, port, {@code .git}
      * suffix or trailing slash), so host+group prefixes can be compared regardless of URL form (https,
      * git+ssh, or scp-like {@code git@host:group/repo.git}).

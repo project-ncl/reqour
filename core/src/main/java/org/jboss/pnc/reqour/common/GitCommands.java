@@ -16,11 +16,11 @@ import java.util.regex.Pattern;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import org.jboss.pnc.common.log.LogSanitizer;
 import org.jboss.pnc.reqour.common.exceptions.GitException;
 import org.jboss.pnc.reqour.common.executor.process.ProcessExecutor;
 import org.jboss.pnc.reqour.common.utils.GitUtils;
 import org.jboss.pnc.reqour.common.utils.IOUtils;
-import org.jboss.pnc.reqour.common.utils.URLUtils;
 import org.jboss.pnc.reqour.config.Committer;
 import org.jboss.pnc.reqour.config.ConfigUtils;
 import org.jboss.pnc.reqour.model.ProcessContext;
@@ -117,7 +117,7 @@ public class GitCommands {
                 () -> GitUtils.clone(url, gitConfigOptions),
                 processContextBuilder,
                 url,
-                String.format("Failed to clone repository from '%s'.", URLUtils.maskCredentials(url)));
+                String.format("Failed to clone repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));
     }
 
     public void cloneMirror(String url, ProcessContext.Builder processContextBuilder) {
@@ -129,7 +129,7 @@ public class GitCommands {
                 () -> GitUtils.cloneMirror(url, gitConfigOptions),
                 processContextBuilder,
                 url,
-                String.format("Cannot mirror-clone the repository from '%s'.", URLUtils.maskCredentials(url)));
+                String.format("Cannot mirror-clone the repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));
     }
 
     private void tryClone(
@@ -394,12 +394,12 @@ public class GitCommands {
             return String.format(
                     "If the Github repository is a private repository, you need to add a Github user "
                             + "with read-permissions to '%s'. Please email the Newcastle mailing list for more information.",
-                    URLUtils.maskCredentials(url));
+                    LogSanitizer.maskKnownSecrets(url));
         }
 
         return String.format(
                 "If the Github repository is a private repository, you need to add the Github user '%s' with read-permissions to '%s'.",
                 configUtils.getPrivateGithubUser().get(),
-                URLUtils.maskCredentials(url));
+                LogSanitizer.maskKnownSecrets(url));
     }
 }
