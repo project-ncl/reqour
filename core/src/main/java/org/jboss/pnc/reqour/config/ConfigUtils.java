@@ -66,9 +66,8 @@ public class ConfigUtils {
     }
 
     /**
-     * Find the protected source-code git provider whose {@code urlPrefix} covers the given origin URL
-     * (host + group/subgroup, path-segment aware). Returns empty if none is configured or matches, in
-     * which case the origin is cloned with the previous (unchanged) behavior.
+     * Find the protected source-code git provider whose {@code urlPrefix} covers the given origin URL,
+     * or empty if none matches.
      */
     public Optional<ProtectedSourceCodeGitProviderConfig> findProtectedSourceCodeGitProvider(String url) {
         if (url == null || url.isBlank()) {
@@ -85,10 +84,5 @@ public class ConfigUtils {
                             && (normalizedUrl.equals(prefix) || normalizedUrl.startsWith(prefix + "/"));
                 })
                 .findFirst();
-    }
-
-    /** The configured dedicated proxy for cloning protected external source providers, if any. */
-    public Optional<SourceCloneProxyConfig> getSourceCloneProxy() {
-        return config.git().sourceCloneProxy();
     }
 }

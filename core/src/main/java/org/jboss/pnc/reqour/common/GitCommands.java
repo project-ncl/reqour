@@ -109,24 +109,16 @@ public class GitCommands {
     }
 
     public void clone(String url, ProcessContext.Builder processContextBuilder) {
-        clone(url, List.of(), processContextBuilder);
-    }
-
-    public void clone(String url, List<String> gitConfigOptions, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                () -> GitUtils.clone(url, gitConfigOptions),
+                () -> GitUtils.clone(url),
                 processContextBuilder,
                 url,
                 String.format("Failed to clone repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));
     }
 
     public void cloneMirror(String url, ProcessContext.Builder processContextBuilder) {
-        cloneMirror(url, List.of(), processContextBuilder);
-    }
-
-    public void cloneMirror(String url, List<String> gitConfigOptions, ProcessContext.Builder processContextBuilder) {
         tryClone(
-                () -> GitUtils.cloneMirror(url, gitConfigOptions),
+                () -> GitUtils.cloneMirror(url),
                 processContextBuilder,
                 url,
                 String.format("Cannot mirror-clone the repository from '%s'.", LogSanitizer.maskKnownSecrets(url)));

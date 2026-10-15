@@ -6,7 +6,6 @@ package org.jboss.pnc.reqour.service;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -56,15 +55,14 @@ public class GitCloneService implements CloneService {
         boolean isInternalRepoNew = isInternalRepoNew(adjustedUrl);
         log.debug("Internal repository with adjusted URL '{}' is considered new: {}", adjustedUrl, isInternalRepoNew);
 
-        // Resolve the origin for protected external providers (scp->https + token + proxy); otherwise
-        // it is cloned exactly as before. The proxy applies only to the clone commands below, so the
-        // subsequent push to the internal target repository is never sent through the external proxy.
-        ResolvedOrigin origin = resolveProtectedOrigin(cloneRequest.getOriginRepoUrl());
+        // For a protected external origin this converts scp->https and injects the token; otherwise the
+        // origin is cloned exactly as before.
+        String originUrl = resolveProtectedOrigin(cloneRequest.getOriginRepoUrl());
 
         if (cloneRequest.getRef() == null || isInternalRepoNew) {
-            cloneEverything(cloneRequest, origin.url(), origin.gitConfig(), cloneDir);
+            cloneEverything(cloneRequest, originUrl, cloneDir);
         } else {
-            cloneRefOnly(cloneRequest, origin.url(), origin.gitConfig(), cloneDir);
+            cloneRefOnly(cloneRequest, originUrl, cloneDir);
         }
 
         try {
@@ -80,52 +78,28 @@ public class GitCloneService implements CloneService {
                 .build();
     }
 
-    /** A resolved origin to clone: the (possibly rewritten/credentialed) URL and per-clone git config options. */
-    public record ResolvedOrigin(String url, List<String> gitConfig) {
-    }
-
     /**
      * Resolve how to clone an origin. When the origin falls under a configured protected source provider,
-     * the scp/ssh URL is converted to HTTPS, the provider's credentials are injected, and the dedicated
-     * source-clone proxy (if configured) is returned as per-clone git config. Otherwise the origin is
-     * returned unchanged with no extra config (previous behavior). Shared by the SCM-creation clone and
-     * the build-time adjuster clone. The returned URL may contain a token and must never be logged
-     * directly (command logging masks credentials).
+     * the scp/ssh URL is converted to HTTPS and the provider's credentials are injected; otherwise the
+     * origin is returned unchanged. The returned URL may contain a token and must never be logged directly
+     * (command logging masks credentials).
      */
-    public ResolvedOrigin resolveProtectedOrigin(String originUrl) {
+    public String resolveProtectedOrigin(String originUrl) {
         Optional<ProtectedSourceCodeGitProviderConfig> provider = configUtils
                 .findProtectedSourceCodeGitProvider(originUrl);
         if (provider.isEmpty()) {
-            return new ResolvedOrigin(originUrl, List.of());
+            return originUrl;
         }
         log.info(
                 "Using protected source-code provider credentials for origin matching '{}'",
                 provider.get().urlPrefix());
         String httpsUrl = URLUtils.convertToHttps(originUrl);
-        String withCredentials = URLUtils
-                .addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
-        return new ResolvedOrigin(withCredentials, sourceCloneProxyGitConfig());
-    }
-
-    /**
-     * Per-clone git config options routing the origin clone through the configured source-clone proxy,
-     * or an empty list if no proxy is configured. Passed as {@code git -c http.proxy=...} so only the
-     * (external) origin fetch is proxied. The proxy URL may embed credentials; they are masked in command
-     * logs by the process executor and must never be logged directly.
-     */
-    private List<String> sourceCloneProxyGitConfig() {
-        return configUtils.getSourceCloneProxy().map(proxy -> {
-            String proxyUrl = URLUtils
-                    .addCredentialsToUrl(proxy.url(), proxy.username().orElse(null), proxy.password().orElse(null));
-            log.info("Routing protected-origin clone through the configured source-clone proxy");
-            return List.of("http.proxy=" + proxyUrl);
-        }).orElse(List.of());
+        return URLUtils.addCredentialsToUrl(httpsUrl, provider.get().username(), provider.get().token());
     }
 
     private void cloneEverything(
             RepositoryCloneRequest request,
             String originRepoUrl,
-            List<String> cloneGitConfig,
             Path cloneDir) {
         log.info("Syncing everything");
 
@@ -135,7 +109,7 @@ public class GitCloneService implements CloneService {
         String targetRemote = "target";
 
         // From: https://stackoverflow.com/a/7216269/2907906
-        gitCommands.cloneMirror(originRepoUrl, cloneGitConfig, processContextBuilder);
+        gitCommands.cloneMirror(originRepoUrl, processContextBuilder);
         gitCommands.disableBareRepository(processContextBuilder);
         gitCommands.resetHard(processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
@@ -147,7 +121,6 @@ public class GitCloneService implements CloneService {
     private void cloneRefOnly(
             RepositoryCloneRequest request,
             String originRepoUrl,
-            List<String> cloneGitConfig,
             Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
@@ -156,7 +129,7 @@ public class GitCloneService implements CloneService {
 
         String targetRemote = "target";
 
-        gitCommands.clone(originRepoUrl, cloneGitConfig, processContextBuilder);
+        gitCommands.clone(originRepoUrl, processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
         gitCommands.checkout(request.getRef(), true, processContextBuilder);
         gitCommands.addRemote(targetRemote, request.getTargetRepoUrl(), processContextBuilder);

@@ -18,17 +18,10 @@ public interface GitConfig {
     GitProvidersConfig gitProviders();
 
     /**
-     * Credentials for cloning from protected (private) source-code providers, keyed by host+group
-     * prefix. Used only for the origin clone when a match is found; unrelated to {@link #gitProviders()}
-     * (the push destination). Absent/empty = previous behavior for all origins.
+     * Credentials for cloning from protected (private) source-code providers, applied only to the origin
+     * clone when its URL matches a configured prefix.
      */
     Optional<List<ProtectedSourceCodeGitProviderConfig>> protectedSourceCodeGitProviders();
-
-    /**
-     * Optional forward proxy used only when cloning the origin of a matched protected source provider
-     * (e.g. a firewalled env that can reach GitLab only via an authenticated proxy). Absent = no proxy.
-     */
-    Optional<SourceCloneProxyConfig> sourceCloneProxy();
 
     Set<String> acceptableSchemes();
 

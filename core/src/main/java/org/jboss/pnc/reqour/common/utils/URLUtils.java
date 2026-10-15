@@ -36,10 +36,9 @@ public class URLUtils {
     }
 
     /**
-     * Inject {@code username:token@} userinfo into an http(s) URL so git clones with those credentials
-     * ({@code https://username:token@host/path}). Returns the URL unchanged for non-http(s) URLs (e.g.
-     * scp-like or git+ssh, where token-in-URL does not apply) or when the token is missing. Any existing
-     * userinfo is replaced. {@code username} defaults to {@code oauth2} when blank.
+     * Inject {@code username:token@} userinfo into an http(s) URL ({@code https://username:token@host/path}),
+     * replacing any existing userinfo. Non-http(s) URLs or a missing token are returned unchanged;
+     * {@code username} defaults to {@code oauth2} when blank.
      */
     public static String addCredentialsToUrl(String url, String username, String token) {
         if (url == null || token == null || token.isBlank()) {
@@ -62,13 +61,10 @@ public class URLUtils {
     }
 
     /**
-     * Convert an SSH/scp-style git URL to its HTTPS equivalent, so it can be cloned over HTTPS (with a
-     * token and/or through an HTTP proxy). Handles scp-like {@code git@host:group/repo.git},
-     * {@code git+ssh://git@host/group/repo.git} and {@code ssh://git@host/...}. {@code http(s)://} URLs
-     * (and anything not recognized as ssh/scp) are returned unchanged.
-     * <p>
-     * Example: {@code git@gitlab.com:lw/lw-builds/repo.git} →
-     * {@code https://gitlab.com/lw/lw-builds/repo.git}.
+     * Convert an SSH/scp-style git URL to its HTTPS equivalent (e.g.
+     * {@code git@gitlab.com:lw/repo.git} → {@code https://gitlab.com/lw/repo.git}). Handles scp-like,
+     * {@code git+ssh://} and {@code ssh://} forms; {@code http(s)://} and unrecognized URLs are returned
+     * unchanged.
      */
     public static String convertToHttps(String url) {
         if (url == null || url.isBlank()) {

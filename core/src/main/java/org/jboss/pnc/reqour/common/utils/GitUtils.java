@@ -51,21 +51,7 @@ public class GitUtils {
     }
 
     public static List<String> clone(String url) {
-        return clone(url, List.of());
-    }
-
-    /**
-     * Clone, optionally with per-invocation git config options (each passed as {@code -c <option>}, e.g.
-     * {@code http.proxy=http://user:pass@host:port}). The options apply only to this git command.
-     */
-    public static List<String> clone(String url, List<String> gitConfigOptions) {
-        List<String> command = new ArrayList<>();
-        command.add("git");
-        addConfigOptions(command, gitConfigOptions);
-        command.add("clone");
-        command.add(url);
-        command.add(".");
-        return command;
+        return List.of("git", "clone", url, ".");
     }
 
     /**
@@ -77,28 +63,7 @@ public class GitUtils {
      * @return
      */
     public static List<String> cloneMirror(String url) {
-        return cloneMirror(url, List.of());
-    }
-
-    /** Mirror-clone, optionally with per-invocation git config options (see {@link #clone(String, List)}). */
-    public static List<String> cloneMirror(String url, List<String> gitConfigOptions) {
-        List<String> command = new ArrayList<>();
-        command.add("git");
-        addConfigOptions(command, gitConfigOptions);
-        command.add("clone");
-        command.add("--mirror");
-        command.add(url);
-        command.add("./.git");
-        return command;
-    }
-
-    private static void addConfigOptions(List<String> command, List<String> gitConfigOptions) {
-        if (gitConfigOptions != null) {
-            for (String option : gitConfigOptions) {
-                command.add("-c");
-                command.add(option);
-            }
-        }
+        return List.of("git", "clone", "--mirror", url, "./.git");
     }
 
     public static List<String> commit(String commitMessage) {

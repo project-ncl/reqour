@@ -35,38 +35,14 @@ class GitUtilsTest {
     }
 
     @Test
-    void clone_noConfigOptions_isPlainClone() {
+    void clone_isPlainClone() {
         assertThat(GitUtils.clone("https://host/group/repo.git"))
                 .containsExactly("git", "clone", "https://host/group/repo.git", ".");
     }
 
     @Test
-    void clone_withConfigOptions_prependsEachAsDashC() {
-        // each option is passed as "-c <option>" and must precede the 'clone' subcommand to be honored
-        List<String> command = GitUtils
-                .clone("https://host/group/repo.git", List.of("http.proxy=http://u:p@proxy:80"));
-
-        assertThat(command).containsExactly(
-                "git",
-                "-c",
-                "http.proxy=http://u:p@proxy:80",
-                "clone",
-                "https://host/group/repo.git",
-                ".");
-    }
-
-    @Test
-    void cloneMirror_withConfigOptions_prependsEachAsDashC() {
-        List<String> command = GitUtils
-                .cloneMirror("https://host/group/repo.git", List.of("http.proxy=http://u:p@proxy:80"));
-
-        assertThat(command).containsExactly(
-                "git",
-                "-c",
-                "http.proxy=http://u:p@proxy:80",
-                "clone",
-                "--mirror",
-                "https://host/group/repo.git",
-                "./.git");
+    void cloneMirror_isPlainMirrorClone() {
+        assertThat(GitUtils.cloneMirror("https://host/group/repo.git"))
+                .containsExactly("git", "clone", "--mirror", "https://host/group/repo.git", "./.git");
     }
 }
