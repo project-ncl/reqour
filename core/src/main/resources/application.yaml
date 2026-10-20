@@ -42,6 +42,9 @@ reqour:
             duration-unit: seconds
       internal-urls: []  # overridden in runtime config
       private-github-user: ${PRIVATE_GITHUB_USER}
+      clone-source:  # credential applied only when cloning from this host
+        host: ${CLONE_SOURCE_HOST:gitlab.com}
+        token: ${GITLAB_BOT_TOKEN:}
     log:
       final-log:
         bifrost-uploader:
