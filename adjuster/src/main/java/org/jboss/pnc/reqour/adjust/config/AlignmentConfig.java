@@ -29,6 +29,9 @@ public interface AlignmentConfig {
     @WithName("npm")
     NpmProviderConfig npmProviderConfig();
 
+    @WithName("ant")
+    AntProviderConfig antProviderConfig();
+
     Map<String, BuildCategoryConfig> buildCategories();
 
     boolean validate();
