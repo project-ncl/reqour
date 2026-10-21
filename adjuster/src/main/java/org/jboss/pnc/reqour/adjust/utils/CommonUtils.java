@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jboss.pnc.api.reqour.dto.VersioningState;
+import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,5 +66,22 @@ public class CommonUtils {
         } else {
             return versioningState;
         }
+    }
+
+    public static Path extractDirectoryOfFile(Path file) {
+        log.debug("Extracting directory of the file {}", file);
+
+        if (!Files.exists(file)) {
+            throw new AdjusterException(String.format("Pom file '%s' does not exist", file));
+        }
+        if (!Files.isRegularFile(file)) {
+            throw new AdjusterException(String.format("Specified pom location '%s' is not a file", file));
+        }
+        Path pomDirectory = file.getParent();
+        if (pomDirectory == null) {
+            throw new AdjusterException(String.format("Cannot get the directory of the pom file '%s'", file));
+        }
+
+        return pomDirectory;
     }
 }

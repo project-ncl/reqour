@@ -87,6 +87,18 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     gradleCommands,
                     scriptPrefetcher,
                     config.manipulatorAuth());
+            case ANT ->
+                new AntProvider(
+                        config.alignment(),
+                        coreConfig.envs(),
+                        adjustRequest,
+                        workdir,
+                        objectMapper,
+                        processExecutor,
+                        userLogger,
+                        scriptPrefetcher,
+                        adjustResultExtractor,
+                        config.manipulatorAuth());
             case NPM ->
                 new NpmProvider(
                         config.alignment(),

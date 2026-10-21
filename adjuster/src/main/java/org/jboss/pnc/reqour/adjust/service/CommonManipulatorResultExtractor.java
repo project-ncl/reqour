@@ -63,6 +63,16 @@ public class CommonManipulatorResultExtractor {
      * Obtain {@link ManipulatorResult#getVersioningState()}. In case execution root overrides are specified, use them
      * for overrides.
      */
+    public VersioningState obtainVersioningStateFromManipulatorResult(Path alignmentResultFilePath) {
+        return obtainVersioningStateFromManipulatorResult(
+                alignmentResultFilePath,
+                ExecutionRootOverrides.noOverrides());
+    }
+
+    /**
+     * Obtain {@link ManipulatorResult#getVersioningState()}. In case execution root overrides are specified, use them
+     * for overrides.
+     */
     public VersioningState obtainVersioningStateFromManipulatorResult(
             Path alignmentResultFilePath,
             ExecutionRootOverrides executionRootOverrides) {
