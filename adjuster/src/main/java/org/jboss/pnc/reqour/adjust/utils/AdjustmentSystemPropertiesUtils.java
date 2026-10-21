@@ -21,6 +21,10 @@ public class AdjustmentSystemPropertiesUtils {
         return String.format("%s=%s", name.getCliRepresentation(), value);
     }
 
+    public static String getSystemPropertyFormat(String name) {
+        return String.format("-D%s", name);
+    }
+
     /**
      * In the given {@code Stream<String>}, it tries to find the occurrence for 'name=<value>'. In case there is no '=',
      * it will apply {@code defaultValue}.<br/>

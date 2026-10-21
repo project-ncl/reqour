@@ -79,6 +79,16 @@ public class AdjustProviderPickerImpl implements AdjustProviderPicker {
                     coreConfig.envs(),
                     userLogger,
                     gradleCommands);
+            case ANT ->
+                new AntProvider(
+                        config.alignment(),
+                        coreConfig.envs(),
+                        adjustRequest,
+                        workdir,
+                        objectMapper,
+                        processExecutor,
+                        userLogger,
+                        adjustResultExtractor);
             case NPM ->
                 new NpmProvider(
                         config.alignment(),
