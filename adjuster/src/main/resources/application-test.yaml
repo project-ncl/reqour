@@ -64,6 +64,10 @@ reqour:
         cli-jar-path: '${test.location.providers.npm}/npm-manipulator-cli.jar'
         alignment-parameters:
           - '-Doverride=config'
+      ant:
+        cli-jar-path: '${test.location.providers.ant}/ame-cli.jar'
+        alignment-parameters:
+          - '-Doverride=config'
       build-categories:
         STANDARD:
           persistent-mode: PERSISTENT
@@ -107,5 +111,6 @@ test:
       gradle: '${test.location.providers.dir}/gradle'
       sbt: '${test.location.providers.dir}/sbt'
       npm: '${test.location.providers.dir}/npm'
+      ant: '${test.location.providers.dir}/ant'
   heartbeat:
     path: /heartbeat
