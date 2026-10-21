@@ -88,6 +88,9 @@ public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
                 .additionalOverridableAlignmentParameters(
                         CommonManipulatorConfigUtils
                                 .computeAdditionalOverridableAlignmentParameters(adjustRequest, alignmentConfig))
+                .additionalNonOverridableAlignmentParameters(
+                        CommonManipulatorConfigUtils
+                                .computeAdditionalNonOverridableAlignmentParameters(adjustRequest, alignmentConfig))
                 .cliJarPath(antProviderConfig.cliJarPath())
                 .workdir(workdir)
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
