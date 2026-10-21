@@ -45,7 +45,7 @@ public class PmeConfig extends CommonManipulatorConfig {
     boolean preferPersistentEnabled;
 
     /**
-     * Sub-folder where will be alignment results file accessible once the manipulation finishes
+     * Subfolder where will be alignment results file accessible once the manipulation finishes
      */
     Path subFolderWithAlignmentResultFile;
 

@@ -26,7 +26,6 @@ import org.jboss.pnc.reqour.adjust.config.AlignmentConfig;
 import org.jboss.pnc.reqour.adjust.config.MvnProviderConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.PmeConfig;
 import org.jboss.pnc.reqour.adjust.config.manipulator.common.CommonManipulatorConfigUtils;
-import org.jboss.pnc.reqour.adjust.exception.AdjusterException;
 import org.jboss.pnc.reqour.adjust.model.UserSpecifiedAlignmentParameters;
 import org.jboss.pnc.reqour.adjust.service.CommonManipulatorResultExtractor;
 import org.jboss.pnc.reqour.adjust.service.RootGavExtractor;
@@ -73,7 +72,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
         final Path subFolderWithResults;
-        // immutable collection returned, so let's make it mutable, and add there the results file if needed
+        // immutable collection returned, so let's make it mutable and add there the result file if needed
         final List<String> userAlignmentParametersWithFile = new ArrayList<>(
                 userSpecifiedAlignmentParameters.getAlignmentParameters());
         if (userSpecifiedAlignmentParameters.getLocation().isEmpty()) {
@@ -81,7 +80,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         } else {
             userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocation().get());
             Path pomFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get());
-            subFolderWithResults = extractPomFileDirectory(pomFile);
+            subFolderWithResults = CommonUtils.extractDirectoryOfFile(pomFile);
         }
 
         config = PmeConfig.builder()
@@ -275,22 +274,5 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
             }
         }
         return subFolderTargetDirectory.resolve("alignmentReport.json");
-    }
-
-    private Path extractPomFileDirectory(Path pomFile) {
-        log.debug("Extracting directory of pom file {}", pomFile);
-
-        if (!Files.exists(pomFile)) {
-            throw new AdjusterException(String.format("Pom file '%s' does not exist", pomFile));
-        }
-        if (!Files.isRegularFile(pomFile)) {
-            throw new AdjusterException(String.format("Specified pom location '%s' is not a file", pomFile));
-        }
-        Path pomDirectory = pomFile.getParent();
-        if (pomDirectory == null) {
-            throw new AdjusterException(String.format("Cannot get the directory of the pom file '%s'", pomFile));
-        }
-
-        return pomDirectory;
     }
 }
