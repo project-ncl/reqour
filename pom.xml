@@ -82,6 +82,8 @@
         <quarkus.platform.version>3.37.1</quarkus.platform.version>
         <rootPath>${basedir}</rootPath>
         <tagSuffix />
+        <!-- Temporarily disable spotless (see https://github.com/project-ncl/reqour/actions/runs/39774325932/job/119811407058?pr=443) -->
+        <spotless.skip>true</spotless.skip>
 
         <!-- Dependencies versions -->
         <version.lombok>1.18.48</version.lombok>
