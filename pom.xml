@@ -119,9 +119,6 @@
         <version.maven-replacer-plugin>1.4.1</version.maven-replacer-plugin>
         <version.maven-jar-plugin>3.5.0</version.maven-jar-plugin>
         <version.quarkus-pnc-client-auth>1.0.0</version.quarkus-pnc-client-auth>
-
-        <!-- Temporarily disable spotless (see https://github.com/project-ncl/reqour/actions/runs/39774325932/job/119811407058?pr=443) -->
-        <spotless.skip>true</spotless.skip>
    </properties>
 
     <dependencyManagement>
