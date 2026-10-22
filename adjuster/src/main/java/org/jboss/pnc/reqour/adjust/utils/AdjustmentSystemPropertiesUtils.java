@@ -21,10 +21,6 @@ public class AdjustmentSystemPropertiesUtils {
         return String.format("%s=%s", name.getCliRepresentation(), value);
     }
 
-    public static String getSystemPropertyFormat(String name) {
-        return String.format("-D%s", name);
-    }
-
     /**
      * In the given {@code Stream<String>}, it tries to find the occurrence for 'name=<value>'. In case there is no '=',
      * it will apply {@code defaultValue}.<br/>
@@ -86,7 +82,8 @@ public class AdjustmentSystemPropertiesUtils {
         BREW_PULL_ACTIVE("restBrewPullActive"),
         VERSION_SUFFIX_ALTERNATIVES("versionSuffixAlternatives"),
         MANIPULATION_DISABLE("manipulation.disable"),
-        VERSION_OVERRIDE("versionOverride");
+        VERSION_OVERRIDE("versionOverride"),
+        JSON_REPORT_FILE("reportJSONOutputFile");
 
         private final String cliName;
 

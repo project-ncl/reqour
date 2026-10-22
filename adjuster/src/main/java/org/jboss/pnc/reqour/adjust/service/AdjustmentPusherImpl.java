@@ -75,7 +75,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void prepareSearchingBranch(Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         gitCommands.createBranch("reqour_search_temp_branch_" + UUID.randomUUID(), processContextBuilder);
@@ -83,7 +83,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private String findTag(Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         String currentTreeSha = gitCommands.writeTree(processContextBuilder);
@@ -95,7 +95,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
      * Try to find the tag corresponding to the provided tree SHA
      */
     String findTagByTreeSha(Path workdir, String treeSha) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         List<String> tags = IOUtils.splitByNewLine(
                 processExecutor.stdout(
@@ -123,7 +123,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void pushTag(Path workdir, String tagName) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.pushTags(GitUtils.DEFAULT_REMOTE_NAME, List.of(tagName), processContextBuilder);
     }
@@ -133,7 +133,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
             String alignmentRootVersion,
             String tagMessage,
             boolean noAlignmentChangesAllowed) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         String commitId = tryCommitChanges(processContextBuilder, noAlignmentChangesAllowed);
@@ -146,7 +146,9 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
         return tagName;
     }
 
-    private String tryCommitChanges(ProcessContext.Builder processContextBuilder, boolean noAlignmentChangesAllowed) {
+    private String tryCommitChanges(
+            ProcessContext.ProcessContextBuilder processContextBuilder,
+            boolean noAlignmentChangesAllowed) {
         try {
             return commitChanges(processContextBuilder);
         } catch (GitException ex) {
@@ -160,14 +162,14 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
         }
     }
 
-    private String commitChanges(ProcessContext.Builder processContextBuilder) {
+    private String commitChanges(ProcessContext.ProcessContextBuilder processContextBuilder) {
         log.debug("Committing changes done by Reqour");
         gitCommands.commit("Reqour", processContextBuilder);
         return gitCommands.revParse(workdir);
     }
 
     private String computeTagName(
-            ProcessContext.Builder processContextBuilder,
+            ProcessContext.ProcessContextBuilder processContextBuilder,
             String alignmentRootVersion,
             String commitId) {
         String tagName = (alignmentRootVersion != null) ? alignmentRootVersion : String.format("reqour-%s", commitId);
@@ -178,7 +180,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void tryTagHead(
-            ProcessContext.Builder processContextBuilder,
+            ProcessContext.ProcessContextBuilder processContextBuilder,
             String tagName,
             String tagMessage,
             boolean failOnNoAlignmentChanges) {
@@ -193,14 +195,17 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
         }
     }
 
-    private void tagHead(ProcessContext.Builder processContextBuilder, String tagName, String tagMessage) {
+    private void tagHead(
+            ProcessContext.ProcessContextBuilder processContextBuilder,
+            String tagName,
+            String tagMessage) {
         if (!gitCommands.doesTagExistLocally(tagName, processContextBuilder)) {
             gitCommands.createAnnotatedTag(tagName, tagMessage, processContextBuilder);
         }
     }
 
     private String getCommitOfTag(Path workdir, String tagName) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         return gitCommands.getCommitByTag(tagName, processContextBuilder);
     }
@@ -210,7 +215,7 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
     }
 
     private void createBranchForTaggedCommit(Path workdir, String tagName, String commitId) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         String branchName = "branch-reqour-" + tagName + "-" + commitId;
 

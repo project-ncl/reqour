@@ -78,7 +78,7 @@ public class ProcessExecutorImpl implements ProcessExecutor {
     }
 
     @Override
-    public String stdout(ProcessContext.Builder processContextBuilder) {
+    public String stdout(ProcessContext.ProcessContextBuilder processContextBuilder) {
         StringBuilder sb = new StringBuilder();
 
         ProcessContext processContext = processContextBuilder

@@ -75,7 +75,7 @@ public class GitCloneService implements CloneService {
     private void cloneEverything(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing everything");
 
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn);
 
         String targetRemote = "target";
@@ -93,7 +93,7 @@ public class GitCloneService implements CloneService {
     private void cloneRefOnly(RepositoryCloneRequest request, Path cloneDir) {
         log.info("Syncing only ref: {}", request.getRef());
 
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn);
 
         String targetRemote = "target";
@@ -112,7 +112,8 @@ public class GitCloneService implements CloneService {
 
         gitCommands.clone(url, ProcessContext.withWorkdirAndConsumers(cloneDir, userLogger::info, userLogger::warn));
 
-        ProcessContext.Builder processContextBuilder = ProcessContext.withWorkdirAndIgnoringOutput(cloneDir);
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
+                .withWorkdirAndIgnoringOutput(cloneDir);
         final boolean isInternalRepoNew;
         if (gitCommands.listTags(processContextBuilder).isEmpty()) {
             isInternalRepoNew = gitCommands.listBranches(processContextBuilder).isEmpty();
@@ -128,7 +129,10 @@ public class GitCloneService implements CloneService {
         return isInternalRepoNew;
     }
 
-    public void pushClonedChanges(String ref, String remote, ProcessContext.Builder processContextBuilder) {
+    public void pushClonedChanges(
+            String ref,
+            String remote,
+            ProcessContext.ProcessContextBuilder processContextBuilder) {
         if (gitCommands.doesBranchExistsLocally(ref, processContextBuilder)) {
             gitCommands.push(remote, ref, false, processContextBuilder);
         } else if (gitCommands.doesTagExistLocally(ref, processContextBuilder)) {
@@ -141,7 +145,7 @@ public class GitCloneService implements CloneService {
         }
     }
 
-    private void addTagAndPush(String ref, String remote, ProcessContext.Builder processContextBuilder) {
+    private void addTagAndPush(String ref, String remote, ProcessContext.ProcessContextBuilder processContextBuilder) {
         log.info("adding tag and pushing");
         String newTag = "reqour-sync-" + ref;
 

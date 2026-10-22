@@ -17,7 +17,7 @@ import lombok.Builder;
 import lombok.Value;
 
 @Value
-@Builder(builderClassName = "Builder", toBuilder = true)
+@Builder(toBuilder = true)
 public class ProcessContext {
 
     List<String> command;
@@ -26,7 +26,7 @@ public class ProcessContext {
     Consumer<String> stdoutConsumer;
     Consumer<String> stderrConsumer;
 
-    public static ProcessContext.Builder withWorkdirAndConsumers(
+    public static ProcessContext.ProcessContextBuilder withWorkdirAndConsumers(
             Path workdir,
             Consumer<String> stdoutConsumer,
             Consumer<String> stderrConsumer) {
@@ -35,14 +35,14 @@ public class ProcessContext {
                     String.format("Directory '%s' which should be working directory does not exist", workdir));
         }
 
-        return ProcessContext.builder()
+        return new ProcessContext.ProcessContextBuilder()
                 .workingDirectory(workdir)
                 .extraEnvVariables(Collections.emptyMap())
                 .stdoutConsumer(stdoutConsumer)
                 .stderrConsumer(stderrConsumer);
     }
 
-    public static ProcessContext.Builder withWorkdirAndIgnoringOutput(Path workdir) {
+    public static ProcessContext.ProcessContextBuilder withWorkdirAndIgnoringOutput(Path workdir) {
         return withWorkdirAndConsumers(workdir, IOUtils::ignoreOutput, IOUtils::ignoreOutput);
     }
 }

@@ -26,9 +26,10 @@ public interface ProcessExecutor {
      * Analogical to {@link ProcessExecutor#execute(ProcessContext)}. However, ignores the exit code and returns STDOUT.
      *
      * @param processContextBuilder builder of the process context. Uses this builder, but overrides the
-     *        {@link ProcessContext.Builder#getStdoutConsumer()} in order to return the whole STDOUT as the result.
+     *        {@link ProcessContext.ProcessContextBuilder#getStdoutConsumer()} in order to return the whole STDOUT as
+     *        the result.
      *        Hence, the STDOUT consumer provided by the client is ignored.
      * @return STDOUT of the process
      */
-    String stdout(ProcessContext.Builder processContextBuilder);
+    String stdout(ProcessContext.ProcessContextBuilder processContextBuilder);
 }

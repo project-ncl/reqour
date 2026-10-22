@@ -1,5 +1,5 @@
 /*
- * SPDX-FileCopyrightText: Copyright © 2024 Red Hat, Inc.
+ * Copyright 2024 Red Hat, Inc.
  * SPDX-License-Identifier: Apache-2.0
  */
 package org.jboss.pnc.reqour.adjust.config.manipulator;
@@ -30,7 +30,7 @@ public class AmeConfig extends CommonManipulatorConfig {
     boolean isBrewPullEnabled;
 
     /**
-     * Subfolder where will be alignment results file accessible once the manipulation finishes
+     * File with alignment results
      */
-    Path subFolderWithAlignmentResultFile;
+    Path alignmentResultFile;
 }
