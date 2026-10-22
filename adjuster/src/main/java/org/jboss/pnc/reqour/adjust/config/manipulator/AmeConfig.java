@@ -30,7 +30,7 @@ public class AmeConfig extends CommonManipulatorConfig {
     boolean isBrewPullEnabled;
 
     /**
-     * Subfolder where will be alignment results file accessible once the manipulation finishes
+     * File with alignment results
      */
-    Path subFolderWithAlignmentResultFile;
+    Path alignmentResultFile;
 }

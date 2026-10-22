@@ -86,7 +86,7 @@ public class MvnProvider extends AbstractAdjustProvider<PmeConfig> implements Ad
         } else {
             userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocation().get());
             Path pomFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get());
-            subFolderWithResults = CommonUtils.extractDirectoryOfFile(pomFile);
+            subFolderWithResults = CommonUtils.extractDirectoryOfBuildFile(pomFile);
         }
 
         config = PmeConfig.builder()

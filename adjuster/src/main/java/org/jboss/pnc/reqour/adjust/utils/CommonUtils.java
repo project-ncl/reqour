@@ -68,20 +68,25 @@ public class CommonUtils {
         }
     }
 
-    public static Path extractDirectoryOfFile(Path file) {
-        log.debug("Extracting directory of the file {}", file);
+    public static Path extractDirectoryOfBuildFile(Path buildFileLocation) {
+        String buildFileName = buildFileLocation.getFileName().toString();
+        log.debug(
+                "Extracting directory of the build file ({}) from the location: {}",
+                buildFileName,
+                buildFileLocation);
 
-        if (!Files.exists(file)) {
-            throw new AdjusterException(String.format("Pom file '%s' does not exist", file));
+        if (!Files.exists(buildFileLocation)) {
+            throw new AdjusterException(String.format("No build file located at '%s' exists", buildFileLocation));
         }
-        if (!Files.isRegularFile(file)) {
-            throw new AdjusterException(String.format("Specified pom location '%s' is not a file", file));
+        if (!Files.isRegularFile(buildFileLocation)) {
+            throw new AdjusterException(String.format("Specified entry '%s' is not a file", buildFileLocation));
         }
-        Path pomDirectory = file.getParent();
-        if (pomDirectory == null) {
-            throw new AdjusterException(String.format("Cannot get the directory of the pom file '%s'", file));
+        Path buildFileDirectory = buildFileLocation.getParent();
+        if (buildFileDirectory == null) {
+            throw new AdjusterException(
+                    String.format("Cannot get the directory of the build file from location: %s", buildFileLocation));
         }
 
-        return pomDirectory;
+        return buildFileDirectory;
     }
 }
