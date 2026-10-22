@@ -5,15 +5,15 @@
 package org.jboss.pnc.reqour.adjust.provider;
 
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.BREW_PULL_ACTIVE;
+import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.JSON_REPORT_FILE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.REST_MODE;
 import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.AdjustmentSystemPropertyName.VERSION_INCREMENTAL_SUFFIX;
-import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.getSystemPropertyFormat;
-import static org.jboss.pnc.reqour.adjust.utils.AdjustmentSystemPropertiesUtils.getSystemPropertyValue;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.microprofile.config.ConfigProvider;
 import org.jboss.pnc.api.reqour.dto.AdjustRequest;
@@ -46,8 +46,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
 
-    private final static String DEFAULT_ALIGNMENT_RESULT_FILENAME = "alignmentReport.json";
-    private static final String OUTPUT_FILE_PROP_NAME = "reportJSONOutputFile";
+    public final static String DEFAULT_ALIGNMENT_REPORT_FILENAME = "alignmentReport.json";
 
     private final CommonManipulatorResultExtractor adjustResultExtractor;
 
@@ -69,16 +68,10 @@ public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
         UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters = CommonManipulatorConfigUtils
                 .parseUserSpecifiedAlignmentParameters(adjustRequest);
 
-        final Path subFolderWithResults;
-        // immutable collection returned, so let's make it mutable and add there the result file if needed
         final List<String> userAlignmentParametersWithFile = new ArrayList<>(
                 userSpecifiedAlignmentParameters.getAlignmentParameters());
-        if (userSpecifiedAlignmentParameters.getLocation().isEmpty()) {
-            subFolderWithResults = workdir;
-        } else {
+        if (userSpecifiedAlignmentParameters.getLocation().isPresent()) {
             userAlignmentParametersWithFile.add("--file=" + userSpecifiedAlignmentParameters.getLocation().get());
-            Path buildFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get());
-            subFolderWithResults = CommonUtils.extractDirectoryOfFile(buildFile);
         }
 
         config = AmeConfig.builder()
@@ -101,7 +94,7 @@ public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
                 .cliJarPath(antProviderConfig.cliJarPath())
                 .workdir(workdir)
                 .isBrewPullEnabled(CommonManipulatorConfigUtils.isBrewPullEnabled(adjustRequest))
-                .subFolderWithAlignmentResultFile(subFolderWithResults)
+                .alignmentResultFile(getPathToAlignmentResultFile(userSpecifiedAlignmentParameters, workdir))
                 .build();
 
         if (ConfigProvider.getConfig().getValue(ConfigConstants.VALIDATE_ALIGNMENT_CONFIG, Boolean.class)) {
@@ -157,7 +150,7 @@ public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
     @Override
     ManipulatorResult obtainManipulatorResult() {
         VersioningState versioningState = adjustResultExtractor.obtainVersioningStateFromManipulatorResult(
-                getPathToAlignmentResultFile());
+                config.getAlignmentResultFile());
         log.debug("Parsed versioning state is: {}", versioningState);
 
         return ManipulatorResult.builder()
@@ -166,12 +159,27 @@ public class AntProvider extends AbstractAdjustProvider<AmeConfig> {
                 .build();
     }
 
-    private Path getPathToAlignmentResultFile() {
-        final Path subFolderWithAlignmentResultFile = config.getSubFolderWithAlignmentResultFile();
-        final String alignmentResultFileName = getSystemPropertyValue(
-                getSystemPropertyFormat(OUTPUT_FILE_PROP_NAME),
-                config.getUserSpecifiedAlignmentParameters().stream()).orElse(DEFAULT_ALIGNMENT_RESULT_FILENAME);
+    private Path getPathToAlignmentResultFile(
+            UserSpecifiedAlignmentParameters userSpecifiedAlignmentParameters,
+            Path workdir) {
+        Optional<String> alignmentReportFile = AdjustmentSystemPropertiesUtils.getSystemPropertyValue(
+                JSON_REPORT_FILE,
+                userSpecifiedAlignmentParameters.getAlignmentParameters().stream());
 
-        return subFolderWithAlignmentResultFile.resolve(alignmentResultFileName);
+        if (alignmentReportFile.isPresent()) {
+            // In case alignment file was specified through the CLI option, we try to find it from the current workdir
+            userLogger.info("Alignment report file CLI option specified as: '{}'", alignmentReportFile.get());
+            return workdir.resolve(Path.of(alignmentReportFile.get()));
+        }
+
+        // Otherwise, the default location is in the same folder as build.xml file is
+        final Path buildFileFolder;
+        if (userSpecifiedAlignmentParameters.getLocation().isEmpty()) {
+            buildFileFolder = workdir;
+        } else {
+            Path buildFile = workdir.resolve(userSpecifiedAlignmentParameters.getLocation().get());
+            buildFileFolder = CommonUtils.extractDirectoryOfBuildFile(buildFile);
+        }
+        return buildFileFolder.resolve(DEFAULT_ALIGNMENT_REPORT_FILENAME);
     }
 }

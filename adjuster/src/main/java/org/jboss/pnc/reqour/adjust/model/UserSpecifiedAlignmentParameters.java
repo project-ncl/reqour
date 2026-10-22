@@ -25,7 +25,7 @@ public class UserSpecifiedAlignmentParameters {
     private static final Optional<Path> defaultLocation = Optional.empty();
 
     /**
-     * Location.
+     * Location of a build file (e.g., pom.xml or build.gradle)
      */
     Optional<Path> location;
 
