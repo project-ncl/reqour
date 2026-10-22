@@ -82,7 +82,8 @@ class GitCloneServiceTest {
 
     void setUpDestRepoWithOnlyMainBranch() throws IOException {
         Files.createDirectory(DEST_REPO_WITH_MAIN_BRANCH_PATH);
-        ProcessContext.Builder pcb = ProcessContext.withWorkdirAndIgnoringOutput(DEST_REPO_WITH_MAIN_BRANCH_PATH);
+        ProcessContext.ProcessContextBuilder pcb = ProcessContext
+                .withWorkdirAndIgnoringOutput(DEST_REPO_WITH_MAIN_BRANCH_PATH);
 
         processExecutor.execute(
                 pcb.command(

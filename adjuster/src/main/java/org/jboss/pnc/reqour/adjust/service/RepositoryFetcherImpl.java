@@ -134,7 +134,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     private boolean syncExternalRepo(AdjustRequest adjustRequest, Path workdir, String gitUsername) {
         boolean isRefInternal = false;
 
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.clone(adjustRequest.getOriginRepoUrl(), processContextBuilder);
         gitCommands.setupGitLfsIfPresent(processContextBuilder);
@@ -201,7 +201,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
     }
 
     private void shallowCloneWithTags(String url, String ref, Path workdir) {
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         gitCommands.init(false, processContextBuilder);
@@ -225,7 +225,7 @@ public class RepositoryFetcherImpl implements RepositoryFetcher {
         }
 
         userLogger.debug("Repository '{}' is using git submodules, transforming into fat repository", workdir);
-        ProcessContext.Builder processContextBuilder = ProcessContext
+        ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
         gitCommands.submoduleUpdateInit(processContextBuilder);
 

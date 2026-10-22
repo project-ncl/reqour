@@ -72,7 +72,7 @@ public class GradleCommands {
     private String getProperty(Path rootDir, String property) {
         log.debug("About to compute project's {} for a Gradle project located at {}", property, rootDir);
 
-        final ProcessContext.Builder processContextBuilder = ProcessContext
+        final ProcessContext.ProcessContextBuilder processContextBuilder = ProcessContext
                 .withWorkdirAndConsumers(rootDir, userLogger::info, userLogger::warn)
                 .extraEnvVariables(
                         Map.ofEntries(
