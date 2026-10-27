@@ -69,7 +69,7 @@
 
     <!-- Dependencies versions -->
     <version.lombok>1.18.48</version.lombok>
-    <version.quarkus-logging-json>3.5.0</version.quarkus-logging-json>
+    <version.quarkus-logging-json>3.5.1</version.quarkus-logging-json>
     <version.quarkus-logging-kafka>3.0.5</version.quarkus-logging-kafka>
     <version.pnc-api>3.5.3</version.pnc-api>
     <version.pnc-common>3.5.5-SNAPSHOT</version.pnc-common>
