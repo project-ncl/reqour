@@ -17,7 +17,7 @@
 
   <groupId>org.jboss.pnc.reqour</groupId>
   <artifactId>reqour-parent</artifactId>
-  <version>4.0.0-SNAPSHOT</version>
+  <version>4.0.0</version>
   <packaging>pom</packaging>
 
   <name>reqour</name>
@@ -54,7 +54,7 @@
   <scm>
     <connection>scm:git:https://github.com/project-ncl/reqour.git</connection>
     <developerConnection>scm:git:git@github.com:project-ncl/reqour.git</developerConnection>
-    <tag>HEAD</tag>
+    <tag>4.0.0</tag>
     <url>https://github.com/project-ncl/reqour/</url>
   </scm>
 
