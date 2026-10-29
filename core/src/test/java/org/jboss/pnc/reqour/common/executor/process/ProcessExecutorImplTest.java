@@ -64,7 +64,7 @@ public class ProcessExecutorImplTest {
     void maskKnownSecrets_masksBasicCredentialInRestHeaders() {
         // Basic token must be ≥20 chars to be matched by LogSanitizer's BASIC_CREDENTIALS pattern.
         // Randomly generated — not a real credential.
-        String token = "ZZiUV8G4ehK6hcQJnGmlXkvp8TzE"; // HashiCorpIgnore
+        String token = "ZZiUV8G4ehK6hcQJnGmlXkvp8TzE"; // HashiCorpIgnore notsecret
         String command = "java -jar app.jar -DrestHeaders=Authorization:Basic " + token;
         String masked = org.jboss.pnc.common.log.LogSanitizer.maskKnownSecrets(command);
         assertThat(masked).doesNotContain(token);
@@ -74,7 +74,7 @@ public class ProcessExecutorImplTest {
     @Test
     void maskKnownSecrets_masksArtifactoryToken() {
         // Randomly generated — not a real credential.
-        String token = "z5VHqFJ7V06eWJIqyLNAJ4kVNAyL6I41YbGtm24xDWiGcLu1qPBEmDu8"; // HashiCorpIgnore
+        String token = "z5VHqFJ7V06eWJIqyLNAJ4kVNAyL6I41YbGtm24xDWiGcLu1qPBEmDu8"; // HashiCorpIgnore notsecret
         String envString = "{ARTIFACTORY_READ_TOKEN=" + token + ", ARTIFACTORY_URL=https://artifactory.example.com}";
         String masked = org.jboss.pnc.common.log.LogSanitizer.maskKnownSecrets(envString);
         assertThat(masked).doesNotContain(token);
