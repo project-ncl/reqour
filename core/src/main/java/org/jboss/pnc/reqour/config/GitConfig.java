@@ -33,4 +33,23 @@ public interface GitConfig {
     boolean validateInternalUrl();
 
     Committer user();
+
+    /**
+     * Credential used only for cloning from the configured source host. The push destination is unaffected.
+     */
+    CloneSourceConfig cloneSource();
+
+    interface CloneSourceConfig {
+
+        /**
+         * Host for which the clone-source token is applied.
+         */
+        @WithDefault("gitlab.com")
+        String host();
+
+        /**
+         * Bot token used to authenticate the source clone. When absent, no credential is injected.
+         */
+        Optional<String> token();
+    }
 }
