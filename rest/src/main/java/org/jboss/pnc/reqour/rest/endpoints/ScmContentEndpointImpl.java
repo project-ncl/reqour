@@ -4,9 +4,15 @@
  */
 package org.jboss.pnc.reqour.rest.endpoints;
 
+import static org.jboss.pnc.reqour.rest.endpoints.OidcRoleConstants.PNC_APP_ORCH_BUILD_READ;
+import static org.jboss.pnc.reqour.rest.endpoints.OidcRoleConstants.PNC_APP_REPOUR_USER;
+import static org.jboss.pnc.reqour.rest.endpoints.OidcRoleConstants.PNC_USERS;
+import static org.jboss.pnc.reqour.rest.endpoints.OidcRoleConstants.PNC_USERS_ADMIN;
+
 import java.io.InputStream;
 import java.util.List;
 
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Response;
@@ -15,12 +21,11 @@ import jakarta.ws.rs.core.StreamingOutput;
 import org.jboss.pnc.api.reqour.rest.ScmContentEndpoint;
 import org.jboss.pnc.reqour.service.scmcontent.ScmContentService;
 
-import io.quarkus.security.Authenticated;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Read-only: any authenticated caller, like the PNC endpoints that expose this content. The repository is limited to
- * the internal locations by the service.
+ * Read-only: the roles orch requires to read builds (its endpoints expose this content), plus the repour role of
+ * reqour's other endpoints. The repository is limited to the internal locations by the service.
  */
 @ApplicationScoped
 @Slf4j
@@ -30,7 +35,7 @@ public class ScmContentEndpointImpl implements ScmContentEndpoint {
     ScmContentService service;
 
     @Override
-    @Authenticated
+    @RolesAllowed({ PNC_APP_ORCH_BUILD_READ, PNC_USERS, PNC_USERS_ADMIN, PNC_APP_REPOUR_USER })
     public Response archive(String url, List<String> revisions) {
         ScmContentService.Archive archive = service.archive(url, revisions);
         StreamingOutput body = out -> {
@@ -42,7 +47,7 @@ public class ScmContentEndpointImpl implements ScmContentEndpoint {
     }
 
     @Override
-    @Authenticated
+    @RolesAllowed({ PNC_APP_ORCH_BUILD_READ, PNC_USERS, PNC_USERS_ADMIN, PNC_APP_REPOUR_USER })
     public Response diff(String url, List<String> bases, List<String> heads) {
         ScmContentService.Diff diff = service.diff(url, bases, heads);
         if (!diff.diff().isComplete()) {
