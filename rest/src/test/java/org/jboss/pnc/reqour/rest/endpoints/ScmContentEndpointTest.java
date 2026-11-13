@@ -535,12 +535,28 @@ class ScmContentEndpointTest {
 
     @Test
     @TestSecurity(user = TEST_USER, roles = { "someone-else" })
-    void otherRolesAreForbidden() {
-        Response response = RestAssured.given()
+    void anyAuthenticatedCallerIsAllowed() {
+        // 400 from validation: past the security check
+        Response archive = RestAssured.given().queryParam("url", "").queryParam("revision", HEAD).get("/archive");
+        assertThat(archive.statusCode()).isEqualTo(400);
+        Response diff = RestAssured.given().queryParam("url", GITLAB_URL).queryParam("head", HEAD).get("/diff");
+        assertThat(diff.statusCode()).isEqualTo(400);
+    }
+
+    @Test
+    @TestSecurity
+    void anonymousCallersAreRejected() {
+        Response archive = RestAssured.given()
                 .queryParam("url", GITLAB_URL)
                 .queryParam("revision", HEAD)
                 .get("/archive");
-        assertThat(response.statusCode()).isEqualTo(403);
+        assertThat(archive.statusCode()).isEqualTo(401);
+        Response diff = RestAssured.given()
+                .queryParam("url", GITLAB_URL)
+                .queryParam("base", HEAD)
+                .queryParam("head", HEAD)
+                .get("/diff");
+        assertThat(diff.statusCode()).isEqualTo(401);
     }
 
     private static String blobId(byte[] content) {
