@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
+import java.util.List;
 
 import jakarta.inject.Inject;
 
@@ -84,6 +85,74 @@ class AdjustmentPusherTest {
 
         assertThat(actualPushResult.tag()).isEqualTo(version);
         assertThat(actualPushResult.commit()).isNotEqualTo(upstreamCommit);
+    }
+
+    @Test
+    void pushAlignedChanges_untrackedBuildOutput_isNotCommitted() throws IOException {
+        RepoInitializer.makeAlignmentChanges(ADJUST_DIR);
+        // what PME and builds leave behind when the project does not ignore its build output
+        for (String path : List.of(
+                "target/pom-manip-ext-marker.txt",
+                "my-app/target/alignmentReport.json",
+                "build/libs/app.jar",
+                ".gradle/8.5/checksums.lock")) {
+            Path file = ADJUST_DIR.resolve(path);
+            Files.createDirectories(file.getParent());
+            Files.writeString(file, "x");
+        }
+
+        AdjustmentPushResult result = adjustmentPusher
+                .pushAlignedChanges(mvnRequest(), aligned("1.0-aligned-00042"), true);
+
+        List<String> committed = git(ADJUST_DIR, "ls-tree", "-r", "--name-only", result.commit());
+        assertThat(committed).contains("my-app/pom.xml")
+                .noneMatch(path -> path.contains("target/") || path.contains("build/") || path.contains(".gradle/"));
+        assertThat(git(ADJUST_DIR, "show", result.commit() + ":my-app/pom.xml")).anyMatch(
+                line -> line.contains("1.0-aligned-00042"));
+        // the project's own ignore rules are not changed
+        assertThat(git(ADJUST_DIR, "status", "--porcelain", "--", ".gitignore")).isEmpty();
+    }
+
+    @Test
+    void pushAlignedChanges_trackedFileUnderBuildOutputDirectory_isStillCommitted() throws IOException {
+        Path tracked = ADJUST_DIR.resolve("target/tracked.txt");
+        Files.createDirectories(tracked.getParent());
+        Files.writeString(tracked, "upstream");
+        git(ADJUST_DIR, "add", "--force", "target/tracked.txt");
+        git(ADJUST_DIR, "commit", "-q", "-m", "a project that tracks a file under target/");
+        RepoInitializer.makeAlignmentChanges(ADJUST_DIR);
+        Files.writeString(tracked, "aligned");
+
+        AdjustmentPushResult result = adjustmentPusher
+                .pushAlignedChanges(mvnRequest(), aligned("1.0-aligned-00042"), true);
+
+        assertThat(git(ADJUST_DIR, "show", result.commit() + ":target/tracked.txt")).containsExactly("aligned");
+    }
+
+    private static AdjustRequest mvnRequest() {
+        return AdjustRequest.builder().buildConfigParameters(Collections.emptyMap()).buildType(BuildType.MVN).build();
+    }
+
+    private static ManipulatorResult aligned(String version) {
+        return ManipulatorResult.builder()
+                .versioningState(VersioningState.builder().executionRootVersion(version).build())
+                .build();
+    }
+
+    private static List<String> git(Path dir, String... args) throws IOException {
+        List<String> command = new java.util.ArrayList<>(List.of("git"));
+        command.addAll(List.of(args));
+        Process process = new ProcessBuilder(command).directory(dir.toFile()).redirectErrorStream(true).start();
+        String output = new String(process.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        try {
+            if (process.waitFor() != 0) {
+                throw new IOException("git " + String.join(" ", args) + " failed: " + output);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException(e);
+        }
+        return output.isEmpty() ? List.of() : List.of(output.split("\n"));
     }
 
     @Test
