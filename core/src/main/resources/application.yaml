@@ -11,6 +11,9 @@ quarkus:
         broker-list: kafka.example.com:443
         topic: kafka-topic
 
+  github-app:
+    app-id: 1234
+
 reqour:
   core:
     git:

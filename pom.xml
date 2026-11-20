@@ -69,6 +69,7 @@
 
     <!-- Dependencies versions -->
     <version.lombok>1.18.48</version.lombok>
+    <version.quarkus-github-app>2.16.0</version.quarkus-github-app>
     <version.quarkus-logging-json>3.6.0</version.quarkus-logging-json>
     <version.quarkus-logging-kafka>3.0.5</version.quarkus-logging-kafka>
     <version.pnc-api>4.0.2-SNAPSHOT</version.pnc-api>
@@ -265,6 +266,11 @@
         <artifactId>org.eclipse.jgit</artifactId>
         <version>${version.jgit}</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.quarkiverse.githubapp</groupId>
+        <artifactId>quarkus-github-app</artifactId>
+        <version>${version.quarkus-github-app}</version>
       </dependency>
       <dependency>
         <groupId>io.quarkiverse.wiremock</groupId>
