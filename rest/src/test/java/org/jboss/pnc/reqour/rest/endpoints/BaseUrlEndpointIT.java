@@ -11,12 +11,10 @@ import jakarta.ws.rs.core.MediaType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
-import io.quarkus.test.common.http.TestHTTPEndpoint;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 
 @QuarkusTest
-@TestHTTPEndpoint(BaseUrlEndpoint.class)
 class BaseUrlEndpointIT {
 
     @Test
@@ -27,7 +25,7 @@ class BaseUrlEndpointIT {
                 .when()
                 .redirects()
                 .follow(false)
-                .get()
+                .get("/")
                 .then()
                 .statusCode(303)
                 .and()
