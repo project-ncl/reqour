@@ -209,7 +209,8 @@ public class GitHubAppInstallationTokenProvider {
         Map<String, GHPermissionType> installationTokenPermissions = Map
                 .of("contents", contentsPermission, "metadata", metadataPermission);
         try {
-            GHAppInstallationToken installationToken = installation.createToken(installationTokenPermissions)
+            GHAppInstallationToken installationToken = installation.createToken()
+                    .permissions(installationTokenPermissions)
                     .repositories(repositories)
                     .create();
             Date expiresAt = installationToken.getExpiresAt();
