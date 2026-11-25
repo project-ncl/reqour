@@ -7,7 +7,6 @@ package org.jboss.pnc.reqour.runtime;
 import java.io.IOException;
 import java.net.URI;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -20,8 +19,7 @@ import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuth;
-import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
-import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
@@ -135,12 +133,8 @@ public class BeanFactory {
                 .withDescription(policy.description())
                 .withRetry()
                 .maxRetries(policy.retry().maxRetries())
-                .abortOn(
-                        List.of(
-                                NullPointerException.class,
-                                IllegalArgumentException.class,
-                                InvalidPrivateKeyException.class,
-                                GitHubAppInstallationNotFoundException.class))
+                // Retry only transient failures (5xx/transport); every other exception is permanent and aborts.
+                .retryOn(GitHubAppTransientException.class)
                 .withExponentialBackoff()
                 .factor(policy.retry().exponentialBackoff().factor())
                 .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)

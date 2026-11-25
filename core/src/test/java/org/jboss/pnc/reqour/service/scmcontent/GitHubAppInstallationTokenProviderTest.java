@@ -32,6 +32,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitHubAppAuthenticationException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationTokenException;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -674,6 +675,55 @@ class GitHubAppInstallationTokenProviderTest {
         }
 
         @Test
+        @DisplayName("a 5xx while authenticating as the App is a transient error, not an authentication failure")
+        void throwsTransientWhenAppAuthReturns500() {
+            wireMockServer.stubFor(
+                    get(urlEqualTo("/app"))
+                            .willReturn(
+                                    aResponse().withStatus(500)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody("{\"message\": \"Internal Server Error\"}")));
+
+            assertThatThrownBy(() -> obtainToken(pkcs1Pem, "my-org"))
+                    .isInstanceOf(GitHubAppTransientException.class)
+                    // A 5xx must not be reported as a permanent authentication failure.
+                    .isNotInstanceOf(GitHubAppAuthenticationException.class)
+                    .hasMessageContaining("failed due to a transient error");
+        }
+
+        @Test
+        @DisplayName("a 5xx during token creation is a transient error, not a token-minting failure")
+        void throwsTransientWhenTokenCreationReturns500() {
+            String baseUrl = getBaseUrl();
+            wireMockServer.stubFor(
+                    get(urlEqualTo("/orgs/transient-token-org/installation"))
+                            .willReturn(
+                                    aResponse()
+                                            .withStatus(200)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody("""
+                                                    {
+                                                      "id": 44444,
+                                                      "account": { "login": "transient-token-org", "id": 5 },
+                                                      "app_id": 123456,
+                                                      "access_tokens_url": "%s/app/installations/44444/access_tokens"
+                                                    }
+                                                    """.formatted(baseUrl))));
+            wireMockServer.stubFor(
+                    post(urlEqualTo("/app/installations/44444/access_tokens"))
+                            .willReturn(
+                                    aResponse()
+                                            .withStatus(500)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody("{\"message\": \"Internal Server Error\"}")));
+
+            assertThatThrownBy(() -> obtainToken(pkcs1Pem, "transient-token-org"))
+                    .isInstanceOf(GitHubAppTransientException.class)
+                    .isNotInstanceOf(GitHubAppInstallationTokenException.class)
+                    .hasMessageContaining("due to a transient error");
+        }
+
+        @Test
         @DisplayName("throws GitHubAppInstallationTokenException when token creation fails with 401")
         void throwsWhenTokenCreationFails() {
             String baseUrl = getBaseUrl();
@@ -730,7 +780,7 @@ class GitHubAppInstallationTokenProviderTest {
                                                     """)));
 
             assertThatThrownBy(() -> obtainToken(pkcs1Pem, "server-err-org"))
-                    .isInstanceOf(GitHubAppException.class)
+                    .isInstanceOf(GitHubAppTransientException.class)
                     // A 5xx must not be misreported as a missing installation (that is reserved for a genuine 404).
                     .isNotInstanceOf(GitHubAppInstallationNotFoundException.class)
                     .hasMessageContaining(
@@ -738,6 +788,26 @@ class GitHubAppInstallationTokenProviderTest {
                     .hasCauseInstanceOf(IOException.class);
 
             wireMockServer.verify(1, getRequestedFor(urlEqualTo("/orgs/server-err-org/installation")));
+        }
+
+        @Test
+        @DisplayName("a 403 during installation lookup is a permanent error, not transient and not installation-not-found")
+        void throwsPermanentWhenInstallationLookupReturns403() {
+            wireMockServer.stubFor(
+                    get(urlEqualTo("/orgs/forbidden-org/installation"))
+                            .willReturn(
+                                    aResponse()
+                                            .withStatus(403)
+                                            .withHeader("Content-Type", "application/json")
+                                            .withBody("{\"message\":\"Forbidden\"}")));
+
+            assertThatThrownBy(() -> obtainToken(pkcs1Pem, "forbidden-org"))
+                    .isInstanceOf(GitHubAppException.class)
+                    // A 4xx other than 404 is permanent: it must not be retried (transient) nor treated as missing.
+                    .isNotInstanceOf(GitHubAppTransientException.class)
+                    .isNotInstanceOf(GitHubAppInstallationNotFoundException.class)
+                    .hasMessageContaining(
+                            "Failed to look up the GitHub App (id=123456) installation for organization: forbidden-org");
         }
 
         @Test

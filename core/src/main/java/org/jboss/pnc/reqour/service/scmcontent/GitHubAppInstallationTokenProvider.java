@@ -4,6 +4,7 @@
  */
 package org.jboss.pnc.reqour.service.scmcontent;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringReader;
 import java.security.PrivateKey;
@@ -24,6 +25,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitHubAppAuthenticationException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationTokenException;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
 import org.jboss.pnc.reqour.config.GitHubAppInstallationTokenFaultTolerancePolicy;
 import org.kohsuke.github.GHApp;
@@ -33,6 +35,7 @@ import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHPermissionType;
 import org.kohsuke.github.GitHub;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.HttpException;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
 import io.smallrye.faulttolerance.api.ApplyGuard;
@@ -120,10 +123,15 @@ public class GitHubAppInstallationTokenProvider {
      * @throws IllegalArgumentException if {@code appId} or {@code organization} is blank, or {@code repositories}
      *         is empty
      * @throws InvalidPrivateKeyException if {@code privateKeyPem} is not a valid PKCS#1/PKCS#8 RSA private key
-     * @throws GitHubAppAuthenticationException if authenticating as the App fails
+     * @throws GitHubAppAuthenticationException if authenticating as the App fails permanently (e.g. a 4xx such as bad
+     *         credentials or an unknown App)
      * @throws GitHubAppInstallationNotFoundException if the App is not installed on {@code organization}
-     * @throws GitHubAppInstallationTokenException if the token token cannot be minted or is returned without an expiry
-     * @throws GitHubAppException if looking up the installation fails for a reason other than a missing installation
+     * @throws GitHubAppInstallationTokenException if the token cannot be minted for a permanent reason (e.g. a 4xx) or
+     *         is returned without an expiry
+     * @throws GitHubAppTransientException if any step fails for a transient reason (a 5xx or transport error) worth
+     *         retrying
+     * @throws GitHubAppException if looking up the installation fails for a permanent reason other than a missing
+     *         installation (e.g. a 403)
      */
     @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(
@@ -169,6 +177,13 @@ public class GitHubAppInstallationTokenProvider {
 
             app = gitHubAsApp.getApp();
         } catch (IOException | RuntimeException e) {
+            if (isTransient(e)) {
+                // A 5xx or a transport error: GitHub may be down, not necessarily bad credentials. Let the guard retry.
+                throw new GitHubAppTransientException(
+                        "Authenticating as the GitHub App (id=" + appId + ") failed due to a transient error",
+                        e);
+            }
+            // A 4xx (e.g. 401/403): the credentials or App id are wrong; retrying will not help.
             throw new GitHubAppAuthenticationException("Authentication as the GitHub App (id=" + appId + ") failed", e);
         }
 
@@ -181,11 +196,14 @@ public class GitHubAppInstallationTokenProvider {
                     "GitHub App (id=" + appId + ") installation not found for organization: " + organization,
                     e);
         } catch (IOException e) {
-            // Non-404 (e.g. a 5xx or a transport error): a transient/unexpected failure, not a missing installation.
-            throw new GitHubAppException(
-                    "Failed to look up the GitHub App (id=" + appId + ") installation for organization: "
-                            + organization,
-                    e);
+            String message = "Failed to look up the GitHub App (id=" + appId + ") installation for organization: "
+                    + organization;
+            if (isTransient(e)) {
+                // A 5xx or a transport error, not a missing installation: a transient failure worth retrying.
+                throw new GitHubAppTransientException(message + " due to a transient error", e);
+            }
+            // A permanent non-404 failure (e.g. a 403): retrying will not help.
+            throw new GitHubAppException(message, e);
         }
 
         Map<String, GHPermissionType> installationTokenPermissions = Map
@@ -201,10 +219,40 @@ public class GitHubAppInstallationTokenProvider {
             }
             return new InstallationToken(installationToken.getToken(), expiresAt.toInstant());
         } catch (IOException e) {
+            if (isTransient(e)) {
+                // A 5xx or a transport error: a transient failure worth retrying, not a credentials/permission problem.
+                throw new GitHubAppTransientException(
+                        "Failed to obtain an installation token for organization: " + organization
+                                + " due to a transient error",
+                        e);
+            }
+            // A 4xx (e.g. 401/403): bad credentials or insufficient permissions; retrying will not help.
             throw new GitHubAppInstallationTokenException(
                     "Failed to obtain an installation token for organization: " + organization,
                     e);
         }
+    }
+
+    /**
+     * Classifies a GitHub call failure as transient (worth retrying) or permanent. A transport-level error or a 5xx
+     * server response is transient; a 4xx response (e.g. a 401 for bad credentials or a 404 for a missing resource) is
+     * permanent, since retrying it would only repeat the same failure.
+     */
+    private static boolean isTransient(Throwable e) {
+        for (Throwable current = e; current != null; current = current.getCause()) {
+            if (current instanceof HttpException httpException) {
+                int responseCode = httpException.getResponseCode();
+                // A non-positive code means the status line could not be read, i.e. a transport-level failure.
+                return responseCode <= 0 || responseCode >= 500;
+            }
+            if (current instanceof FileNotFoundException) {
+                // kohsuke surfaces a 404 as a FileNotFoundException rather than an HttpException.
+                return false;
+            }
+        }
+        // No HTTP status anywhere in the chain: a plain IOException is a transport error (timeout, connection
+        // refused, ...) and is transient; anything else (e.g. a RuntimeException while signing the JWT) is permanent.
+        return e instanceof IOException;
     }
 
     /** Resolves the API endpoint, falling back to {@link #DEFAULT_API_URL} when {@code apiUrl} is null or blank. */
