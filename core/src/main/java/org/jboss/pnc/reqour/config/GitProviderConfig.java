@@ -7,6 +7,7 @@ package org.jboss.pnc.reqour.config;
 import java.util.List;
 import java.util.Optional;
 
+import io.smallrye.config.WithConverter;
 import io.smallrye.config.WithParentName;
 
 /**
@@ -28,6 +29,8 @@ public interface GitProviderConfig {
 
     String gitUrlInternalTemplate();
 
+    /** Stripped once here for every consumer (REST clients, git, SCM content). */
+    @WithConverter(StrippedStringConverter.class)
     String token();
 
     @WithParentName

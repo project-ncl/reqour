@@ -382,7 +382,7 @@ class ScmContentEndpointTest {
                 .get("/diff");
 
         assertThat(response.statusCode()).isEqualTo(502);
-        assertThat(response.asString()).contains("The git provider returned HTTP 401")
+        assertThat(response.asString()).contains("The git provider rejected the credentials of reqour (HTTP 401)")
                 .contains("BAD_GATEWAY")
                 .doesNotContain("Unauthorized");
     }
