@@ -22,7 +22,9 @@ import jakarta.inject.Inject;
 
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import org.kohsuke.github.GHPermissionType;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Fault;
 
 import io.quarkiverse.wiremock.devservice.ConnectWireMock;
 import io.quarkus.test.junit.QuarkusTest;
@@ -188,5 +191,89 @@ class GitHubAppInstallationTokenProviderGuardTest {
 
         // A missing installation is permanent, so the guard must abort instead of retrying: exactly one lookup.
         wiremock.verifyThat(1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
+    @DisplayName("exhausts the retries on a persistent 5xx and then fails with a transient exception")
+    void exhaustsRetriesOnPersistentServerError() {
+        String org = "down-org";
+
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(500)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"message\":\"Internal Server Error\"}")));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppTransientException.class);
+
+        // Every attempt is transient, so the guard retries until exhausted: maxRetries + 1 lookups.
+        int maxRetries = ConfigProvider.getConfig()
+                .getValue(
+                        "reqour.core.git.github-app-installation-token.fault-tolerance.retry.max-retries",
+                        Integer.class);
+        wiremock.verifyThat(maxRetries + 1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
+    @DisplayName("does not retry a permanent 401 unauthorized installation lookup")
+    void doesNotRetryUnauthorized() {
+        String org = "unauthorized-org";
+
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(401)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"message\":\"Bad credentials\"}")));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppException.class);
+
+        // A 401 is permanent, so the guard must abort instead of retrying: exactly one lookup.
+        wiremock.verifyThat(1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
+    @DisplayName("does not retry a permanent 403 forbidden installation lookup")
+    void doesNotRetryForbidden() {
+        String org = "forbidden-org";
+
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(403)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"message\":\"Forbidden\"}")));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppException.class);
+
+        // A 403 is permanent, so the guard must abort instead of retrying: exactly one lookup.
+        wiremock.verifyThat(1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
+    @DisplayName("retries a transport-level error and then fails with a transient exception")
+    void retriesTransportErrorThenFails() {
+        String org = "reset-org";
+
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER)));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppTransientException.class);
+
+        // A transport error is transient, so the guard retries until exhausted: maxRetries + 1 lookups.
+        int maxRetries = ConfigProvider.getConfig()
+                .getValue(
+                        "reqour.core.git.github-app-installation-token.fault-tolerance.retry.max-retries",
+                        Integer.class);
+        wiremock.verifyThat(maxRetries + 1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
     }
 }
