@@ -25,7 +25,7 @@ import org.jboss.pnc.reqour.common.exceptions.GitHubAppException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationTokenException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
-import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
+import org.jboss.pnc.reqour.config.GitHubAppInstallationTokenFaultTolerancePolicy;
 import org.kohsuke.github.GHApp;
 import org.kohsuke.github.GHAppInstallation;
 import org.kohsuke.github.GHAppInstallationToken;
@@ -42,10 +42,10 @@ import io.smallrye.faulttolerance.api.ApplyGuard;
  * PKCS#1 ({@code -----BEGIN RSA PRIVATE KEY-----}) or PKCS#8 ({@code -----BEGIN PRIVATE KEY-----}) private key.
  *
  * <p>
- * The public {@code getInstallationToken} methods are guarded by the shared
- * {@value GitProviderFaultTolerancePolicy#GIT_PROVIDERS_FAULT_TOLERANCE_GUARD} fault-tolerance policy, which applies
- * retry (with exponential backoff) and a timeout. Any failure that is not retried, or that remains after the retries
- * are exhausted, is surfaced as a {@link GitHubAppException}.
+ * The public {@code getInstallationToken} methods are guarded by the
+ * {@value GitHubAppInstallationTokenFaultTolerancePolicy#GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD}
+ * fault-tolerance policy, which applies retry (with exponential backoff) and a timeout. Any failure that is not
+ * retried, or that remains after the retries are exhausted, is surfaced as a {@link GitHubAppException}.
  */
 @ApplicationScoped
 public class GitHubAppInstallationTokenProvider {
@@ -81,7 +81,7 @@ public class GitHubAppInstallationTokenProvider {
      *         {@link #getInstallationToken(String, String, String, String, GHPermissionType, GHPermissionType, List)}
      *         for the specific subtypes
      */
-    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(
             String appId,
             String privateKeyPem,
@@ -125,7 +125,7 @@ public class GitHubAppInstallationTokenProvider {
      * @throws GitHubAppException if looking up the installation fails for a reason other than a missing installation,
      *         or if the installation token cannot be minted or is returned without an expiry
      */
-    @ApplyGuard(GitProviderFaultTolerancePolicy.GIT_PROVIDERS_FAULT_TOLERANCE_GUARD)
+    @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(
             String appId,
             String privateKeyPem,

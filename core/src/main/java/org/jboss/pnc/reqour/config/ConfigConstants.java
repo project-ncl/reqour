@@ -21,6 +21,8 @@ public class ConfigConstants {
     public static final String GIT_PROVIDERS = REQOUR_CORE_CONFIG + ".git.git-providers";
     public static final String GIT_PROVIDERS_FAULT_TOLERANCE = REQOUR_CORE_CONFIG
             + ".git.git-providers.fault-tolerance";
+    public static final String GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE = REQOUR_CORE_CONFIG
+            + ".git.github-app-installation-token.fault-tolerance";
     public static final String BIFROST_UPLOADER_URL = REQOUR_CORE_CONFIG + ".log.final-log.bifrost-uploader.base-url";
     public static final String GITLAB_INTERNAL_URL = REQOUR_CORE_CONFIG
             + ".git.git-providers.gitlab.git-url-internal-template";

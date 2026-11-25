@@ -6,6 +6,8 @@ package org.jboss.pnc.reqour.runtime;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,9 +20,11 @@ import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuth;
+import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.GitHubAppInstallationTokenFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.api.github.GitHubRestClient;
@@ -117,6 +121,34 @@ public class BeanFactory {
                 .duration(
                         gitProviderFaultTolerancePolicy.timeout().duration(),
                         gitProviderFaultTolerancePolicy.timeout().durationUnit())
+                .done()
+                .build();
+    }
+
+    @Produces
+    @Identifier(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
+    public Guard internalRetryGitHubAppInstallationToken(
+            GitHubAppInstallationTokenFaultTolerancePolicy policy,
+            @UserLogger Logger userLogger) {
+        return Guard.create()
+                .withDescription(policy.description())
+                .withRetry()
+                .maxRetries(policy.retry().maxRetries())
+                .abortOn(
+                        List.of(
+                                NullPointerException.class,
+                                IllegalArgumentException.class,
+                                InvalidPrivateKeyException.class))
+                .withExponentialBackoff()
+                .factor(policy.retry().exponentialBackoff().factor())
+                .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)
+                .done()
+                .beforeRetry(
+                        t -> userLogger
+                                .warn("Performing retry, last exception was: {}: {}", t.getMessage(), t.getCause(), t))
+                .done()
+                .withTimeout()
+                .duration(policy.timeout().durationSeconds(), ChronoUnit.SECONDS)
                 .done()
                 .build();
     }

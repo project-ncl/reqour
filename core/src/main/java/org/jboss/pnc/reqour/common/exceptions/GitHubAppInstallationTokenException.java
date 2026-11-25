@@ -5,7 +5,7 @@
 package org.jboss.pnc.reqour.common.exceptions;
 
 /**
- * Thrown when the GitHub App is not installed on the specified organization or target.
+ * Thrown when minting a GitHub App installation token fails, or the token is returned without an expiry.
  */
 public class GitHubAppInstallationTokenException extends GitHubAppException {
 
