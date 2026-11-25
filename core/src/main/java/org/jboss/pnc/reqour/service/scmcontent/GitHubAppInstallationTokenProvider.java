@@ -34,7 +34,9 @@ import org.kohsuke.github.GHAppInstallationToken;
 import org.kohsuke.github.GHFileNotFoundException;
 import org.kohsuke.github.GHPermissionType;
 import org.kohsuke.github.GitHub;
+import org.kohsuke.github.GitHubAbuseLimitHandler;
 import org.kohsuke.github.GitHubBuilder;
+import org.kohsuke.github.GitHubRateLimitHandler;
 import org.kohsuke.github.HttpException;
 import org.kohsuke.github.extras.authorization.JWTTokenProvider;
 
@@ -176,6 +178,11 @@ public class GitHubAppInstallationTokenProvider {
             gitHubAsApp = new GitHubBuilder()
                     .withEndpoint(endpoint)
                     .withAuthorizationProvider(new JWTTokenProvider(appId, privateKey))
+                    // The default WAIT handlers sleep inside the HTTP client until the rate/abuse limit resets, which
+                    // the guard cannot bound. FAIL instead throws immediately; isTransient() maps the resulting
+                    // HttpException to a GitHubAppTransientException so the guard retries it with its own backoff.
+                    .withRateLimitHandler(GitHubRateLimitHandler.FAIL)
+                    .withAbuseLimitHandler(GitHubAbuseLimitHandler.FAIL)
                     .build();
 
             app = gitHubAsApp.getApp();
@@ -238,13 +245,18 @@ public class GitHubAppInstallationTokenProvider {
     }
 
     /**
-     * Classifies a GitHub call failure as transient (worth retrying) or permanent. A transport-level error or a 5xx
-     * server response is transient; a 4xx response (e.g. a 401 for bad credentials or a 404 for a missing resource) is
-     * permanent, since retrying it would only repeat the same failure.
+     * Classifies a GitHub call failure as transient (worth retrying) or permanent. A transport-level error, a 5xx
+     * server response, or a rate/abuse-limit rejection is transient; any other 4xx response (e.g. a 401 for bad
+     * credentials or a 404 for a missing resource) is permanent, since retrying it would only repeat the same failure.
      */
     private static boolean isTransient(Throwable e) {
         for (Throwable current = e; current != null; current = current.getCause()) {
             if (current instanceof HttpException httpException) {
+                // The FAIL rate/abuse-limit handlers throw an HttpException (often a 403/429) that is transient: the
+                // limit resets after a while, so the guard should back off and retry rather than give up.
+                if (isRateOrAbuseLimit(httpException)) {
+                    return true;
+                }
                 int responseCode = httpException.getResponseCode();
                 // A non-positive code means the status line could not be read, i.e. a transport-level failure.
                 return responseCode <= 0 || responseCode >= 500;
@@ -257,6 +269,22 @@ public class GitHubAppInstallationTokenProvider {
         // No HTTP status anywhere in the chain: a plain IOException is a transport error (timeout, connection
         // refused, ...) and is transient; anything else (e.g. a RuntimeException while signing the JWT) is permanent.
         return e instanceof IOException;
+    }
+
+    /**
+     * Recognizes the {@link HttpException} thrown by {@link GitHubRateLimitHandler#FAIL} and
+     * {@link GitHubAbuseLimitHandler#FAIL}. These handlers do not use a dedicated exception type, so they are matched
+     * by
+     * the fixed messages the library attaches ({@code "API rate limit reached"} and {@code "Abuse limit reached"}),
+     * which lets a rate/abuse-limit 403/429 be treated as transient without also retrying an ordinary 403.
+     */
+    private static boolean isRateOrAbuseLimit(HttpException httpException) {
+        String message = httpException.getMessage();
+        if (message == null) {
+            return false;
+        }
+        String lower = message.toLowerCase();
+        return lower.contains("rate limit reached") || lower.contains("abuse limit reached");
     }
 
     /** Resolves the API endpoint, falling back to {@link #DEFAULT_API_URL} when {@code apiUrl} is null or blank. */

@@ -258,6 +258,33 @@ class GitHubAppInstallationTokenProviderGuardTest {
     }
 
     @Test
+    @DisplayName("treats a rate-limit rejection as transient and retries it until exhausted")
+    void retriesRateLimitThenFails() {
+        String org = "throttled-org";
+
+        // The FAIL rate-limit handler fires on a 403 carrying X-RateLimit-Remaining: 0, throwing an HttpException that
+        // the provider maps to a transient failure instead of letting the HTTP client sleep until the limit resets.
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(403)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withHeader("X-RateLimit-Remaining", "0")
+                                        .withBody("{\"message\":\"API rate limit exceeded\"}")));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppTransientException.class);
+
+        // A rate-limit rejection is transient, so the guard retries until exhausted: maxRetries + 1 lookups.
+        int maxRetries = ConfigProvider.getConfig()
+                .getValue(
+                        "reqour.core.git.github-app-installation-token.fault-tolerance.retry.max-retries",
+                        Integer.class);
+        wiremock.verifyThat(maxRetries + 1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
     @DisplayName("retries a transport-level error and then fails with a transient exception")
     void retriesTransportErrorThenFails() {
         String org = "reset-org";
