@@ -217,7 +217,10 @@ public class GitHubAppInstallationTokenProvider {
         if (pem == null) {
             throw new InvalidPrivateKeyException("Private key PEM must not be null");
         }
-        try (PEMParser parser = new PEMParser(new StringReader(pem))) {
+        // Secrets/env vars often store the PEM with literal "\n" (and "\r\n") escape sequences rather than real line
+        // breaks; PEMParser needs actual newlines, so normalize them back before parsing.
+        String normalizedPem = pem.replace("\\r\\n", "\n").replace("\\n", "\n");
+        try (PEMParser parser = new PEMParser(new StringReader(normalizedPem))) {
             Object parsed = parser.readObject();
             JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
             PrivateKey key;

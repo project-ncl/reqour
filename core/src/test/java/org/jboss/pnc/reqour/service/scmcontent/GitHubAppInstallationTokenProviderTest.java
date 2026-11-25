@@ -160,6 +160,46 @@ class GitHubAppInstallationTokenProviderTest {
         }
 
         @Test
+        @DisplayName("parses a PKCS#1 PEM whose line breaks are literal \\n escape sequences")
+        void parsesPkcs1PrivateKeyWithEscapedNewlines() throws Exception {
+            // Secrets/env vars often store the PEM with the two characters "\n" instead of real line breaks.
+            String escapedPem = pkcs1Pem.replace("\n", "\\n");
+            assertThat(escapedPem).doesNotContain("\n").contains("\\n");
+
+            PrivateKey privateKey = provider.parsePrivateKeyPem(escapedPem);
+
+            assertThat(privateKey).isNotNull();
+            assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+            assertThat(privateKey).isInstanceOf(RSAPrivateKey.class);
+        }
+
+        @Test
+        @DisplayName("parses a PKCS#1 PEM whose line breaks are literal \\r\\n escape sequences")
+        void parsesPkcs1PrivateKeyWithEscapedCrlf() throws Exception {
+            String escapedPem = pkcs1Pem.replace("\n", "\\r\\n");
+            assertThat(escapedPem).doesNotContain("\n").contains("\\r\\n");
+
+            PrivateKey privateKey = provider.parsePrivateKeyPem(escapedPem);
+
+            assertThat(privateKey).isNotNull();
+            assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+            assertThat(privateKey).isInstanceOf(RSAPrivateKey.class);
+        }
+
+        @Test
+        @DisplayName("parses a PKCS#1 PEM containing double literal \\n escape sequences")
+        void parsesPkcs1PrivateKeyWithDoubleEscapedNewlines() throws Exception {
+            // Blank lines show up as consecutive "\n\n"; every occurrence must be normalized.
+            String escapedPem = "\\n\\n" + pkcs1Pem.replace("\n", "\\n") + "\\n\\n";
+
+            PrivateKey privateKey = provider.parsePrivateKeyPem(escapedPem);
+
+            assertThat(privateKey).isNotNull();
+            assertThat(privateKey.getAlgorithm()).isEqualTo("RSA");
+            assertThat(privateKey).isInstanceOf(RSAPrivateKey.class);
+        }
+
+        @Test
         @DisplayName("parses PKCS#8 private key successfully")
         void parsesPkcs8PrivateKey() throws Exception {
             assertThat(pkcs8Pem).contains("BEGIN PRIVATE KEY");
