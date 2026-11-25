@@ -5,7 +5,7 @@
 package org.jboss.pnc.reqour.common.exceptions;
 
 /**
- * Thrown when authenticating as the GitHub App or generating an installation token fails.
+ * Thrown when authenticating as the GitHub App
  */
 public class GitHubAppAuthenticationException extends GitHubAppException {
 

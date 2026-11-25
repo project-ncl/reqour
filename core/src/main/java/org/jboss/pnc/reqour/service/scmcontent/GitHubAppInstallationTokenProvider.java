@@ -122,8 +122,8 @@ public class GitHubAppInstallationTokenProvider {
      * @throws InvalidPrivateKeyException if {@code privateKeyPem} is not a valid PKCS#1/PKCS#8 RSA private key
      * @throws GitHubAppAuthenticationException if authenticating as the App fails
      * @throws GitHubAppInstallationNotFoundException if the App is not installed on {@code organization}
-     * @throws GitHubAppException if looking up the installation fails for a reason other than a missing installation,
-     *         or if the installation token cannot be minted or is returned without an expiry
+     * @throws GitHubAppInstallationTokenException if the token token cannot be minted or is returned without an expiry
+     * @throws GitHubAppException if looking up the installation fails for a reason other than a missing installation
      */
     @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(
@@ -213,7 +213,7 @@ public class GitHubAppInstallationTokenProvider {
     }
 
     /** Parses an RSA private key from a PKCS#1 or PKCS#8 PEM string. */
-    PrivateKey parsePrivateKeyPem(String pem) throws InvalidPrivateKeyException {
+    PrivateKey parsePrivateKeyPem(String pem) {
         if (pem == null) {
             throw new InvalidPrivateKeyException("Private key PEM must not be null");
         }
@@ -235,6 +235,8 @@ public class GitHubAppInstallationTokenProvider {
                 throw new InvalidPrivateKeyException("Unsupported private key algorithm: " + key.getAlgorithm());
             }
             return key;
+        } catch (InvalidPrivateKeyException e) {
+            throw e;
         } catch (IOException | RuntimeException e) {
             throw new InvalidPrivateKeyException("Failed to parse private key PEM: " + e.getMessage(), e);
         }
