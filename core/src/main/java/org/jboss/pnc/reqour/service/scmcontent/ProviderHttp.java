@@ -37,7 +37,8 @@ import lombok.extern.slf4j.Slf4j;
  * <li>Provider errors become {@link ScmContentException}s with a generic message (details are logged): 404 stays 404
  * (callers try the next candidate), timeouts are 504 and anything else is 502.</li>
  * <li>Bodies read into memory have a deadline and a size limit; streamed bodies are aborted when idle.</li>
- * <li>I/O errors, 5xx and 429 are retried with a backoff, honouring {@code Retry-After}; timeouts are not.</li>
+ * <li>I/O errors, 5xx, 429 and rate-limiting 403 are retried with a backoff, honouring {@code Retry-After}; timeouts
+ * are not.</li>
  * </ul>
  */
 @Slf4j
@@ -97,7 +98,8 @@ class ProviderHttp {
     ProviderHttp(HttpClient client, String authHeader, String authValue, Settings settings) {
         this.client = client;
         this.authHeader = authHeader;
-        this.authValue = authValue;
+        // a token pasted into a secret often ends with a line break, which is not a valid header value
+        this.authValue = authValue == null ? null : authValue.strip();
         this.settings = settings;
         this.deadline = System.nanoTime() + settings.requestBudget().toNanos();
         this.fetchBudget = settings.maxFetchedBytes();
@@ -234,7 +236,7 @@ class ProviderHttp {
                     .header("Accept", accept)
                     .header("User-Agent", "reqour");
             if (sameOrigin(uri, current)) {
-                request.header(authHeader, authValue);
+                credentials(request, current);
             }
             HttpResponse<InputStream> response = send(request.GET().build());
             int status = response.statusCode();
@@ -257,6 +259,25 @@ class ProviderHttp {
             throw error(current, status, response);
         }
         throw new ScmContentException(ScmContentException.BAD_GATEWAY, "Too many redirects from the git provider");
+    }
+
+    /**
+     * Adds the credentials header. A value that is not a valid header (e.g. a line break inside the token) is a
+     * configuration error, reported without the value: the JDK's message would contain it.
+     */
+    private void credentials(HttpRequest.Builder request, URI uri) {
+        try {
+            request.header(authHeader, authValue);
+        } catch (IllegalArgumentException e) {
+            log.error(
+                    "The {} credential configured for {} is not a valid HTTP header value (check it for control"
+                            + " characters such as line breaks, or characters outside visible ASCII)",
+                    authHeader,
+                    uri.getHost());
+            throw new ScmContentException(
+                    ScmContentException.BAD_GATEWAY,
+                    "The git provider credentials of reqour are misconfigured");
+        }
     }
 
     private HttpResponse<InputStream> send(HttpRequest request) {
@@ -335,10 +356,32 @@ class ProviderHttp {
     private static ScmContentException error(URI uri, int status, HttpResponse<InputStream> response) {
         String preview = preview(response.body());
         log.warn("HTTP {} from {}{}", status, withoutQuery(uri), preview.isBlank() ? "" : ": " + preview);
+        boolean rateLimited = status == 429 || (status == 403 && rateLimited(response));
+        String message;
+        if (rateLimited) {
+            message = "The git provider rate-limited reqour (HTTP " + status + ")";
+        } else if (status == 401) {
+            message = "The git provider rejected the credentials of reqour (HTTP 401)";
+        } else if (status == 403) {
+            message = "The git provider refused the request (HTTP 403): check the permissions of the credentials of"
+                    + " reqour";
+        } else {
+            message = "The git provider returned HTTP " + status;
+        }
         return new ScmContentException(
                 status == 404 ? ScmContentException.NOT_FOUND : ScmContentException.BAD_GATEWAY,
-                "The git provider returned HTTP " + status,
-                new ProviderStatus(status, preview, retryAfter(response)));
+                message,
+                new ProviderStatus(status, preview, retryAfter(response), rateLimited));
+    }
+
+    /**
+     * GitHub answers 403, not only 429, when it rate-limits: with {@code Retry-After} (secondary limits) or with no
+     * request left ({@code X-RateLimit-Remaining: 0}); GitLab uses {@code RateLimit-Remaining}.
+     */
+    static boolean rateLimited(HttpResponse<?> response) {
+        return response.headers().firstValue("Retry-After").isPresent()
+                || "0".equals(response.headers().firstValue("X-RateLimit-Remaining").map(String::trim).orElse(null))
+                || "0".equals(response.headers().firstValue("RateLimit-Remaining").map(String::trim).orElse(null));
     }
 
     private static Duration retryAfter(HttpResponse<?> response) {
@@ -358,7 +401,7 @@ class ProviderHttp {
         if (e.getStatus() != ScmContentException.BAD_GATEWAY || !(e.getCause() instanceof ProviderStatus status)) {
             return false;
         }
-        return status.status == 0 || status.status >= 500 || status.status == 429;
+        return status.status == 0 || status.status >= 500 || status.rateLimited;
     }
 
     private Duration retryDelay(ScmContentException e, Duration regular) {
@@ -443,12 +486,15 @@ class ProviderHttp {
         final int status;
         final String preview;
         final Duration retryAfter;
+        /** 429, or a 403 that rate-limits: retried like a server error. */
+        final boolean rateLimited;
 
-        ProviderStatus(int status, String preview, Duration retryAfter) {
+        ProviderStatus(int status, String preview, Duration retryAfter, boolean rateLimited) {
             super("HTTP " + status, null, false, false);
             this.status = status;
             this.preview = preview;
             this.retryAfter = retryAfter;
+            this.rateLimited = rateLimited;
         }
 
         ProviderStatus(int status, String preview, Throwable cause) {
@@ -456,6 +502,7 @@ class ProviderHttp {
             this.status = status;
             this.preview = preview;
             this.retryAfter = null;
+            this.rateLimited = false;
         }
     }
 

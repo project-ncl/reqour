@@ -126,6 +126,88 @@ class ProviderHttpTest {
     }
 
     @Test
+    void aTokenEndingWithALineBreakIsTrimmed() {
+        HttpServer provider = server("provider", exchange -> send(exchange, 200, "ok"));
+        ProviderHttp http = new ProviderHttp(ProviderHttp.newClient(FAST), "Authorization", "token\n", FAST);
+
+        assertThat(read(http, url(provider, "/x"))).isEqualTo("ok");
+        assertThat(authorizations).containsEntry("provider /x", "token");
+    }
+
+    @Test
+    void anInvalidTokenIsAConfigurationErrorThatDoesNotShowIt() {
+        HttpServer provider = server("provider", exchange -> send(exchange, 200, "ok"));
+        ProviderHttp http = new ProviderHttp(ProviderHttp.newClient(FAST), "Authorization", "sec\nret", FAST);
+
+        assertThatThrownBy(() -> read(http, url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> {
+                    assertThat(e.getStatus()).isEqualTo(ScmContentException.BAD_GATEWAY);
+                    assertThat(e.getMessage()).isEqualTo("The git provider credentials of reqour are misconfigured")
+                            .doesNotContain("sec");
+                    assertThat(e.getCause()).isNull();
+                });
+        assertThat(authorizations).isEmpty();
+    }
+
+    @Test
+    void rejectedCredentialsAreReportedAsSuch() {
+        HttpServer provider = server("provider", exchange -> send(exchange, 401, "401 Unauthorized"));
+
+        assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> {
+                    assertThat(e.getStatus()).isEqualTo(ScmContentException.BAD_GATEWAY);
+                    assertThat(e.getMessage())
+                            .isEqualTo("The git provider rejected the credentials of reqour (HTTP 401)");
+                });
+    }
+
+    @Test
+    void aRateLimiting403IsRetriedAndNotBlamedOnTheCredentials() {
+        AtomicInteger calls = new AtomicInteger();
+        HttpServer provider = server("provider", exchange -> {
+            if (calls.incrementAndGet() == 1) {
+                exchange.getResponseHeaders().add("Retry-After", "0");
+                send(exchange, 403, "You have exceeded a secondary rate limit");
+            } else {
+                send(exchange, 200, "ok");
+            }
+        });
+
+        assertThat(read(http(), url(provider, "/x"))).isEqualTo("ok");
+        assertThat(calls).hasValue(2);
+    }
+
+    @Test
+    void anExhaustedRateLimitIsReportedAsSuch() {
+        HttpServer provider = server("provider", exchange -> {
+            exchange.getResponseHeaders().add("X-RateLimit-Remaining", "0");
+            send(exchange, 403, "API rate limit exceeded");
+        });
+
+        assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> assertThat(e.getMessage()).isEqualTo("The git provider rate-limited reqour (HTTP 403)"));
+    }
+
+    @Test
+    void aPlain403IsAboutPermissions() {
+        AtomicInteger calls = new AtomicInteger();
+        HttpServer provider = server("provider", exchange -> {
+            calls.incrementAndGet();
+            send(exchange, 403, "Resource not accessible by integration");
+        });
+
+        assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> assertThat(e.getMessage()).isEqualTo(
+                        "The git provider refused the request (HTTP 403): check the permissions of the credentials"
+                                + " of reqour"));
+        assertThat(calls).hasValue(1);
+    }
+
+    @Test
     void aStalledBodyTimesOut() {
         HttpServer provider = server("provider", exchange -> {
             exchange.sendResponseHeaders(200, 0);

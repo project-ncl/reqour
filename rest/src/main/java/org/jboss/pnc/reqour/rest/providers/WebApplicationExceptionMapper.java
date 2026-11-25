@@ -22,8 +22,10 @@ public class WebApplicationExceptionMapper implements ExceptionMapper<WebApplica
     public Response toResponse(WebApplicationException exception) {
         if (exception.getResponse().getStatus() / 100 == 5) {
             log.error("Web application exception occurred: ", exception);
+            // like AllOtherExceptionsMapper: a 5xx comes from the framework or a client library, whose message can
+            // contain anything; the details stay in the log
             return Response.status(exception.getResponse().getStatus())
-                    .entity(new ErrorResponse(exception))
+                    .entity(new ErrorResponse(exception.getClass().getSimpleName(), AllOtherExceptionsMapper.MESSAGE))
                     .type(MediaType.APPLICATION_JSON_TYPE)
                     .build();
         }
