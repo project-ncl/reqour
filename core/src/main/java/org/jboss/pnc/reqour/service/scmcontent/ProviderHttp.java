@@ -15,6 +15,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.jboss.pnc.reqour.common.exceptions.ScmContentException;
+import org.jboss.pnc.reqour.common.utils.HttpHeaderValues;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
@@ -37,8 +39,10 @@ import lombok.extern.slf4j.Slf4j;
  * <li>Provider errors become {@link ScmContentException}s with a generic message (details are logged): 404 stays 404
  * (callers try the next candidate), timeouts are 504 and anything else is 502.</li>
  * <li>Bodies read into memory have a deadline and a size limit; streamed bodies are aborted when idle.</li>
- * <li>I/O errors, 5xx, 429 and rate-limiting 403 are retried with a backoff, honouring {@code Retry-After}; timeouts
- * are not.</li>
+ * <li>I/O errors and 5xx are retried with a backoff, honouring {@code Retry-After}; timeouts are not.</li>
+ * <li>Rate limiting (429, or a 403 that rate-limits) is only retried when {@code Retry-After} allows it within
+ * {@link Settings#maxRetryAfter()}, as GitHub asks; otherwise it is a 503 with the provider's wait as
+ * {@code Retry-After}.</li>
  * </ul>
  */
 @Slf4j
@@ -77,6 +81,9 @@ class ProviderHttp {
 
     private static final int PREVIEW_BYTES = 300;
     private static final int MAX_REDIRECTS = 5;
+    /** GitHub: without Retry-After or a reset time, wait at least one minute before retrying a rate limit. */
+    static final Duration DEFAULT_RATE_LIMIT_WAIT = Duration.ofMinutes(1);
+    private static final Duration MAX_RATE_LIMIT_WAIT = Duration.ofHours(1);
     private static final ScheduledExecutorService WATCHDOG = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread thread = new Thread(r, "scm-content-watchdog");
         thread.setDaemon(true);
@@ -98,8 +105,7 @@ class ProviderHttp {
     ProviderHttp(HttpClient client, String authHeader, String authValue, Settings settings) {
         this.client = client;
         this.authHeader = authHeader;
-        // a token pasted into a secret often ends with a line break, which is not a valid header value
-        this.authValue = authValue == null ? null : authValue.strip();
+        this.authValue = authValue;
         this.settings = settings;
         this.deadline = System.nanoTime() + settings.requestBudget().toNanos();
         this.fetchBudget = settings.maxFetchedBytes();
@@ -210,11 +216,11 @@ class ProviderHttp {
                 return call.run();
             } catch (ScmContentException e) {
                 if (attempt >= delays.size() || !retryable(e)) {
-                    throw e;
+                    throw givenUp(e);
                 }
                 Duration delay = retryDelay(e, delays.get(attempt));
                 if (System.nanoTime() + delay.toNanos() >= deadline) {
-                    throw e;
+                    throw givenUp(e);
                 }
                 log.debug(
                         "Attempt {} for {} failed ({}), retrying in {}",
@@ -270,12 +276,12 @@ class ProviderHttp {
             request.header(authHeader, authValue);
         } catch (IllegalArgumentException e) {
             log.error(
-                    "The {} credential configured for {} is not a valid HTTP header value (check it for control"
-                            + " characters such as line breaks, or characters outside visible ASCII)",
+                    "The {} credential configured for {} is not a valid HTTP header value ({})",
                     authHeader,
-                    uri.getHost());
+                    uri.getHost(),
+                    HttpHeaderValues.INVALID_HINT);
             throw new ScmContentException(
-                    ScmContentException.BAD_GATEWAY,
+                    ScmContentException.INTERNAL_SERVER_ERROR,
                     "The git provider credentials of reqour are misconfigured");
         }
     }
@@ -356,7 +362,8 @@ class ProviderHttp {
     private static ScmContentException error(URI uri, int status, HttpResponse<InputStream> response) {
         String preview = preview(response.body());
         log.warn("HTTP {} from {}{}", status, withoutQuery(uri), preview.isBlank() ? "" : ": " + preview);
-        boolean rateLimited = status == 429 || (status == 403 && rateLimited(response));
+        boolean rateLimited = status == 429 || (status == 403 && rateLimited(response, preview));
+        Duration retryAfter = retryAfter(response);
         String message;
         if (rateLimited) {
             message = "The git provider rate-limited reqour (HTTP " + status + ")";
@@ -371,17 +378,64 @@ class ProviderHttp {
         return new ScmContentException(
                 status == 404 ? ScmContentException.NOT_FOUND : ScmContentException.BAD_GATEWAY,
                 message,
-                new ProviderStatus(status, preview, retryAfter(response), rateLimited));
+                new ProviderStatus(
+                        status,
+                        preview,
+                        retryAfter,
+                        rateLimited ? rateLimitWait(response, retryAfter, Instant.now()) : null));
     }
 
     /**
-     * GitHub answers 403, not only 429, when it rate-limits: with {@code Retry-After} (secondary limits) or with no
-     * request left ({@code X-RateLimit-Remaining: 0}); GitLab uses {@code RateLimit-Remaining}.
+     * GitHub answers 403, not only 429, when it rate-limits: with {@code Retry-After} (secondary limits), with no
+     * request left ({@code X-RateLimit-Remaining: 0}, primary limit), or with a message about a secondary rate limit.
+     * GitLab answers 429, with {@code RateLimit-Remaining}.
      */
-    static boolean rateLimited(HttpResponse<?> response) {
+    static boolean rateLimited(HttpResponse<?> response, String preview) {
         return response.headers().firstValue("Retry-After").isPresent()
-                || "0".equals(response.headers().firstValue("X-RateLimit-Remaining").map(String::trim).orElse(null))
-                || "0".equals(response.headers().firstValue("RateLimit-Remaining").map(String::trim).orElse(null));
+                || "0".equals(header(response, "X-RateLimit-Remaining"))
+                || "0".equals(header(response, "RateLimit-Remaining"))
+                || (preview != null && preview.toLowerCase(Locale.ROOT).contains("rate limit"));
+    }
+
+    /**
+     * How long the provider asks to wait: its {@code Retry-After}, else until its rate limit resets
+     * ({@code X-RateLimit-Reset} on GitHub, {@code RateLimit-Reset} on GitLab, both in epoch seconds), else one minute
+     * (GitHub's guidance); between 1 second and 1 hour.
+     */
+    static Duration rateLimitWait(HttpResponse<?> response, Duration retryAfter, Instant now) {
+        Duration wait = retryAfter;
+        if (wait == null) {
+            String reset = header(response, "X-RateLimit-Reset");
+            if (reset == null) {
+                reset = header(response, "RateLimit-Reset");
+            }
+            try {
+                wait = reset == null ? null : Duration.between(now, Instant.ofEpochSecond(Long.parseLong(reset)));
+            } catch (NumberFormatException e) {
+                wait = null;
+            }
+        }
+        if (wait == null) {
+            wait = DEFAULT_RATE_LIMIT_WAIT;
+        }
+        return wait.compareTo(Duration.ofSeconds(1)) < 0 ? Duration.ofSeconds(1)
+                : wait.compareTo(MAX_RATE_LIMIT_WAIT) > 0 ? MAX_RATE_LIMIT_WAIT : wait;
+    }
+
+    private static String header(HttpResponse<?> response, String name) {
+        return response.headers().firstValue(name).map(String::trim).orElse(null);
+    }
+
+    /**
+     * A rate limit that is not retried becomes a 503 with the provider's wait as {@code Retry-After}, so that the
+     * caller can back off; other errors are thrown as they are.
+     */
+    private static ScmContentException givenUp(ScmContentException e) {
+        if (e.getCause() instanceof ProviderStatus status && status.rateLimitWait != null) {
+            long seconds = Math.max(1, (status.rateLimitWait.toMillis() + 999) / 1000);
+            return ScmContentException.unavailable(e.getMessage(), (int) Math.min(Integer.MAX_VALUE, seconds));
+        }
+        return e;
     }
 
     private static Duration retryAfter(HttpResponse<?> response) {
@@ -397,11 +451,15 @@ class ProviderHttp {
         }
     }
 
-    private static boolean retryable(ScmContentException e) {
+    private boolean retryable(ScmContentException e) {
         if (e.getStatus() != ScmContentException.BAD_GATEWAY || !(e.getCause() instanceof ProviderStatus status)) {
             return false;
         }
-        return status.status == 0 || status.status >= 500 || status.rateLimited;
+        if (status.rateLimitWait != null) {
+            // only when the provider says when, and soon enough: retrying earlier can get the integration banned
+            return status.retryAfter != null && status.retryAfter.compareTo(settings.maxRetryAfter()) <= 0;
+        }
+        return status.status == 0 || status.status >= 500;
     }
 
     private Duration retryDelay(ScmContentException e, Duration regular) {
@@ -486,15 +544,15 @@ class ProviderHttp {
         final int status;
         final String preview;
         final Duration retryAfter;
-        /** 429, or a 403 that rate-limits: retried like a server error. */
-        final boolean rateLimited;
+        /** For a rate limit (429, or a 403 that rate-limits): how long the provider asks to wait; else null. */
+        final Duration rateLimitWait;
 
-        ProviderStatus(int status, String preview, Duration retryAfter, boolean rateLimited) {
+        ProviderStatus(int status, String preview, Duration retryAfter, Duration rateLimitWait) {
             super("HTTP " + status, null, false, false);
             this.status = status;
             this.preview = preview;
             this.retryAfter = retryAfter;
-            this.rateLimited = rateLimited;
+            this.rateLimitWait = rateLimitWait;
         }
 
         ProviderStatus(int status, String preview, Throwable cause) {
@@ -502,7 +560,7 @@ class ProviderHttp {
             this.status = status;
             this.preview = preview;
             this.retryAfter = null;
-            this.rateLimited = false;
+            this.rateLimitWait = null;
         }
     }
 

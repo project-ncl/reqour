@@ -126,15 +126,6 @@ class ProviderHttpTest {
     }
 
     @Test
-    void aTokenEndingWithALineBreakIsTrimmed() {
-        HttpServer provider = server("provider", exchange -> send(exchange, 200, "ok"));
-        ProviderHttp http = new ProviderHttp(ProviderHttp.newClient(FAST), "Authorization", "token\n", FAST);
-
-        assertThat(read(http, url(provider, "/x"))).isEqualTo("ok");
-        assertThat(authorizations).containsEntry("provider /x", "token");
-    }
-
-    @Test
     void anInvalidTokenIsAConfigurationErrorThatDoesNotShowIt() {
         HttpServer provider = server("provider", exchange -> send(exchange, 200, "ok"));
         ProviderHttp http = new ProviderHttp(ProviderHttp.newClient(FAST), "Authorization", "sec\nret", FAST);
@@ -142,7 +133,7 @@ class ProviderHttpTest {
         assertThatThrownBy(() -> read(http, url(provider, "/x"))).isInstanceOfSatisfying(
                 ScmContentException.class,
                 e -> {
-                    assertThat(e.getStatus()).isEqualTo(ScmContentException.BAD_GATEWAY);
+                    assertThat(e.getStatus()).isEqualTo(ScmContentException.INTERNAL_SERVER_ERROR);
                     assertThat(e.getMessage()).isEqualTo("The git provider credentials of reqour are misconfigured")
                             .doesNotContain("sec");
                     assertThat(e.getCause()).isNull();
@@ -180,15 +171,82 @@ class ProviderHttpTest {
     }
 
     @Test
-    void anExhaustedRateLimitIsReportedAsSuch() {
+    void anExhaustedRateLimitIsNotRetriedAndAsksToWaitUntilTheReset() {
+        AtomicInteger calls = new AtomicInteger();
+        long reset = java.time.Instant.now().plusSeconds(120).getEpochSecond();
         HttpServer provider = server("provider", exchange -> {
+            calls.incrementAndGet();
             exchange.getResponseHeaders().add("X-RateLimit-Remaining", "0");
+            exchange.getResponseHeaders().add("X-RateLimit-Reset", Long.toString(reset));
             send(exchange, 403, "API rate limit exceeded");
         });
 
         assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
                 ScmContentException.class,
-                e -> assertThat(e.getMessage()).isEqualTo("The git provider rate-limited reqour (HTTP 403)"));
+                e -> {
+                    assertThat(e.getStatus()).isEqualTo(ScmContentException.SERVICE_UNAVAILABLE);
+                    assertThat(e.getMessage()).isEqualTo("The git provider rate-limited reqour (HTTP 403)");
+                    assertThat(e.getRetryAfterSeconds()).isBetween(100, 121);
+                });
+        assertThat(calls).hasValue(1);
+    }
+
+    @Test
+    void aRetryAfterOverTheLimitIsNotRetriedEarly() {
+        AtomicInteger calls = new AtomicInteger();
+        HttpServer provider = server("provider", exchange -> {
+            calls.incrementAndGet();
+            exchange.getResponseHeaders().add("Retry-After", "30");
+            send(exchange, 403, "You have exceeded a secondary rate limit");
+        });
+
+        assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> {
+                    assertThat(e.getStatus()).isEqualTo(ScmContentException.SERVICE_UNAVAILABLE);
+                    assertThat(e.getRetryAfterSeconds()).isEqualTo(30);
+                });
+        assertThat(calls).hasValue(1);
+    }
+
+    @Test
+    void aRateLimitWithoutAWaitIsNotRetriedAndAsksForAMinute() {
+        AtomicInteger calls = new AtomicInteger();
+        HttpServer provider = server("provider", exchange -> {
+            calls.incrementAndGet();
+            send(
+                    exchange,
+                    exchange.getRequestURI().getPath().equals("/429") ? 429 : 403,
+                    "You have exceeded a secondary rate limit. Please wait a few minutes before you try again.");
+        });
+
+        for (String path : List.of("/429", "/403")) {
+            assertThatThrownBy(() -> read(http(), url(provider, path))).isInstanceOfSatisfying(
+                    ScmContentException.class,
+                    e -> {
+                        assertThat(e.getStatus()).isEqualTo(ScmContentException.SERVICE_UNAVAILABLE);
+                        assertThat(e.getMessage()).startsWith("The git provider rate-limited reqour");
+                        assertThat(e.getRetryAfterSeconds()).isEqualTo(60);
+                    });
+        }
+        assertThat(calls).hasValue(2);
+    }
+
+    @Test
+    void gitlabRateLimitResetIsUsed() {
+        AtomicInteger calls = new AtomicInteger();
+        long reset = java.time.Instant.now().plusSeconds(40).getEpochSecond();
+        HttpServer provider = server("provider", exchange -> {
+            calls.incrementAndGet();
+            exchange.getResponseHeaders().add("RateLimit-Remaining", "0");
+            exchange.getResponseHeaders().add("RateLimit-Reset", Long.toString(reset));
+            send(exchange, 429, "Retry later");
+        });
+
+        assertThatThrownBy(() -> read(http(), url(provider, "/x"))).isInstanceOfSatisfying(
+                ScmContentException.class,
+                e -> assertThat(e.getRetryAfterSeconds()).isBetween(20, 41));
+        assertThat(calls).hasValue(1);
     }
 
     @Test
