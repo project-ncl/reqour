@@ -139,12 +139,7 @@ public class BeanFactory {
                 .factor(policy.retry().exponentialBackoff().factor())
                 .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)
                 .done()
-                .beforeRetry(
-                        t -> userLogger
-                                .warn("Performing retry, last exception was: {}: {}", t.getMessage(), t.getCause(), t))
-                .done()
-                .withTimeout()
-                .duration(policy.timeout().durationSeconds(), ChronoUnit.SECONDS)
+                .beforeRetry(t -> userLogger.warn("Performing retry, last exception was:", t))
                 .done()
                 .build();
     }

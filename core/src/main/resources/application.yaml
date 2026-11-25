@@ -48,8 +48,6 @@ reqour:
             exponential-backoff:
               factor: 2
               max-delay-seconds: 5
-          timeout:
-            duration-seconds: 3
       internal-urls: []  # overridden in runtime config
       private-github-user: ${PRIVATE_GITHUB_USER}
     log:

@@ -42,8 +42,6 @@ reqour:
             max-retries: 2
             exponential-backoff:
               max-delay-seconds: 1
-          timeout:
-            duration-seconds: 3
       acceptable-schemes:
         - https
         - http

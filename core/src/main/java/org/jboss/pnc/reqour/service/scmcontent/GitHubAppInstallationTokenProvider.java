@@ -47,7 +47,7 @@ import io.smallrye.faulttolerance.api.ApplyGuard;
  * <p>
  * The public {@code getInstallationToken} methods are guarded by the
  * {@value GitHubAppInstallationTokenFaultTolerancePolicy#GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD}
- * fault-tolerance policy, which applies retry (with exponential backoff) and a timeout. Any failure that is not
+ * fault-tolerance policy, which retries transient failures with exponential backoff. Any failure that is not
  * retried, or that remains after the retries are exhausted, is surfaced as a {@link GitHubAppException}.
  */
 @ApplicationScoped

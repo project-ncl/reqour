@@ -22,8 +22,6 @@ public interface GitHubAppInstallationTokenFaultTolerancePolicy {
 
     RetryPolicy retry();
 
-    TimeoutPolicy timeout();
-
     interface RetryPolicy {
 
         @Positive
@@ -41,11 +39,5 @@ public interface GitHubAppInstallationTokenFaultTolerancePolicy {
             @DefaultValue("5")
             Integer maxDelaySeconds();
         }
-    }
-
-    interface TimeoutPolicy {
-        @Positive
-        @DefaultValue("3")
-        Integer durationSeconds();
     }
 }
