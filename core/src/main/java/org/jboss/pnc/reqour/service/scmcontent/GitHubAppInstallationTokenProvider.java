@@ -66,6 +66,10 @@ public class GitHubAppInstallationTokenProvider {
     /**
      * Obtains an installation access token using the default GitHub API URL ({@value #DEFAULT_API_URL}).
      *
+     * No @ApplyGuard here: this overload only delegates to the apiUrl-taking overload below, which carries the guard.
+     * Quarkus intercepts self-invocation, so that delegated call is still guarded; annotating both would nest the
+     * retry policy and multiply the attempts.
+     *
      * @param appId GitHub App id; must not be {@code null} or blank
      * @param privateKeyPem PKCS#1 or PKCS#8 PEM content of the App's private key; must not be {@code null}
      * @param organization organization where the App is installed; must not be {@code null} or blank
@@ -84,7 +88,6 @@ public class GitHubAppInstallationTokenProvider {
      *         {@link #getInstallationToken(String, String, String, String, GHPermissionType, GHPermissionType, List)}
      *         for the specific subtypes
      */
-    @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(
             String appId,
             String privateKeyPem,
