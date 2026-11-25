@@ -36,6 +36,14 @@ reqour:
             max-retries: 2
             initial-delay: 1
             initial-delay-unit: seconds
+      github-app-installation-token:
+        fault-tolerance:
+          retry:
+            max-retries: 2
+            exponential-backoff:
+              max-delay-seconds: 1
+          timeout:
+            duration-seconds: 3
       acceptable-schemes:
         - https
         - http

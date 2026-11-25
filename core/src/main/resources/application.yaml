@@ -40,6 +40,16 @@ reqour:
           timeout:
             duration: 60
             duration-unit: seconds
+      github-app-installation-token:
+        fault-tolerance:
+          description: 'Fault Tolerance Policy for GitHub App Installation Token'
+          retry:
+            max-retries: 3
+            exponential-backoff:
+              factor: 2
+              max-delay-seconds: 5
+          timeout:
+            duration-seconds: 3
       internal-urls: []  # overridden in runtime config
       private-github-user: ${PRIVATE_GITHUB_USER}
     log:

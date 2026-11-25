@@ -20,6 +20,7 @@ import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuth;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
 import org.jboss.pnc.reqour.common.exceptions.InvalidPrivateKeyException;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigConstants;
@@ -138,7 +139,8 @@ public class BeanFactory {
                         List.of(
                                 NullPointerException.class,
                                 IllegalArgumentException.class,
-                                InvalidPrivateKeyException.class))
+                                InvalidPrivateKeyException.class,
+                                GitHubAppInstallationNotFoundException.class))
                 .withExponentialBackoff()
                 .factor(policy.retry().exponentialBackoff().factor())
                 .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)
