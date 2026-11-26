@@ -205,7 +205,9 @@ public class GitHubAppInstallationTokenProvider {
             throw new GitHubAppInstallationNotFoundException(
                     "GitHub App (id=" + appId + ") installation not found for organization: " + organization,
                     e);
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
+            // RuntimeException too: github-api can surface a failure as an unchecked GHException, which must still be
+            // wrapped so every failure leaves this method as a GitHubAppException (per the Javadoc).
             String message = "Failed to look up the GitHub App (id=" + appId + ") installation for organization: "
                     + organization;
             if (isTransient(e)) {
@@ -218,18 +220,18 @@ public class GitHubAppInstallationTokenProvider {
 
         Map<String, GHPermissionType> installationTokenPermissions = Map
                 .of("contents", contentsPermission, "metadata", metadataPermission);
+        GHAppInstallationToken installationToken;
+        Date expiresAt;
         try {
-            GHAppInstallationToken installationToken = installation.createToken()
+            installationToken = installation.createToken()
                     .permissions(installationTokenPermissions)
                     .repositories(repositories)
                     .create();
-            Date expiresAt = installationToken.getExpiresAt();
-            if (expiresAt == null) {
-                throw new GitHubAppInstallationTokenException(
-                        "GitHub returned an installation token without an expiry for organization: " + organization);
-            }
-            return new InstallationToken(installationToken.getToken(), expiresAt.toInstant());
-        } catch (IOException e) {
+            // getExpiresAt() can itself make an HTTP call (hence throws IOException), so it stays inside the try.
+            expiresAt = installationToken.getExpiresAt();
+        } catch (IOException | RuntimeException e) {
+            // RuntimeException too: see the installation-lookup catch above. The null-expiry check is kept out of this
+            // try so the GitHubAppInstallationTokenException it may throw (itself a RuntimeException) is not re-wrapped.
             if (isTransient(e)) {
                 // A 5xx or a transport error: a transient failure worth retrying, not a credentials/permission problem.
                 throw new GitHubAppTransientException(
@@ -242,6 +244,12 @@ public class GitHubAppInstallationTokenProvider {
                     "Failed to obtain an installation token for organization: " + organization,
                     e);
         }
+
+        if (expiresAt == null) {
+            throw new GitHubAppInstallationTokenException(
+                    "GitHub returned an installation token without an expiry for organization: " + organization);
+        }
+        return new InstallationToken(installationToken.getToken(), expiresAt.toInstant());
     }
 
     /**
