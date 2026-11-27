@@ -22,6 +22,7 @@ import jakarta.inject.Inject;
 
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.eclipse.microprofile.config.ConfigProvider;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppInstallationNotFoundException;
 import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
@@ -303,6 +304,33 @@ class GitHubAppInstallationTokenProviderGuardTest {
                 .isInstanceOf(GitHubAppTransientException.class);
 
         // A rate-limit rejection is transient, so the guard retries until exhausted: maxRetries + 1 lookups.
+        int maxRetries = ConfigProvider.getConfig()
+                .getValue(
+                        "reqour.core.git.github-app-installation-token.fault-tolerance.retry.max-retries",
+                        Integer.class);
+        wiremock.verifyThat(maxRetries + 1, getRequestedFor(urlEqualTo("/orgs/" + org + "/installation")));
+    }
+
+    @Test
+    @DisplayName("times out a stuck installation lookup, retries it, and fails with a timeout once exhausted")
+    void retriesTimeoutThenFails() {
+        String org = "hanging-org";
+
+        // The response is delayed far beyond the per-attempt timeout (duration-seconds: 1 in application-test.yaml), so
+        // every attempt is interrupted and timed out rather than completing.
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withFixedDelay(5_000)
+                                        .withStatus(200)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody(installationBody(org, 55555L))));
+
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(TimeoutException.class);
+
+        // A timeout is transient, so the guard retries until exhausted: maxRetries + 1 lookups.
         int maxRetries = ConfigProvider.getConfig()
                 .getValue(
                         "reqour.core.git.github-app-installation-token.fault-tolerance.retry.max-retries",

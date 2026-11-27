@@ -49,8 +49,10 @@ import io.smallrye.faulttolerance.api.ApplyGuard;
  * <p>
  * The public {@code getInstallationToken} methods are guarded by the
  * {@value GitHubAppInstallationTokenFaultTolerancePolicy#GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD}
- * fault-tolerance policy, which retries transient failures with exponential backoff. Any failure that is not
- * retried, or that remains after the retries are exhausted, is surfaced as a {@link GitHubAppException}.
+ * fault-tolerance policy, which retries transient failures with exponential backoff and bounds each attempt with a
+ * timeout. Any failure that is not retried, or that remains after the retries are exhausted, is surfaced as a
+ * {@link GitHubAppException}, except a per-attempt timeout the guard enforces outside this method: once every attempt
+ * times out, the guard surfaces a {@link org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException}.
  */
 @ApplicationScoped
 public class GitHubAppInstallationTokenProvider {
@@ -137,6 +139,8 @@ public class GitHubAppInstallationTokenProvider {
      *         retrying
      * @throws GitHubAppException if looking up the installation fails for a permanent reason other than a missing
      *         installation (e.g. a 403)
+     * @throws org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException if every attempt exceeds the guard's
+     *         per-attempt timeout and the retries are exhausted
      */
     @ApplyGuard(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
     public InstallationToken getInstallationToken(

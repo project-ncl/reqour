@@ -7,12 +7,14 @@ package org.jboss.pnc.reqour.runtime;
 import java.io.IOException;
 import java.net.URI;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.gitlab4j.api.GitLabApi;
 import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
@@ -136,13 +138,19 @@ public class BeanFactory {
                 // Seed the exponential backoff: it multiplies the previous delay by the factor, so a zero initial
                 // delay would keep every delay (and the max-delay cap) at zero, leaving only jitter between retries.
                 .delay(policy.retry().initialDelaySeconds(), ChronoUnit.SECONDS)
-                // Retry only transient failures (5xx/transport); every other exception is permanent and aborts.
-                .retryOn(GitHubAppTransientException.class)
+                // Retry transient failures (5xx/transport) and per-attempt timeouts; every other exception is
+                // permanent and aborts.
+                .retryOn(List.of(GitHubAppTransientException.class, TimeoutException.class))
                 .withExponentialBackoff()
                 .factor(policy.retry().exponentialBackoff().factor())
                 .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)
                 .done()
                 .beforeRetry(t -> userLogger.warn("Performing retry, last exception was:", t))
+                .done()
+                // Bound each attempt: SmallRye applies the timeout inside the retry, so a stuck call is interrupted
+                // after this duration and then retried, rather than blocking indefinitely.
+                .withTimeout()
+                .duration(policy.timeout().durationSeconds(), ChronoUnit.SECONDS)
                 .done()
                 .build();
     }

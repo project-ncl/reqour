@@ -22,6 +22,8 @@ public interface GitHubAppInstallationTokenFaultTolerancePolicy {
 
     RetryPolicy retry();
 
+    TimeoutPolicy timeout();
+
     interface RetryPolicy {
 
         @Positive
@@ -50,5 +52,18 @@ public interface GitHubAppInstallationTokenFaultTolerancePolicy {
             @DefaultValue("5")
             Integer maxDelaySeconds();
         }
+    }
+
+    interface TimeoutPolicy {
+
+        /**
+         * Maximum duration of a single attempt, in seconds. The SmallRye {@code Guard} applies the timeout inside the
+         * retry, so it bounds each attempt (not the whole flow): a stuck call is interrupted after this many seconds
+         * and
+         * the guard then retries it per {@link RetryPolicy}.
+         */
+        @Positive
+        @DefaultValue("60")
+        Integer durationSeconds();
     }
 }
