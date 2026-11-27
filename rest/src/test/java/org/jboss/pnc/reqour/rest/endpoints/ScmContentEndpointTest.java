@@ -534,14 +534,8 @@ class ScmContentEndpointTest {
     }
 
     @Test
-    @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_ORCH_BUILD_READ })
-    void orchBuildReadersAreAllowed() {
-        assertPastTheSecurityCheck();
-    }
-
-    @Test
-    @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_USERS })
-    void pncUsersAreAllowed() {
+    @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_APP_REPOUR_USER })
+    void repourUsersAreAllowed() {
         assertPastTheSecurityCheck();
     }
 
@@ -549,6 +543,18 @@ class ScmContentEndpointTest {
     @TestSecurity(user = TEST_USER, roles = { OidcRoleConstants.PNC_USERS_ADMIN })
     void pncAdminsAreAllowed() {
         assertPastTheSecurityCheck();
+    }
+
+    @Test
+    @TestSecurity(user = TEST_USER, roles = { "pnc-users" })
+    void pncUsersAreForbidden() {
+        assertForbidden();
+    }
+
+    @Test
+    @TestSecurity(user = TEST_USER, roles = { "pnc-app-orch-build-read" })
+    void orchBuildReadersAreForbidden() {
+        assertForbidden();
     }
 
     private static void assertPastTheSecurityCheck() {
@@ -562,6 +568,10 @@ class ScmContentEndpointTest {
     @Test
     @TestSecurity(user = TEST_USER, roles = { "someone-else" })
     void otherRolesAreForbidden() {
+        assertForbidden();
+    }
+
+    private static void assertForbidden() {
         Response archive = RestAssured.given()
                 .queryParam("url", GITLAB_URL)
                 .queryParam("revision", HEAD)
