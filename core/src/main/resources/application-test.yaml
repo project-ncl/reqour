@@ -36,6 +36,17 @@ reqour:
             max-retries: 2
             initial-delay: 1
             initial-delay-unit: seconds
+      github-app-installation-token:
+        fault-tolerance:
+          retry:
+            max-retries: 2
+            initial-delay-seconds: 1
+            exponential-backoff:
+              # Must stay strictly above initial-delay-seconds (SmallRye requires initial delay < max delay).
+              max-delay-seconds: 2
+          timeout:
+            # Short per-attempt bound so the timeout test trips quickly instead of waiting out the 60s default.
+            duration-seconds: 1
       acceptable-schemes:
         - https
         - http

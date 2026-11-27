@@ -6,21 +6,26 @@ package org.jboss.pnc.reqour.runtime;
 
 import java.io.IOException;
 import java.net.URI;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.faulttolerance.exceptions.TimeoutException;
 import org.gitlab4j.api.GitLabApi;
 import org.jboss.pnc.bifrost.upload.BifrostLogUploader;
 import org.jboss.pnc.common.concurrent.HeartbeatScheduler;
 import org.jboss.pnc.common.concurrent.mdc.MDCScheduledThreadPoolExecutor;
 import org.jboss.pnc.common.http.PNCHttpClient;
 import org.jboss.pnc.quarkus.client.auth.runtime.PNCClientAuth;
+import org.jboss.pnc.reqour.common.exceptions.GitHubAppTransientException;
 import org.jboss.pnc.reqour.config.BifrostUploaderConfig;
 import org.jboss.pnc.reqour.config.ConfigConstants;
 import org.jboss.pnc.reqour.config.ConfigUtils;
+import org.jboss.pnc.reqour.config.GitHubAppInstallationTokenFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.GitProviderFaultTolerancePolicy;
 import org.jboss.pnc.reqour.config.ReqourCoreConfig;
 import org.jboss.pnc.reqour.runtime.api.github.GitHubRestClient;
@@ -117,6 +122,35 @@ public class BeanFactory {
                 .duration(
                         gitProviderFaultTolerancePolicy.timeout().duration(),
                         gitProviderFaultTolerancePolicy.timeout().durationUnit())
+                .done()
+                .build();
+    }
+
+    @Produces
+    @Identifier(GitHubAppInstallationTokenFaultTolerancePolicy.GITHUB_APP_INSTALLATION_TOKEN_FAULT_TOLERANCE_GUARD)
+    public Guard internalRetryGitHubAppInstallationToken(
+            GitHubAppInstallationTokenFaultTolerancePolicy policy,
+            @UserLogger Logger userLogger) {
+        return Guard.create()
+                .withDescription(policy.description())
+                .withRetry()
+                .maxRetries(policy.retry().maxRetries())
+                // Seed the exponential backoff: it multiplies the previous delay by the factor, so a zero initial
+                // delay would keep every delay (and the max-delay cap) at zero, leaving only jitter between retries.
+                .delay(policy.retry().initialDelaySeconds(), ChronoUnit.SECONDS)
+                // Retry transient failures (5xx/transport) and per-attempt timeouts; every other exception is
+                // permanent and aborts.
+                .retryOn(List.of(GitHubAppTransientException.class, TimeoutException.class))
+                .withExponentialBackoff()
+                .factor(policy.retry().exponentialBackoff().factor())
+                .maxDelay(policy.retry().exponentialBackoff().maxDelaySeconds(), ChronoUnit.SECONDS)
+                .done()
+                .beforeRetry(t -> userLogger.warn("Performing retry, last exception was:", t))
+                .done()
+                // Bound each attempt: SmallRye applies the timeout inside the retry, so a stuck call is interrupted
+                // after this duration and then retried, rather than blocking indefinitely.
+                .withTimeout()
+                .duration(policy.timeout().durationSeconds(), ChronoUnit.SECONDS)
                 .done()
                 .build();
     }

@@ -40,6 +40,18 @@ reqour:
           timeout:
             duration: 60
             duration-unit: seconds
+      github-app-installation-token:
+        fault-tolerance:
+          description: 'Fault Tolerance Policy for GitHub App Installation Token'
+          retry:
+            max-retries: 3
+            initial-delay-seconds: 1
+            exponential-backoff:
+              factor: 2
+              max-delay-seconds: 5
+          timeout:
+            # Per-attempt bound (SmallRye applies the timeout inside the retry), interrupting a stuck call.
+            duration-seconds: 60
       internal-urls: []  # overridden in runtime config
       private-github-user: ${PRIVATE_GITHUB_USER}
     log:

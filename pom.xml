@@ -78,6 +78,8 @@
     <version.bifrost-upload-client>4.0.0</version.bifrost-upload-client>
     <version.gitlab4j-api>6.3.0</version.gitlab4j-api>
     <version.github-api>1.330</version.github-api>
+    <version.jjwt>0.13.0</version.jjwt>
+    <version.bouncycastle>1.87</version.bouncycastle>
     <version.assertj-core>3.27.7</version.assertj-core>
     <version.jgit>7.8.1.202611041320-r</version.jgit>
     <version.wiremock>1.8.1</version.wiremock>
@@ -193,6 +195,43 @@
         <artifactId>github-api</artifactId>
         <version>${version.github-api}</version>
       </dependency>
+      <!-- Optional dependencies of github-api, required by JWTTokenProvider -->
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${version.jjwt}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${version.jjwt}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${version.jjwt}</version>
+        <scope>runtime</scope>
+      </dependency>
+
+      <!-- Parses PKCS#1 ("BEGIN RSA PRIVATE KEY") PEM files. The artifacts must stay on the same version, the Quarkus BOM would otherwise pin bcprov/bcutil to its own. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>${version.bouncycastle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+        <version>${version.bouncycastle}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>${version.bouncycastle}</version>
+      </dependency>
+
       <dependency>
         <!-- This dependency is used because adjuster has to know PME's internal representation in order to parse the result. -->
         <groupId>org.jboss.pnc.maven-manipulator</groupId>
