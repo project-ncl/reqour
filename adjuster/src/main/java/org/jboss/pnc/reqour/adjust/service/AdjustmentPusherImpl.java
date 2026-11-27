@@ -4,7 +4,12 @@
  */
 package org.jboss.pnc.reqour.adjust.service;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,6 +54,13 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
 
     private final Path workdir = CommonUtils.getAdjustDir();
 
+    /**
+     * Build output directories: whatever a manipulator or build leaves there must not reach the alignment commit, also
+     * when the project does not ignore them (old tags often have no .gitignore). Maven and sbt write to target/ (PME's
+     * marker and reports), Gradle to build/ and .gradle/.
+     */
+    static final List<String> BUILD_OUTPUT_PATTERNS = List.of("target/", "build/", ".gradle/");
+
     @Override
     public AdjustmentPushResult pushAlignedChanges(
             AdjustRequest adjustRequest,
@@ -79,7 +91,36 @@ public class AdjustmentPusherImpl implements AdjustmentPusher {
                 .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
 
         gitCommands.createBranch("reqour_search_temp_branch_" + UUID.randomUUID(), processContextBuilder);
+        excludeBuildOutput(workdir);
         gitCommands.addAll(processContextBuilder);
+    }
+
+    /**
+     * Adds {@link #BUILD_OUTPUT_PATTERNS} to the clone's {@code info/exclude}, which {@code git add --all} honors like
+     * a
+     * .gitignore without changing the project's files. Only untracked files are affected: a file the project tracks
+     * under such a directory is still committed when the alignment changes it.
+     */
+    void excludeBuildOutput(Path workdir) {
+        ProcessContext.Builder processContextBuilder = ProcessContext
+                .withWorkdirAndConsumers(workdir, userLogger::info, userLogger::warn);
+        String excludeFile = processExecutor
+                .stdout(processContextBuilder.command(List.of("git", "rev-parse", "--git-path", "info/exclude")))
+                .strip();
+        Path exclude = workdir.resolve(excludeFile);
+        try {
+            Files.createDirectories(exclude.getParent());
+            Files.writeString(
+                    exclude,
+                    "\n# reqour: build output does not belong to the alignment commit\n"
+                            + String.join("\n", BUILD_OUTPUT_PATTERNS) + "\n",
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Cannot exclude build output from the alignment commit in " + exclude, e);
+        }
+        userLogger.info("Excluding untracked build output from the alignment commit: {}", BUILD_OUTPUT_PATTERNS);
     }
 
     private String findTag(Path workdir) {
