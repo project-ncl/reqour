@@ -45,6 +45,7 @@ reqour:
           description: 'Fault Tolerance Policy for GitHub App Installation Token'
           retry:
             max-retries: 3
+            initial-delay-seconds: 1
             exponential-backoff:
               factor: 2
               max-delay-seconds: 5

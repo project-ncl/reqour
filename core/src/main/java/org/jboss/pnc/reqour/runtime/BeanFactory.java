@@ -133,6 +133,9 @@ public class BeanFactory {
                 .withDescription(policy.description())
                 .withRetry()
                 .maxRetries(policy.retry().maxRetries())
+                // Seed the exponential backoff: it multiplies the previous delay by the factor, so a zero initial
+                // delay would keep every delay (and the max-delay cap) at zero, leaving only jitter between retries.
+                .delay(policy.retry().initialDelaySeconds(), ChronoUnit.SECONDS)
                 // Retry only transient failures (5xx/transport); every other exception is permanent and aborts.
                 .retryOn(GitHubAppTransientException.class)
                 .withExponentialBackoff()

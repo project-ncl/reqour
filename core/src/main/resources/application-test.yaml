@@ -40,8 +40,10 @@ reqour:
         fault-tolerance:
           retry:
             max-retries: 2
+            initial-delay-seconds: 1
             exponential-backoff:
-              max-delay-seconds: 1
+              # Must stay strictly above initial-delay-seconds (SmallRye requires initial delay < max delay).
+              max-delay-seconds: 2
       acceptable-schemes:
         - https
         - http

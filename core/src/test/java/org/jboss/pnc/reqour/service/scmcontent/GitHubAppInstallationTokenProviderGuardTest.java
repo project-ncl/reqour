@@ -218,6 +218,32 @@ class GitHubAppInstallationTokenProviderGuardTest {
     }
 
     @Test
+    @DisplayName("spaces retries out by the configured backoff delay instead of firing them back-to-back")
+    void appliesBackoffDelayBetweenRetries() {
+        String org = "slow-org";
+
+        wiremock.register(
+                get(urlEqualTo("/orgs/" + org + "/installation"))
+                        .willReturn(
+                                aResponse()
+                                        .withStatus(500)
+                                        .withHeader("Content-Type", "application/json")
+                                        .withBody("{\"message\":\"Internal Server Error\"}")));
+
+        long startNanos = System.nanoTime();
+        assertThatThrownBy(() -> obtainToken(org))
+                .isInstanceOf(GitHubAppTransientException.class);
+        long elapsedMillis = (System.nanoTime() - startNanos) / 1_000_000;
+
+        // With initial-delay-seconds: 1 and factor 2 (capped at max-delay-seconds: 2) the two retries wait a base 1s
+        // then 2s (3s total). SmallRye's default random jitter is +/-200ms per delay, so the worst-case floor is ~2.6s,
+        // and real HTTP round-trips only add. A 2.3s lower bound therefore stays safely non-flaky (delays can only make
+        // the elapsed time longer) while still catching the regression, where a zero initial delay leaves the backoff
+        // at zero and both retries fire within the jitter window (<300ms total).
+        assertThat(elapsedMillis).isGreaterThanOrEqualTo(2_300);
+    }
+
+    @Test
     @DisplayName("does not retry a permanent 401 unauthorized installation lookup")
     void doesNotRetryUnauthorized() {
         String org = "unauthorized-org";

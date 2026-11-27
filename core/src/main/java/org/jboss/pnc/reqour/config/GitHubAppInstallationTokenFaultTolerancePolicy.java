@@ -28,6 +28,17 @@ public interface GitHubAppInstallationTokenFaultTolerancePolicy {
         @DefaultValue("3")
         Integer maxRetries();
 
+        /**
+         * Delay before the first retry, in seconds. Must be positive: the exponential backoff multiplies this value by
+         * the {@link ExponentialBackoffPolicy#factor()} on each subsequent retry, so a zero initial delay would keep
+         * every delay at zero and make the backoff (and {@link ExponentialBackoffPolicy#maxDelaySeconds()})
+         * ineffective. It must also stay strictly below {@link ExponentialBackoffPolicy#maxDelaySeconds()}, which
+         * SmallRye requires when building the backoff.
+         */
+        @Positive
+        @DefaultValue("1")
+        Integer initialDelaySeconds();
+
         ExponentialBackoffPolicy exponentialBackoff();
 
         interface ExponentialBackoffPolicy {
